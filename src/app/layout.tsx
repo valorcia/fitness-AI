@@ -35,7 +35,7 @@ export const metadata: Metadata = {
   },
   twitter: { card: "summary_large_image", title: "PulseCoach AI" },
   manifest: "/manifest.webmanifest",
-  icons: { icon: "/favicon.svg", apple: "/apple-touch-icon.png" },
+  icons: { icon: "/favicon.svg" },
 };
 
 export const viewport: Viewport = {
