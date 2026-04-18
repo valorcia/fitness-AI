@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 220 20% 98%;
+  --foreground: 222 47% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 9%;
+  --primary: 210 100% 52%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 220 14% 96%;
+  --secondary-foreground: 222 47% 9%;
+  --muted: 220 14% 96%;
+  --muted-foreground: 222 10% 45%;
+  --accent: 210 100% 96%;
+  --accent-foreground: 210 100% 32%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 220 13% 91%;
+  --input: 220 13% 91%;
+  --ring: 210 100% 52%;
+  --radius: 0.75rem;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Inter", system-ui, sans-serif;
+}
+
+.dark {
+  --background: 222 47% 4%;
+  --foreground: 210 20% 98%;
+  --card: 222 47% 7%;
+  --card-foreground: 210 20% 98%;
+  --popover: 222 47% 7%;
+  --popover-foreground: 210 20% 98%;
+  --primary: 210 100% 60%;
+  --primary-foreground: 222 47% 6%;
+  --secondary: 222 33% 12%;
+  --secondary-foreground: 210 20% 98%;
+  --muted: 222 33% 12%;
+  --muted-foreground: 215 16% 60%;
+  --accent: 222 33% 14%;
+  --accent-foreground: 210 100% 70%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 210 20% 98%;
+  --border: 222 33% 16%;
+  --input: 222 33% 16%;
+  --ring: 210 100% 60%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply scroll-smooth antialiased;
+  }
+  body {
+    @apply bg-background font-sans text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+  }
+  ::selection {
+    @apply bg-primary/30 text-foreground;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+  }
+  .elevated {
+    box-shadow:
+      0 1px 0 0 hsl(var(--foreground) / 0.04),
+      0 20px 60px -30px hsl(var(--foreground) / 0.25);
+  }
+  .gradient-text {
+    background: linear-gradient(90deg, hsl(210 100% 70%), hsl(198 95% 60%));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .hero-gradient {
+    background:
+      radial-gradient(60% 50% at 50% 0%, hsl(210 100% 60% / 0.2), transparent 60%),
+      radial-gradient(40% 40% at 80% 20%, hsl(280 90% 65% / 0.15), transparent 60%),
+      radial-gradient(40% 40% at 20% 30%, hsl(190 100% 60% / 0.15), transparent 60%);
+  }
+}

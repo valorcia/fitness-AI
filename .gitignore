@@ -1,0 +1,17 @@
+node_modules
+.next
+out
+dist
+coverage
+.env
+.env.local
+.env.*.local
+.DS_Store
+*.log
+.vercel
+.vscode
+.idea
+.turbo
+playwright-report
+test-results
+/prisma/migrations/dev
