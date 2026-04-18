@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       { status: 503 },
     );
   }
+  const client = openai;
 
   const tier = sub?.tier ?? "FREE";
   const persona = prefs?.coachPersona ?? "FUN";
@@ -63,7 +64,7 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const completion = await openai.chat.completions.create({
+        const completion = await client.chat.completions.create({
           model: models.coach,
           stream: true,
           temperature: 0.6,
