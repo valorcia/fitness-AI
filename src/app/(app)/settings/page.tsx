@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CoachSettings } from "@/features/coach/coach-settings";
+import { ThemeToggle } from "@/components/app/theme-toggle";
 
 export const metadata = { title: "Paramètres" };
 
@@ -38,6 +39,16 @@ export default async function SettingsPage() {
               voiceEnabled: prefs?.voiceEnabled ?? true,
             }}
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Apparence</CardTitle>
+          <CardDescription>Mode clair, sombre ou automatique selon votre système.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ThemeToggle />
         </CardContent>
       </Card>
 

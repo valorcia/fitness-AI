@@ -21,6 +21,7 @@ import { auth, signOut } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "./bottom-nav";
+import { ThemeToggle } from "./theme-toggle";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -110,7 +111,8 @@ export async function AppShell({ children }: { children: ReactNode }) {
           <span className="text-sm text-muted-foreground">
             Bonjour, {session?.user?.name?.split(" ")[0] ?? "athlète"} 👋
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
             <Button size="sm" variant="outline" asChild>
               <Link href="/safety/sos">SOS</Link>
             </Button>

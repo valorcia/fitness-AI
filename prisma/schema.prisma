@@ -163,6 +163,7 @@ model User {
   posts               Post[]
   postLikes           PostLike[]
   postComments        PostComment[]
+  coachMemories       CoachMemory[]
 
   @@index([role])
   @@index([deletedAt])
@@ -262,18 +263,20 @@ model HealthProfile {
 }
 
 model Preference {
-  id           String        @id @default(cuid())
-  userId       String        @unique
-  coachPersona CoachPersona  @default(FUN)
-  coachName    String        @default("Pulse")
-  coachAvatar  String        @default("default") // key into avatar catalog
-  voiceEnabled Boolean       @default(true)
-  voiceId      String?
-  notifications Json         @default("{}")
-  units        String        @default("metric") // metric | imperial
-  theme        String        @default("dark")
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  userId          String        @unique
+  coachPersona    CoachPersona  @default(FUN)
+  coachName       String        @default("Pulse")
+  coachAvatar     String        @default("default") // legacy avatar key
+  coachProfileSlug String?                           // selected CoachProfile.slug
+  coachVoiceMode  String        @default("tts")      // tts | avatar | text
+  voiceEnabled    Boolean       @default(true)
+  voiceId         String?
+  notifications   Json          @default("{}")
+  units           String        @default("metric")   // metric | imperial
+  theme           String        @default("system")   // system | light | dark
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -669,6 +672,44 @@ model Consent {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, kind])
+}
+
+model CoachProfile {
+  id                String   @id @default(cuid())
+  slug              String   @unique
+  displayName       String
+  gender            String
+  ageYears          Int
+  ethnicity         String?
+  specialty         String
+  style             String   // MILITARY | FRIENDLY | EXPERT
+  bio               String
+  tagline           String
+  portraitUrl       String
+  bodyUrl           String?
+  elevenLabsVoiceId String?
+  openaiVoice       String?
+  heygenAvatarId    String?
+  sampleAudioUrl    String?
+  locales           String[] @default(["fr"])
+  isPremium         Boolean  @default(false)
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model CoachMemory {
+  id        String   @id @default(cuid())
+  userId    String
+  kind      String   // injury | goal | preference | life_event | perf_record | conversation
+  content   String   @db.Text
+  weight    Float    @default(1)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, kind])
+  @@index([userId, createdAt])
 }
 
 model FeatureFlag {

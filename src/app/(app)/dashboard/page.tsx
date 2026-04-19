@@ -20,10 +20,15 @@ export default async function DashboardPage() {
   const session = await auth();
   const userId = session!.user.id;
 
-  const [profile, sub, prefs, plan, last7, streak, xpSum] = await Promise.all([
+  const [profile, sub, prefs, currentCoach, plan, last7, streak, xpSum] = await Promise.all([
     prisma.profile.findUnique({ where: { userId } }),
     prisma.subscription.findUnique({ where: { userId } }),
     prisma.preference.findUnique({ where: { userId } }),
+    prisma.preference.findUnique({ where: { userId } }).then((p) =>
+      p?.coachProfileSlug
+        ? prisma.coachProfile.findUnique({ where: { slug: p.coachProfileSlug } })
+        : null,
+    ),
     prisma.trainingPlan.findFirst({
       where: { userId },
       orderBy: { createdAt: "desc" },
@@ -204,7 +209,14 @@ export default async function DashboardPage() {
               Ouvrir →
             </Link>
           </div>
-          <CoachChat coachName={prefs?.coachName ?? "Pulse"} coachAvatar={prefs?.coachAvatar ?? "default"} />
+          <CoachChat
+            coachName={currentCoach?.displayName.split(" ")[0] ?? prefs?.coachName ?? "Pulse"}
+            coachAvatar={prefs?.coachAvatar ?? "default"}
+            voiceEnabled={prefs?.voiceEnabled ?? true}
+            openaiVoice={currentCoach?.openaiVoice ?? "nova"}
+            elevenLabsVoiceId={currentCoach?.elevenLabsVoiceId ?? undefined}
+            portraitUrl={currentCoach?.portraitUrl}
+          />
         </CardContent>
       </Card>
 
