@@ -20,6 +20,9 @@ const nextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
     ],
   },
+  async rewrites() {
+    return [{ source: "/favicon.ico", destination: "/icon" }];
+  },
   async headers() {
     const securityHeaders = [
       { key: "X-Frame-Options", value: "DENY" },
