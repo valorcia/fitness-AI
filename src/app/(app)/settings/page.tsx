@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { CoachSettings } from "@/features/coach/coach-settings";
 
 export const metadata = { title: "Paramètres" };
 
@@ -22,6 +23,23 @@ export default async function SettingsPage() {
         <h1 className="text-3xl font-bold tracking-tight">Paramètres</h1>
         <p className="text-muted-foreground">Profil, coach, confidentialité, données.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Coach personnalisé</CardTitle>
+          <CardDescription>Nom, avatar, voix et personnalité.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CoachSettings
+            initial={{
+              coachPersona: prefs?.coachPersona ?? "FUN",
+              coachName: prefs?.coachName ?? "Pulse",
+              coachAvatar: prefs?.coachAvatar ?? "default",
+              voiceEnabled: prefs?.voiceEnabled ?? true,
+            }}
+          />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -48,29 +66,6 @@ export default async function SettingsPage() {
               Se déconnecter
             </Button>
           </form>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Coach</CardTitle>
-          <CardDescription>Personnalité, voix, unités.</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-3 text-sm">
-          <div className="flex justify-between">
-            <span>Personnalité</span>
-            <Badge variant="outline">{prefs?.coachPersona}</Badge>
-          </div>
-          <div className="flex justify-between">
-            <span>Voix activée</span>
-            <Badge variant={prefs?.voiceEnabled ? "success" : "outline"}>
-              {prefs?.voiceEnabled ? "Oui" : "Non"}
-            </Badge>
-          </div>
-          <div className="flex justify-between">
-            <span>Unités</span>
-            <Badge variant="outline">{prefs?.units}</Badge>
-          </div>
         </CardContent>
       </Card>
 

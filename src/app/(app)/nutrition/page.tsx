@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { bmrMifflinStJeor, dailyWaterNeedMl, ageFromBirthDate } from "@/lib/utils";
+import { PhotoCapture } from "@/features/nutrition/photo-capture";
 
 export const metadata = { title: "Nutrition" };
 
@@ -66,6 +67,8 @@ export default async function NutritionPage() {
           </CardContent>
         </Card>
       </div>
+
+      <PhotoCapture />
 
       <Card>
         <CardHeader>

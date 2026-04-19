@@ -15,9 +15,10 @@ export default async function DashboardPage() {
   const session = await auth();
   const userId = session!.user.id;
 
-  const [profile, sub, nextWorkout, last7, streak, xpSum] = await Promise.all([
+  const [profile, sub, prefs, nextWorkout, last7, streak, xpSum] = await Promise.all([
     prisma.profile.findUnique({ where: { userId }, include: { user: true } }),
     prisma.subscription.findUnique({ where: { userId } }),
+    prisma.preference.findUnique({ where: { userId } }),
     prisma.workout.findFirst({
       where: { userId, status: { in: ["PLANNED", "IN_PROGRESS"] } },
       orderBy: { scheduledFor: "asc" },
@@ -106,7 +107,7 @@ export default async function DashboardPage() {
             <CardDescription>Posez une question, demandez une adaptation.</CardDescription>
           </CardHeader>
           <CardContent>
-            <CoachChat />
+            <CoachChat coachName={prefs?.coachName ?? "Pulse"} coachAvatar={prefs?.coachAvatar ?? "default"} />
           </CardContent>
         </Card>
       </div>

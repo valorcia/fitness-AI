@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Dumbbell, LayoutDashboard, MapPinned, Activity, Apple, Trophy, CreditCard, Settings, ShieldAlert } from "lucide-react";
+import { Dumbbell, LayoutDashboard, MapPinned, Activity, Apple, Trophy, CreditCard, Settings, ShieldAlert, Calendar, Users, Library } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +8,12 @@ import { Badge } from "@/components/ui/badge";
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/workout", label: "Séance", icon: Activity },
+  { href: "/exercises", label: "Exercices", icon: Library },
+  { href: "/calendar", label: "Calendrier", icon: Calendar },
   { href: "/outdoor", label: "Outdoor", icon: MapPinned },
   { href: "/progression", label: "Progression", icon: Trophy },
   { href: "/nutrition", label: "Nutrition", icon: Apple },
+  { href: "/community", label: "Communauté", icon: Users },
   { href: "/subscription", label: "Abonnement", icon: CreditCard },
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];

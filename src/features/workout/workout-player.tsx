@@ -11,6 +11,7 @@ import { formatDuration } from "@/lib/utils";
 import { Volume2, VolumeX, CheckCircle2 } from "lucide-react";
 import type { Workout, WorkoutSet, Exercise, WorkoutFeedback } from "@prisma/client";
 import { FeedbackForm } from "./feedback-form";
+import { ExerciseIllustration } from "@/components/exercise/exercise-illustration";
 
 type SetWithExercise = WorkoutSet & { exercise: Exercise };
 type Props = { workout: Workout & { sets: SetWithExercise[]; feedback: WorkoutFeedback | null } };
@@ -134,12 +135,19 @@ export function WorkoutPlayer({ workout }: Props) {
               animate={{ opacity: 1, y: 0 }}
               className="grid gap-4"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-2xl font-bold">{activeSet.exercise.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {activeSet.targetSets ?? "?"} × {activeSet.targetReps ?? activeSet.targetTempo ?? "reps"}
-                    {activeSet.targetWeight ? ` @ ${activeSet.targetWeight} kg` : ""}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <ExerciseIllustration
+                    category={activeSet.exercise.category}
+                    slug={activeSet.exercise.slug}
+                    size="md"
+                  />
+                  <div>
+                    <div className="text-2xl font-bold">{activeSet.exercise.name}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {activeSet.targetSets ?? "?"} × {activeSet.targetReps ?? activeSet.targetTempo ?? "reps"}
+                      {activeSet.targetWeight ? ` @ ${activeSet.targetWeight} kg` : ""}
+                    </div>
                   </div>
                 </div>
                 <Badge>{activeIdx + 1} / {total}</Badge>

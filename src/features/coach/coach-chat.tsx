@@ -1,19 +1,26 @@
 "use client";
 
 import * as React from "react";
-import { Send, Sparkles } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { CoachAvatar } from "./coach-avatar";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-export function CoachChat() {
+export function CoachChat({
+  coachName = "Pulse",
+  coachAvatar = "default",
+}: {
+  coachName?: string;
+  coachAvatar?: string;
+}) {
   const [input, setInput] = React.useState("");
   const [messages, setMessages] = React.useState<Msg[]>([
     {
       role: "assistant",
-      content: "Je suis votre coach. Quel est votre objectif aujourd'hui ?",
+      content: `Salut, moi c'est ${coachName}. Quel est ton objectif aujourd'hui ?`,
     },
   ]);
   const [pending, setPending] = React.useState(false);
@@ -60,7 +67,14 @@ export function CoachChat() {
   }
 
   return (
-    <div className="flex h-[320px] flex-col gap-3">
+    <div className="flex h-[360px] flex-col gap-3">
+      <div className="flex items-center gap-2 border-b border-border/40 pb-2">
+        <CoachAvatar avatarKey={coachAvatar} size="sm" />
+        <div>
+          <div className="text-sm font-semibold">{coachName}</div>
+          <div className="text-xs text-muted-foreground">Ton coach IA</div>
+        </div>
+      </div>
       <div className="flex-1 space-y-2 overflow-y-auto pr-1">
         {messages.map((m, i) => (
           <div
@@ -72,9 +86,6 @@ export function CoachChat() {
                 : "mr-auto bg-secondary text-secondary-foreground",
             )}
           >
-            {m.role === "assistant" && (
-              <Sparkles className="mr-1 inline h-3.5 w-3.5 text-primary" />
-            )}
             <span className="whitespace-pre-wrap">{m.content || "…"}</span>
           </div>
         ))}
