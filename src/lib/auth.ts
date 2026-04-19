@@ -67,17 +67,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return true;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user?.id) {
         token.userId = user.id;
       }
-      if (token.userId && !token.role) {
+      if (token.userId && (!token.role || trigger === "update")) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.userId as string },
           select: { role: true, profile: { select: { id: true } } },
         });
         token.role = dbUser?.role ?? "USER";
         token.hasOnboarded = !!dbUser?.profile;
+      } else if (token.userId && token.hasOnboarded !== true) {
+        const hasProfile = await prisma.profile.findUnique({
+          where: { userId: token.userId as string },
+          select: { id: true },
+        });
+        token.hasOnboarded = !!hasProfile;
       }
       return token;
     },
