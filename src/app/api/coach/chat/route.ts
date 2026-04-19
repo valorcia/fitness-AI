@@ -24,7 +24,9 @@ const schema = z.object({
 
 export async function POST(req: Request) {
   const session = await auth();
-  if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
@@ -35,19 +37,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
-  const [profile, prefs, sub] = await Promise.all([
-    prisma.profile.findUnique({ where: { userId: session.user.id } }),
-    prisma.preference.findUnique({ where: { userId: session.user.id } }),
-    prisma.subscription.findUnique({ where: { userId: session.user.id } }),
-  ]);
-
-  if (!openai) {
+  if (openai === null) {
     return NextResponse.json(
       { error: "Le coach IA n'est pas configuré (OPENAI_API_KEY manquant)." },
       { status: 503 },
     );
   }
   const client = openai;
+
+  const [profile, prefs, sub] = await Promise.all([
+    prisma.profile.findUnique({ where: { userId: session.user.id } }),
+    prisma.preference.findUnique({ where: { userId: session.user.id } }),
+    prisma.subscription.findUnique({ where: { userId: session.user.id } }),
+  ]);
 
   const tier = sub?.tier ?? "FREE";
   const persona = prefs?.coachPersona ?? "FUN";
@@ -57,31 +59,33 @@ export async function POST(req: Request) {
     ? `Objectif=${profile.goal}, niveau=${profile.fitnessLevel}, env=${profile.environment}, IMC=${(profile.weightKg / Math.pow(profile.heightCm / 100, 2)).toFixed(1)}`
     : "Profil non renseigné.";
 
-  const system = coachSystemPrompt(persona, userContext) +
+  const system =
+    coachSystemPrompt(persona, userContext) +
     (allowVoice ? "" : "\n(Note: ce compte est FREE, pas de voix premium.)");
+
+  const completion = await client.chat.completions.create({
+    model: models.coach,
+    stream: true,
+    temperature: 0.6,
+    messages: [
+      { role: "system", content: system },
+      ...parsed.data.messages.map((m) => ({ role: m.role, content: m.content })),
+    ],
+  });
 
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const completion = await client.chat.completions.create({
-          model: models.coach,
-          stream: true,
-          temperature: 0.6,
-          messages: [
-            { role: "system", content: system },
-            ...parsed.data.messages.map((m) => ({ role: m.role, content: m.content })),
-          ],
-        });
         for await (const chunk of completion) {
           const delta = chunk.choices[0]?.delta?.content ?? "";
           if (delta) controller.enqueue(encoder.encode(delta));
         }
-        controller.close();
       } catch (e) {
         controller.enqueue(
           encoder.encode(`\n\n[Erreur coach : ${e instanceof Error ? e.message : "inconnue"}]`),
         );
+      } finally {
         controller.close();
       }
     },
