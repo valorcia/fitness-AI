@@ -27,6 +27,19 @@ export function WorkoutPlayer({ workout }: Props) {
     workout.sets.filter((s) => s.completed).length,
   );
 
+  const speak = React.useCallback(
+    (text: string) => {
+      if (!voiceOn || typeof window === "undefined") return;
+      const synth = window.speechSynthesis;
+      if (!synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "fr-FR";
+      synth.speak(u);
+    },
+    [voiceOn],
+  );
+
   React.useEffect(() => {
     if (workout.status === "COMPLETED") return;
     const t = setInterval(() => setElapsed((e) => e + 1), 1000);
@@ -47,19 +60,6 @@ export function WorkoutPlayer({ workout }: Props) {
   const activeSet = workout.sets[activeIdx];
   const total = workout.sets.length;
   const progress = total === 0 ? 0 : (completedCount / total) * 100;
-
-  const speak = React.useCallback(
-    (text: string) => {
-      if (!voiceOn || typeof window === "undefined") return;
-      const synth = window.speechSynthesis;
-      if (!synth) return;
-      synth.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = "fr-FR";
-      synth.speak(u);
-    },
-    [voiceOn],
-  );
 
   async function completeSet() {
     if (!activeSet) return;
