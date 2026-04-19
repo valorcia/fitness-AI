@@ -26,7 +26,7 @@ export const metadata = { title: "Blog" };
 export default function BlogIndex() {
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="text-4xl font-bold tracking-tight">Blog PulseCoach AI</h1>
+      <h1 className="text-4xl font-bold tracking-tight">Blog CoachMe</h1>
       <p className="mt-3 text-muted-foreground">
         Science, IA, coaching, programmes : nos équipes partagent leurs apprentissages.
       </p>

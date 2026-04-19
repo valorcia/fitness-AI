@@ -1,11 +1,11 @@
 {
-  "name": "PulseCoach AI",
-  "short_name": "PulseCoach",
+  "name": "CoachMe",
+  "short_name": "CoachMe",
   "description": "Coach sportif IA premium.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#050816",
-  "theme_color": "#050816",
+  "background_color": "#F7FAFB",
+  "theme_color": "#0E5D56",
   "orientation": "portrait",
   "icons": [
     { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }

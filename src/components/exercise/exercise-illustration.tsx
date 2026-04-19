@@ -1,14 +1,15 @@
+import Image from "next/image";
 import type { ExerciseCategory } from "@prisma/client";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
 import { cn } from "@/lib/utils";
 import {
-  Dumbbell,
   Activity,
-  Heart,
-  Zap,
-  Waves,
+  Dumbbell,
   Flame,
+  Heart,
   PersonStanding,
+  Waves,
+  Zap,
 } from "lucide-react";
 
 const ICONS: Record<ExerciseCategory, React.ComponentType<{ className?: string }>> = {
@@ -24,18 +25,45 @@ const ICONS: Record<ExerciseCategory, React.ComponentType<{ className?: string }
 export function ExerciseIllustration({
   category,
   slug,
+  imageUrl,
   size = "md",
   className,
 }: {
   category: ExerciseCategory;
   slug?: string;
+  imageUrl?: string | null;
   size?: "sm" | "md" | "lg";
   className?: string;
 }) {
   const meta = CATEGORY_META[category];
   const Icon = ICONS[category] ?? Dumbbell;
-  const dim = size === "sm" ? "h-12 w-12" : size === "lg" ? "h-32 w-32" : "h-20 w-20";
-  const iconDim = size === "sm" ? "h-5 w-5" : size === "lg" ? "h-12 w-12" : "h-8 w-8";
+  const dim =
+    size === "sm" ? "h-12 w-12" : size === "lg" ? "h-40 w-40" : "h-20 w-20";
+  const iconDim =
+    size === "sm" ? "h-5 w-5" : size === "lg" ? "h-14 w-14" : "h-8 w-8";
+
+  if (imageUrl) {
+    return (
+      <div
+        className={cn(
+          "relative shrink-0 overflow-hidden rounded-2xl bg-muted",
+          dim,
+          className,
+        )}
+        data-slug={slug}
+      >
+        <Image
+          src={imageUrl}
+          alt={slug ?? category}
+          fill
+          sizes="200px"
+          className="object-cover"
+          unoptimized
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(

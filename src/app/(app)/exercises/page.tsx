@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExerciseIllustration } from "@/components/exercise/exercise-illustration";
+import { TopTabs } from "@/components/app/top-tabs";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
 import type { ExerciseCategory } from "@prisma/client";
 
@@ -18,9 +19,16 @@ export default async function ExercisesPage() {
   );
 
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-6">
+      <TopTabs
+        tabs={[
+          { href: "/dashboard", label: "Tableau de bord" },
+          { href: "/workout", label: "Entraînements" },
+          { href: "/nutrition", label: "Alimentation" },
+        ]}
+      />
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Catalogue d'exercices</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Catalogue d'exercices</h1>
         <p className="text-muted-foreground">
           {exercises.length} exercices illustrés, classés par zone musculaire.
         </p>
@@ -38,7 +46,12 @@ export default async function ExercisesPage() {
               {list.map((e) => (
                 <Card key={e.id}>
                   <CardHeader className="flex-row items-center gap-3 space-y-0">
-                    <ExerciseIllustration category={e.category} slug={e.slug} size="sm" />
+                    <ExerciseIllustration
+                      category={e.category}
+                      slug={e.slug}
+                      imageUrl={e.thumbnailUrl ?? null}
+                      size="sm"
+                    />
                     <div className="min-w-0 flex-1">
                       <CardTitle className="truncate text-base">{e.name}</CardTitle>
                       <div className="flex flex-wrap gap-1 pt-1">

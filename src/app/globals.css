@@ -2,51 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  CoachMe palette
+  - Background: off-white mint #F5FAFA
+  - Primary (CTA): teal #14B8A6
+  - Secondary (authority): navy #1B3954
+*/
+
 :root {
-  --background: 220 20% 98%;
-  --foreground: 222 47% 9%;
+  --background: 186 30% 98%;
+  --foreground: 210 32% 18%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 9%;
+  --card-foreground: 210 32% 18%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 9%;
-  --primary: 210 100% 52%;
+  --popover-foreground: 210 32% 18%;
+  --primary: 172 72% 41%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 222 47% 9%;
-  --muted: 220 14% 96%;
-  --muted-foreground: 222 10% 45%;
-  --accent: 210 100% 96%;
-  --accent-foreground: 210 100% 32%;
-  --destructive: 0 84% 60%;
+  --secondary: 210 40% 22%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 186 20% 94%;
+  --muted-foreground: 210 14% 46%;
+  --accent: 172 60% 94%;
+  --accent-foreground: 172 72% 30%;
+  --destructive: 0 74% 52%;
   --destructive-foreground: 0 0% 100%;
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 210 100% 52%;
-  --radius: 0.75rem;
+  --border: 210 20% 90%;
+  --input: 210 20% 90%;
+  --ring: 172 72% 41%;
+  --radius: 1rem;
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-display: "Inter", system-ui, sans-serif;
+
+  --coach-teal: 172 72% 41%;
+  --coach-teal-deep: 174 86% 23%;
+  --coach-navy: 210 40% 22%;
+  --coach-navy-ink: 210 40% 14%;
 }
 
 .dark {
-  --background: 222 47% 4%;
-  --foreground: 210 20% 98%;
-  --card: 222 47% 7%;
-  --card-foreground: 210 20% 98%;
-  --popover: 222 47% 7%;
-  --popover-foreground: 210 20% 98%;
-  --primary: 210 100% 60%;
-  --primary-foreground: 222 47% 6%;
-  --secondary: 222 33% 12%;
-  --secondary-foreground: 210 20% 98%;
-  --muted: 222 33% 12%;
-  --muted-foreground: 215 16% 60%;
-  --accent: 222 33% 14%;
-  --accent-foreground: 210 100% 70%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 210 20% 98%;
-  --border: 222 33% 16%;
-  --input: 222 33% 16%;
-  --ring: 210 100% 60%;
+  --background: 210 40% 8%;
+  --foreground: 186 30% 97%;
+  --card: 210 40% 11%;
+  --card-foreground: 186 30% 97%;
+  --popover: 210 40% 11%;
+  --popover-foreground: 186 30% 97%;
+  --primary: 172 82% 50%;
+  --primary-foreground: 210 40% 10%;
+  --secondary: 210 40% 18%;
+  --secondary-foreground: 186 30% 97%;
+  --muted: 210 40% 14%;
+  --muted-foreground: 210 12% 62%;
+  --accent: 210 40% 16%;
+  --accent-foreground: 172 82% 60%;
+  --destructive: 0 72% 55%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 210 40% 18%;
+  --input: 210 40% 18%;
+  --ring: 172 82% 50%;
 }
 
 @layer base {
@@ -61,29 +73,38 @@
     font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
   }
   ::selection {
-    @apply bg-primary/30 text-foreground;
+    @apply bg-primary/25 text-foreground;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply border border-white/10 bg-white/5 backdrop-blur-xl;
+    @apply border border-white/40 bg-white/70 backdrop-blur-xl;
+  }
+  .dark .glass {
+    @apply border-white/10 bg-white/5;
   }
   .elevated {
     box-shadow:
-      0 1px 0 0 hsl(var(--foreground) / 0.04),
-      0 20px 60px -30px hsl(var(--foreground) / 0.25);
+      0 1px 0 0 hsl(var(--foreground) / 0.03),
+      0 16px 40px -24px hsl(210 40% 20% / 0.18);
   }
   .gradient-text {
-    background: linear-gradient(90deg, hsl(210 100% 70%), hsl(198 95% 60%));
+    background: linear-gradient(90deg, hsl(var(--coach-teal)) 0%, hsl(var(--coach-navy)) 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   .hero-gradient {
     background:
-      radial-gradient(60% 50% at 50% 0%, hsl(210 100% 60% / 0.2), transparent 60%),
-      radial-gradient(40% 40% at 80% 20%, hsl(280 90% 65% / 0.15), transparent 60%),
-      radial-gradient(40% 40% at 20% 30%, hsl(190 100% 60% / 0.15), transparent 60%);
+      radial-gradient(55% 40% at 50% -5%, hsl(172 60% 70% / 0.28), transparent 60%),
+      radial-gradient(40% 40% at 85% 20%, hsl(210 60% 60% / 0.2), transparent 60%),
+      radial-gradient(40% 40% at 20% 30%, hsl(172 70% 60% / 0.18), transparent 60%);
+  }
+  .coach-card {
+    @apply rounded-2xl border border-border/60 bg-card elevated;
+  }
+  .safe-area-bottom {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 0.5rem);
   }
 }

@@ -140,6 +140,7 @@ export function WorkoutPlayer({ workout }: Props) {
                   <ExerciseIllustration
                     category={activeSet.exercise.category}
                     slug={activeSet.exercise.slug}
+                    imageUrl={activeSet.exercise.thumbnailUrl ?? null}
                     size="md"
                   />
                   <div>

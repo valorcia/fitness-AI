@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { bmrMifflinStJeor, dailyWaterNeedMl, ageFromBirthDate } from "@/lib/utils";
 import { PhotoCapture } from "@/features/nutrition/photo-capture";
+import { TopTabs } from "@/components/app/top-tabs";
 
 export const metadata = { title: "Nutrition" };
 
@@ -35,9 +36,16 @@ export default async function NutritionPage() {
 
   return (
     <div className="grid gap-6">
+      <TopTabs
+        tabs={[
+          { href: "/dashboard", label: "Tableau de bord" },
+          { href: "/workout", label: "Entraînements" },
+          { href: "/nutrition", label: "Alimentation" },
+        ]}
+      />
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Nutrition & hydratation</h1>
-        <p className="text-muted-foreground">Objectifs adaptés à votre profil.</p>
+        <h1 className="text-2xl font-bold tracking-tight">Nutrition & hydratation</h1>
+        <p className="text-muted-foreground">Traçabilité complète des calories et macros.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

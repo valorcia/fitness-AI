@@ -1,5 +1,5 @@
 // ─────────────────────────────────────────────────────────────
-//  PulseCoach AI — Prisma schema
+//  CoachMe — Prisma schema
 //  Postgres (Supabase / Neon). Multi-tenant ready, GDPR-friendly.
 // ─────────────────────────────────────────────────────────────
 
@@ -148,6 +148,7 @@ model User {
   nutritionLogs       NutritionLog[]
   hydrationLogs       HydrationLog[]
   sleepLogs           SleepLog[]
+  weightLogs          WeightLog[]
   safetyContacts      SafetyContact[]
   safetyEvents        SafetyEvent[]
   badges              UserBadge[]
@@ -230,7 +231,17 @@ model HealthProfile {
   id                 String   @id @default(cuid())
   userId             String   @unique
   cardiacIssues      Boolean  @default(false)
+  hypertension       Boolean  @default(false)
+  diabetes           Boolean  @default(false)
+  asthma             Boolean  @default(false)
   jointPain          Boolean  @default(false)
+  backPain           Boolean  @default(false)
+  pregnancy          Boolean  @default(false)
+  surgeryRecent      Boolean  @default(false)
+  smokes             Boolean  @default(false)
+  alcoholUnitsPerWeek Int     @default(0)
+  hoursOfSleep       Int      @default(7)
+  stressLevel        Int      @default(5) // 1..10
   injuries           String[] @default([])
   conditions         String[] @default([])
   medications        String[] @default([])
@@ -238,9 +249,12 @@ model HealthProfile {
   maxHeartRate       Int?
   vo2Max             Float?
   sessionsPerWeek    Int      @default(3)
+  sessionDurationMin Int      @default(45)
   equipment          String[] @default([])
   outdoorAllowed     Boolean  @default(true)
   consentHealthData  Boolean  @default(false)
+  consentMedicalDisclaimer Boolean @default(false)
+  consentDoctorCleared Boolean @default(false)
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 
@@ -459,6 +473,18 @@ model HydrationLog {
   id        String   @id @default(cuid())
   userId    String
   amountMl  Int
+  loggedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, loggedAt])
+}
+
+model WeightLog {
+  id        String   @id @default(cuid())
+  userId    String
+  weightKg  Float
+  note      String?
   loggedAt  DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -5,7 +5,7 @@ export default function PrivacyPage() {
     <article className="prose prose-invert mx-auto max-w-3xl">
       <h1>Politique de confidentialité</h1>
       <p>
-        PulseCoach AI traite vos données avec le plus grand soin. Cette page décrit les principes
+        CoachMe traite vos données avec le plus grand soin. Cette page décrit les principes
         appliqués — le document légal complet est disponible sur demande.
       </p>
       <h2>Données collectées</h2>

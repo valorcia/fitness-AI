@@ -1,111 +1,149 @@
-# Prompt Stitch — PulseCoach AI
+# Prompt Stitch — CoachMe
 
-Copier-coller le prompt ci-dessous dans [Stitch](https://stitch.withgoogle.com/) pour générer l'UI de PulseCoach. Adapté mobile-first + desktop responsive.
+Copier-coller dans [Stitch](https://stitch.withgoogle.com/). Inspiré des captures
+"Entraînements / Tableau de bord / Calendrier" de l'app de référence, avec un
+angle **coaching IA premium** beaucoup plus affirmé que les apps concurrentes.
 
 ---
 
 ## Prompt maître
 
-> **Design a premium fitness AI mobile + web app called "PulseCoach AI".**
+> **Design a premium AI personal coaching app called "CoachMe"** (mobile-first,
+> iOS and Android + responsive web).
 >
 > ## Brand
-> - Dark-first, Apple Fitness+ / Whoop / Tesla minimal vibe.
-> - Primary accent: electric blue `#3B82F6` with cyan glow `#22D3EE`.
-> - Background: near-black `#050816` with subtle radial blue/purple gradients at the top.
-> - Cards: `rgba(255,255,255,0.04)` glass with 1px border `rgba(255,255,255,0.08)`, blur 24px.
-> - Typography: Inter, bold display weights for headings, tight letter-spacing. Gradient text for hero words.
-> - Corner radius 16–24px. Large airy spacing. Motion: soft springs, 200ms.
+> - **Light theme** (clean off-white `#F5FAFA`), optional dark mode later.
+> - **Primary (teal)** `#14B8A6` for actions, CTA, progress.
+> - **Secondary (deep navy)** `#1B3954` for authority, titles, selected tabs.
+> - Accent pale mint `#E0F2F1` for hover/selected states.
+> - Surfaces: pure white cards with soft shadow (`0 16px 40px -24px #1b39541f`).
+> - Corner radius 16–24px. Type: **Inter**. Active elements wear the navy
+>   pill, idle elements wear the mint pill.
 >
-> ## Flows & screens
+> ## Navigation
+> - **Mobile top bar**: clock icon (left) · page title (centered) · list icon (right).
+> - **Sub-tabs pill row** under the header: "Tableau de bord" (active — navy
+>   pill with white text) / "Entraînements" / "Alimentation" (mint pill idle).
+> - **Mobile bottom tab bar** (5 icons):
+>   1. Entraînements (dumbbell) — active teal with underline indicator.
+>   2. Feed (users) — red notification dot for new community posts.
+>   3. Message (chat bubble) — opens the AI coach chat.
+>   4. Manuel (open book) — guides, machine usage, safety.
+>   5. Plus (three dots) — settings, subscription, SOS, notifications.
 >
-> ### 1. Marketing landing (web)
-> - Hero: headline in 2 lines with gradient accent on "coach sportif IA". Subhead 18px muted. Two CTAs (primary glowing + ghost outline). Badge pill "NEW · Coach vocal IA" at top with sparkle icon.
-> - 4 preview glass cards below hero: Séance adaptée, Run tracker, Vélo live, Récupération.
-> - Features grid 8 cards (2x4): AI coach, voice personalities, gym catalog, outdoor GPS, health integrations, safety SOS, gamification, nutrition. Each card: icon top-left in blue bubble, title, 2-line description.
-> - Pricing grid 4 columns: Free / Premium 9.90€ / Pro 19.90€ / Elite 29.90€. Highlight Premium with primary ring + "Le plus choisi" badge. Check-list features with small check icon.
-> - Final CTA glass card full-width with glowing button.
+> ## Onboarding — 8 steps
+> A single-column wizard, progress bar in teal, each step in a white card on
+> the mint gradient background.
 >
-> ### 2. Onboarding wizard (mobile + web)
-> - 6 steps in a card: Identité → Corps → Objectif → Santé → Matériel → Consentement.
-> - Progress bar at top with gradient fill.
-> - Step chrome: current step title + "Étape X / 6". Animated transitions (slide+fade).
-> - Inputs: rounded-xl, subtle inner highlight, focused ring blue.
-> - Goal step uses 5 large tap cards (with emoji + label + 1-line desc): Perte de poids 🔥, Prise de masse 💪, Endurance 🏃, Remise en forme ⚡, Santé ❤️.
-> - Equipment step: multi-select chips with gradient when active.
-> - Final step: consent checkbox + big "Générer mon plan" button (primary glow) + subtle loading spinner morphing into success ✓.
+> 1. **Identité** — prénom, date de naissance, sexe.
+> 2. **Corps** — taille, poids, niveau (4 pills Débutant→Elite).
+> 3. **Objectif** — large tap cards with emoji (perte de poids 🔥, prise de
+>    masse 💪, endurance 🏃, forme ⚡, santé ❤️). Environment tri-pick
+>    (Salle / Maison / Extérieur). Séances/semaine + durée.
+> 4. **Santé** — checklist medical flags (cardiaque, hypertension, diabète,
+>    asthme, articulations, dos, grossesse, chirurgie récente). Free-text
+>    "blessures", "pathologies", "traitements".
+> 5. **Hygiène de vie** — tabac, alcool (unités/semaine), sommeil slider,
+>    stress slider.
+> 6. **Matériel** — multi-select chips (haltères, barre, rack, cable, rameur,
+>    vélo, kettlebell, bandes, etc.) + toggle "outdoor autorisé".
+> 7. **Mon coach** — champ "nom du coach", grille de 5 avatars gradient,
+>    grille de 5 personnalités (Strict/Fun/Zen/Militaire/Elite) avec emoji.
+> 8. **Consentement** — carte disclaimer médical obligatoire + consentement
+>    données santé. Si step 4 a coché un flag à risque : case supplémentaire
+>    "j'ai l'accord de mon médecin" (surlignée ambre).
 >
-> ### 3. Dashboard
-> - Top greeting "Bonjour, {prénom} 👋" + subscription badge.
-> - 4 KPI cards: Streak (🔥 days), Niveau (Lvl + XP), Charge 7j, Récupération.
-> - 2-column layout: left "Prochaine séance" big card with muscle-preview and primary glowing button "Démarrer". Under it a weekly objective progress bar.
-> - Right side: Coach chat card featuring the customizable Coach avatar (circular avatar with emoji + gradient), coach name, and chat bubbles. Input with Send icon button.
+> ## Dashboard (Tableau de bord)
+> - **Banner bleu** "Découvrez comment créer de nouveaux entraînements".
+> - **Banner teal** "Partage ton entraînement".
+> - **Hero card plan** : navy gradient sur photo athlétique réaliste
+>   (Unsplash), titre du plan, badge salle/home/outdoor, étoiles du niveau,
+>   "X jours d'entraînement (Y séances/sem)", CTA "Démarrer la séance".
+> - **KPIs 4 colonnes** : calories brûlées 7 j, streak, niveau, séances.
+> - **Feuille de route "Entraînement suivant"** : liste de cartes, chaque
+>   séance avec un cercle de progression teal (0% initial). Jours verrouillés
+>   = icône cadenas, texte grisé. CTA "Démarrer" sur le prochain.
+> - **Coach card** : avatar gradient + nom du coach + chat rapide.
+> - **Objectif hebdomadaire** : progress bar + compteur "x/y séances" + flamme.
+> - **Mon poids** : graphe ligne teal sur fond mint, valeur actuelle
+>   surlignée en pill teal. Boutons "+0,1 kg" et "+1 kg" pour saisie rapide.
+> - **Groupes musculaires travaillés** : tabs "Dernière / Semaine / Mois / Tout",
+>   bar chart horizontal des groupes.
+> - **Calories brûlées** : courbe kcal/jour.
 >
-> ### 4. Workout live / player
-> - Big exercise title + animated illustration of the movement (loop, 2s, looping silhouette doing squat/bench/etc.) inside a gradient-tiled tile that matches the muscle category color.
-> - Sets counter "3 / 5" chip top right.
-> - Cue list with bullet dots.
-> - During rest: big countdown timer (60s style, circular progress) that fills up with gradient.
-> - Bottom: primary "Valider la série" large pill-shaped button. Secondary voice toggle + stopwatch chip.
-> - Voice pulse ring animation when coach speaks.
+> ## Calendar (mensuel)
+> - Header : chevron gauche · mois (ex. "Avril 2026") · chevron droit.
+> - Grille 7 colonnes, jours compacts. Dessous chaque jour : icône dumbbell
+>   navy (séance prévue) ou teal (terminée), icône footprints ambre
+>   (outdoor). Aujourd'hui = nombre en teal. Jour sélectionné = fond mint.
+> - Panneau "Détail du jour" avec liste de séances + kcal totale.
 >
-> ### 5. Exercise library
-> - Responsive card grid. Each card: illustration tile (gradient background unique per muscle group), exercise name, difficulty badge, muscle chips, 1-line cue. Filter bar at top: category pills, equipment filter, search.
-> - On hover (web): card lifts and gradient glows.
+> ## Entraînements (liste)
+> - Bouton "Nouvelle séance libre" + "Générer un plan IA" en haut.
+> - Cartes de séance : statut badge (prévu / en cours / terminé / sauté),
+>   date, durée, score. CTA "Ouvrir" ou "Voir résumé".
 >
-> ### 6. Outdoor live
-> - Full-bleed map (dark theme) with animated polyline in gradient color.
-> - Overlay card at bottom: 3 big metrics Distance / Durée / Allure. Start/Pause/Stop circular buttons (primary glow + outline). Heart icon with BPM if available.
-> - Zone cardio strip: 5 segments colored (grey / blue / green / orange / red) showing current zone.
+> ## Workout player (séance en cours)
+> - Photo réaliste de l'exercice/machine (Unsplash), sinon tuile gradient
+>   par catégorie musculaire. Nom de l'exercice + sets/reps + poids.
+> - Liste de cues.
+> - Chrono de séance en pill, bouton voix on/off.
+> - Repos : compte à rebours grand format.
+> - Bouton primary full-width "Valider la série".
 >
-> ### 7. Calendar (month view)
-> - Header with month name + prev/next arrows.
-> - 7-column grid. Day cells show date number, small chips for workouts (dumbbell icon, status color: amber planned, emerald completed) and outdoor activity (footprints amber). Today cell has blue ring.
-> - Below: detail panel for selected day with list of workouts (clickable → /workout/{id}), activities, kcal total.
+> ## Nutrition — traçabilité ultra-détaillée
+> - Ring de calories du jour / objectif + macros P/G/L.
+> - Hydratation avec +250 ml.
+> - **Photo AI (style Cal AI)** : gros bouton caméra et bouton "Importer".
+>   Après capture : preview, total kcal + macros, liste d'aliments détectés
+>   avec portion & grammes, barre de confiance, bouton "Enregistrer".
+> - Journal des repas par tranche horaire avec totaux jour/semaine.
 >
-> ### 8. Nutrition
-> - Calorie progress (circular or horizontal) + kcal target.
-> - Hydration progress with big "+250 ml" primary button.
-> - Prominent **Photo AI** card: big camera button "Prendre une photo" with gradient glow + "Importer" outline. After capture: preview image, kcal + macros summary, list of detected food items with grams, confidence bar.
-> - Meal log list grouped by time.
+> ## Coach page
+> - Avatar coach rond gradient XL + nom + personnalité en badge.
+> - Message contextuel du coach (salutation, rappel de la prochaine séance,
+>   feedback sur la dernière performance).
+> - Chat continu en-dessous.
+> - Suggestions rapides (chips) : "Adapte ma séance", "Je suis fatigué",
+>   "Je veux progresser", "Nutrition du jour".
 >
-> ### 9. Community feed
-> - Compose card at top: type chips (Note/Séance/Course/Exploit/Photo), textarea, publish button.
-> - Feed of posts: avatar + name + time + type badge, content, optional image, heart + comment counter buttons (heart animates on tap, filled primary when liked).
+> ## Exercise library
+> - Sections par groupe musculaire, grille de cartes : photo réaliste de la
+>   machine ou illustration gradient si pas de photo, nom, badges difficulté,
+>   muscles ciblés, cue court.
 >
-> ### 10. Progression
-> - 3 KPI tiles: Niveau + XP bar, Streak flame, Badge count.
-> - Grid of badges (bronze/silver/gold/platinum tiers with distinct rim colors), opacity dim for locked.
-> - XP ledger list with timestamps.
+> ## Community feed
+> - Composer avec chips type (Note/Séance/Course/Exploit/Photo), textarea,
+>   publish.
+> - Feed : avatar + nom + time + badge type ; contenu + image ; heart +
+>   comment counters.
 >
-> ### 11. Subscription
-> - 4 tier cards matching landing pricing. Current plan highlighted with "Plan actuel" pill. Actions: "S'abonner" or "Ouvrir portail".
+> ## Manuel (onglet bas)
+> - Cartes guides : démarrer CoachMe, bien utiliser les machines, traçabilité
+>   calories, outdoor, sécurité & urgence.
 >
-> ### 12. Settings → Coach personnalisé
-> - Large circular avatar (gradient bubble + emoji) centered.
-> - Input "Nom du coach" (default Pulse).
-> - Avatar grid: 5 options (Pulse, Zen, Beast, Officer, Elite) — distinct gradient and emoji each.
-> - Personality grid: Strict / Fun / Zen / Militaire / Elite (pill buttons).
-> - Toggle "Voix coach".
+> ## Plus
+> - Liste : Paramètres, Abonnement, Progression (badges & XP), Profil santé,
+>   Sécurité / SOS, Aide, Déconnexion.
 >
-> ### 13. Safety SOS
-> - Big circular red SOS button with pulsing outer ring. Warning text about 15/112. Secondary info: primary contact name.
+> ## Safety SOS
+> - Bouton rond rouge pulsant XL, texte 15/112, nom du contact primaire.
 >
-> ## Mobile specifics
-> - Bottom tab bar (5 items max): Dashboard, Séance, Calendrier, Nutrition, Communauté. Active tab with gradient icon + indicator bar.
-> - Safe areas respected. Swipe-down to refresh.
->
-> ## Illustrations
-> - Exercises: silhouette animations (person doing the movement), solid gradient backgrounds per muscle group (blue=lower, red-orange=push, purple-pink=pull, amber-red=full body, rose-amber=core, emerald-cyan=cardio, indigo-violet=mobility).
-> - Coach avatars: round gradient bubbles with an emoji (💪 Pulse, 🧘 Zen, 🔥 Beast, 🎖️ Officer, 🏆 Elite).
-> - Badges: medal-like with tier rim.
->
-> Use ShadCN/Radix-flavored components. Export as Figma + React components.
+> ## Illustrations & photos
+> - Machines/exercices : photos Unsplash réalistes quand disponibles, sinon
+>   tuile gradient par groupe musculaire.
+> - Coach : avatars ronds gradient avec emoji (Pulse 💪, Zen 🧘, Beast 🔥,
+>   Officer 🎖️, Elite 🏆).
+> - Badges : médailles avec liseré bronze / silver / gold / platinum.
 
 ---
 
-## Raccourcis & variants
+## Raccourcis & variantes
 
-- **Dark theme uniquement** — pas de mode clair pour l'app, seulement pour la landing.
-- **Animations** : réduction motion respecté (`prefers-reduced-motion`).
-- **Accessibilité** : contraste AAA sur texte principal, focus rings visibles.
-- **Icônes** : lucide-react pour cohérence avec le code existant.
+- **Light theme** par défaut, palette teal + navy. Dark mode plus tard.
+- **Mobile-first** strict. Toutes les cartes prennent 100% de largeur sur
+  mobile, 2 colonnes à partir de md.
+- **Réduction motion** : toutes les animations respectent
+  `prefers-reduced-motion`.
+- **Accessibilité** : contraste AA minimum, focus rings teal visibles.
+- **Icônes** : `lucide-react` pour cohérence avec le code.

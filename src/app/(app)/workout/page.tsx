@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TopTabs } from "@/components/app/top-tabs";
 import { formatDuration } from "@/lib/utils";
 
 export const metadata = { title: "Séances" };
@@ -19,9 +20,16 @@ export default async function WorkoutsPage() {
 
   return (
     <div className="grid gap-6">
+      <TopTabs
+        tabs={[
+          { href: "/dashboard", label: "Tableau de bord" },
+          { href: "/workout", label: "Entraînements" },
+          { href: "/nutrition", label: "Alimentation" },
+        ]}
+      />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Séances</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Séances</h1>
           <p className="text-muted-foreground">Programmées, en cours, terminées.</p>
         </div>
         <div className="flex gap-2">

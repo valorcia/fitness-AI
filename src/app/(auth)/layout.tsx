@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="container flex h-16 items-center">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <Dumbbell className="h-5 w-5 text-primary" />
-          <span className="gradient-text tracking-tight">PulseCoach AI</span>
+          <span className="gradient-text tracking-tight">CoachMe</span>
         </Link>
       </header>
       <main className="container flex min-h-[calc(100vh-4rem)] items-center justify-center py-10">

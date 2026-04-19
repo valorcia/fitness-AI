@@ -1,8 +1,8 @@
-# PulseCoach AI
+# CoachMe
 
 > Premium AI fitness coaching — web, PWA, iOS & Android. Built for scale (1M+ users).
 
-PulseCoach AI is a production-grade SaaS starter that pairs a conversational,
+CoachMe is a production-grade SaaS starter that pairs a conversational,
 voice-driven AI coach with adaptive training, outdoor GPS tracking, gamification,
 safety tooling and subscription billing.
 
@@ -67,4 +67,4 @@ docs/                  # ARCHITECTURE, ROADMAP, SCALING, SECURITY
 
 ## License
 
-Proprietary — PulseCoach AI. All rights reserved.
+Proprietary — CoachMe. All rights reserved.

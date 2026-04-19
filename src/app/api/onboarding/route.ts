@@ -53,33 +53,80 @@ export async function POST(req: Request) {
         where: { userId },
         update: {
           injuries: data.injuries,
+          conditions: data.conditions,
+          medications: data.medications,
           cardiacIssues: data.cardiacIssues,
+          hypertension: data.hypertension,
+          diabetes: data.diabetes,
+          asthma: data.asthma,
           jointPain: data.jointPain,
+          backPain: data.backPain,
+          pregnancy: data.pregnancy,
+          surgeryRecent: data.surgeryRecent,
+          smokes: data.smokes,
+          alcoholUnitsPerWeek: data.alcoholUnitsPerWeek,
+          hoursOfSleep: data.hoursOfSleep,
+          stressLevel: data.stressLevel,
           sessionsPerWeek: data.sessionsPerWeek,
+          sessionDurationMin: data.sessionDurationMin,
           equipment: data.equipment,
           outdoorAllowed: data.outdoorAllowed,
           consentHealthData: data.consentHealthData,
+          consentMedicalDisclaimer: data.consentMedicalDisclaimer,
+          consentDoctorCleared: data.consentDoctorCleared,
         },
         create: {
           userId,
           injuries: data.injuries,
+          conditions: data.conditions,
+          medications: data.medications,
           cardiacIssues: data.cardiacIssues,
+          hypertension: data.hypertension,
+          diabetes: data.diabetes,
+          asthma: data.asthma,
           jointPain: data.jointPain,
+          backPain: data.backPain,
+          pregnancy: data.pregnancy,
+          surgeryRecent: data.surgeryRecent,
+          smokes: data.smokes,
+          alcoholUnitsPerWeek: data.alcoholUnitsPerWeek,
+          hoursOfSleep: data.hoursOfSleep,
+          stressLevel: data.stressLevel,
           sessionsPerWeek: data.sessionsPerWeek,
+          sessionDurationMin: data.sessionDurationMin,
           equipment: data.equipment,
           outdoorAllowed: data.outdoorAllowed,
           consentHealthData: data.consentHealthData,
+          consentMedicalDisclaimer: data.consentMedicalDisclaimer,
+          consentDoctorCleared: data.consentDoctorCleared,
         },
       });
 
-      await tx.consent.create({
-        data: { userId, kind: "health_data", granted: true, version: "1.0" },
-      });
-      await tx.streak.upsert({
+      await tx.preference.upsert({
         where: { userId },
-        update: {},
-        create: { userId },
+        update: {
+          coachPersona: data.coachPersona,
+          coachName: data.coachName,
+          coachAvatar: data.coachAvatar,
+        },
+        create: {
+          userId,
+          coachPersona: data.coachPersona,
+          coachName: data.coachName,
+          coachAvatar: data.coachAvatar,
+        },
       });
+
+      await tx.consent.createMany({
+        data: [
+          { userId, kind: "health_data", granted: data.consentHealthData, version: "1.0" },
+          { userId, kind: "medical_disclaimer", granted: data.consentMedicalDisclaimer, version: "1.0" },
+          { userId, kind: "doctor_cleared", granted: data.consentDoctorCleared, version: "1.0" },
+        ],
+      });
+
+      await tx.streak.upsert({ where: { userId }, update: {}, create: { userId } });
+      await tx.weightLog.create({ data: { userId, weightKg: data.weightKg } });
 
       return { profile, health };
     });
