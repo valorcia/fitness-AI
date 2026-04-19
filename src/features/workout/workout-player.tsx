@@ -42,21 +42,24 @@ export function WorkoutPlayer({ workout }: Props) {
     }
     const t = setTimeout(() => setRestSecondsLeft((r) => (r === null ? null : r - 1)), 1000);
     return () => clearTimeout(t);
-  }, [restSecondsLeft]);
+  }, [restSecondsLeft, speak]);
 
   const activeSet = workout.sets[activeIdx];
   const total = workout.sets.length;
   const progress = total === 0 ? 0 : (completedCount / total) * 100;
 
-  function speak(text: string) {
-    if (!voiceOn || typeof window === "undefined") return;
-    const synth = window.speechSynthesis;
-    if (!synth) return;
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "fr-FR";
-    synth.speak(u);
-  }
+  const speak = React.useCallback(
+    (text: string) => {
+      if (!voiceOn || typeof window === "undefined") return;
+      const synth = window.speechSynthesis;
+      if (!synth) return;
+      synth.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "fr-FR";
+      synth.speak(u);
+    },
+    [voiceOn],
+  );
 
   async function completeSet() {
     if (!activeSet) return;

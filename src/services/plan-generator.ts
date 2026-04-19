@@ -91,6 +91,7 @@ const PLAN_JSON_SCHEMA = {
 export async function generatePlan(input: PlanInput): Promise<GeneratedPlan> {
   const { profile, health } = input;
   if (!openai) return fallbackPlan(input);
+  const client = openai;
 
   const prompt = `
 Generate a safe, progressive 4-week training plan for:
@@ -111,7 +112,7 @@ Use exercise slugs from this catalog: barbell-back-squat, bench-press, pull-up, 
 `.trim();
 
   try {
-    const res = await openai.chat.completions.create({
+    const res = await client.chat.completions.create({
       model: models.coach,
       messages: [
         { role: "system", content: "You are a certified strength & conditioning coach. Output strict JSON." },
