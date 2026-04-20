@@ -118,6 +118,15 @@ enum SafetyEventKind {
   CHECKIN_OK
 }
 
+enum MealType {
+  BREAKFAST
+  LUNCH
+  DINNER
+  SNACK
+  PRE_WORKOUT
+  POST_WORKOUT
+}
+
 enum DeviceProvider {
   GARMIN
   FITBIT
@@ -501,16 +510,23 @@ model NutritionLog {
   id          String   @id @default(cuid())
   userId      String
   consumedAt  DateTime @default(now())
+  mealType    MealType?
+  title       String?
+  note        String?
   kcal        Int
   protein     Float
   carbs       Float
   fat         Float
+  fiber       Float    @default(0)
+  sugar       Float    @default(0)
   items       Json     // array of food items
-  source      String   @default("manual") // manual | ai | barcode
+  imageUrl    String?
+  source      String   @default("manual") // manual | ai | barcode | quick
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, consumedAt])
+  @@index([userId, mealType, consumedAt])
 }
 
 model HydrationLog {

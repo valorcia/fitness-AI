@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { TopTabs } from "@/components/app/top-tabs";
 import { CoachChat } from "@/features/coach/coach-chat";
 import { formatDuration } from "@/lib/utils";
-import { Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
+import { Apple, Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
 import { MuscleMap, type MuscleKey } from "@/components/anatomy/muscle-map";
 import { ActivityRings } from "@/components/metrics/activity-rings";
@@ -56,6 +56,13 @@ export default async function DashboardPage() {
     prisma.streak.findUnique({ where: { userId } }),
     prisma.xPEntry.aggregate({ _sum: { amount: true }, where: { userId } }),
   ]);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nutritionToday = await prisma.nutritionLog.aggregate({
+    where: { userId, consumedAt: { gte: today } },
+    _sum: { kcal: true, protein: true, carbs: true, fat: true },
+  });
 
   const muscleMap: Partial<Record<MuscleKey, number>> = {};
   for (const w of last7) {
@@ -235,6 +242,28 @@ export default async function DashboardPage() {
           </div>
         </section>
       )}
+
+      {/* Nutrition quick panel */}
+      <Card>
+        <CardContent className="flex flex-wrap items-center justify-between gap-3 p-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Apple className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">Calories du jour</div>
+              <div className="text-xs text-muted-foreground">
+                {nutritionToday._sum.kcal ?? 0} kcal · P{Math.round(nutritionToday._sum.protein ?? 0)} · G
+                {Math.round(nutritionToday._sum.carbs ?? 0)} · L
+                {Math.round(nutritionToday._sum.fat ?? 0)}
+              </div>
+            </div>
+          </div>
+          <Button asChild variant="outline">
+            <Link href="/nutrition">Ouvrir le suivi</Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Muscles worked this week */}
       <Card>

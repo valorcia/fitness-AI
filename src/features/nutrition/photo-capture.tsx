@@ -20,6 +20,24 @@ type Result = {
   confidence: number;
 };
 
+const MEAL_OPTIONS = [
+  { value: "BREAKFAST", label: "Petit-déj" },
+  { value: "LUNCH", label: "Déjeuner" },
+  { value: "SNACK", label: "Collation" },
+  { value: "DINNER", label: "Dîner" },
+  { value: "PRE_WORKOUT", label: "Pré-séance" },
+  { value: "POST_WORKOUT", label: "Post-séance" },
+] as const;
+
+function inferMealType(): (typeof MEAL_OPTIONS)[number]["value"] {
+  const h = new Date().getHours();
+  if (h < 10) return "BREAKFAST";
+  if (h < 14) return "LUNCH";
+  if (h < 17) return "SNACK";
+  if (h < 22) return "DINNER";
+  return "SNACK";
+}
+
 export function PhotoCapture() {
   const router = useRouter();
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -28,6 +46,9 @@ export function PhotoCapture() {
   const [pending, setPending] = React.useState(false);
   const [result, setResult] = React.useState<Result | null>(null);
   const [error, setError] = React.useState<string | null>(null);
+  const [mealType, setMealType] = React.useState<(typeof MEAL_OPTIONS)[number]["value"]>(
+    inferMealType(),
+  );
   const [totals, setTotals] = React.useState<{
     kcal: number;
     protein: number;
@@ -53,7 +74,7 @@ export function PhotoCapture() {
         const res = await fetch("/api/nutrition/photo", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageBase64: dataUrl }),
+          body: JSON.stringify({ imageBase64: dataUrl, mealType }),
         });
         const body = await res.json();
         if (!res.ok) throw new Error(body.error ?? "Analyse impossible.");
@@ -81,6 +102,22 @@ export function PhotoCapture() {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
+        <div className="flex flex-wrap gap-1.5">
+          {MEAL_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => setMealType(opt.value)}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                mealType === opt.value
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
         <div className="flex flex-wrap gap-2">
           <input
             ref={cameraRef}

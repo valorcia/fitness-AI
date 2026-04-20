@@ -12,6 +12,9 @@ export const maxDuration = 60;
 const requestSchema = z.object({
   imageBase64: z.string().min(100).max(8_000_000), // ≤ ~6 MB image
   note: z.string().max(300).optional(),
+  mealType: z
+    .enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK", "PRE_WORKOUT", "POST_WORKOUT"])
+    .optional(),
   save: z.boolean().default(true),
 });
 
@@ -91,9 +94,15 @@ export async function POST(req: Request) {
     );
 
     if (parsed.data.save) {
+      const title = data.detected_items
+        .slice(0, 3)
+        .map((i) => i.name)
+        .join(" · ");
       await prisma.nutritionLog.create({
         data: {
           userId: session.user.id,
+          mealType: parsed.data.mealType,
+          title: title || undefined,
           kcal: Math.round(totals.kcal),
           protein: Math.round(totals.protein * 10) / 10,
           carbs: Math.round(totals.carbs * 10) / 10,
