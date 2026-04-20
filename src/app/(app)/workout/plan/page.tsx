@@ -11,6 +11,9 @@ import { CalendarClock, Dumbbell, Lock, PlayCircle } from "lucide-react";
 
 export const metadata = { title: "Plan IA" };
 
+const FALLBACK_PHOTO =
+  "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=900&q=70";
+
 const SESSION_PHOTOS: Record<string, string> = {
   STRENGTH:
     "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=900&q=70",
@@ -28,8 +31,7 @@ const SESSION_PHOTOS: Record<string, string> = {
     "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=900&q=70",
   RECOVERY:
     "https://images.unsplash.com/photo-1506629905607-ac3d75c40ffa?auto=format&fit=crop&w=900&q=70",
-  CUSTOM:
-    "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=900&q=70",
+  CUSTOM: FALLBACK_PHOTO,
 };
 
 export default async function PlanPage() {
@@ -98,7 +100,7 @@ export default async function PlanPage() {
           const subtitle = firstSet
             ? CATEGORY_META[firstSet.exercise.category].label
             : w.type.replace("_", " ");
-          const image = SESSION_PHOTOS[w.type] ?? SESSION_PHOTOS.CUSTOM;
+          const image = SESSION_PHOTOS[w.type] ?? FALLBACK_PHOTO;
           return (
             <article
               key={w.id}
