@@ -71,15 +71,15 @@ export async function POST(_req: Request, ctx: { params: Promise<{ provider: str
   // Actual secret exchange handled in /api/devices/callback/[provider].
   const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/devices/callback/${provider.toLowerCase()}`;
   const state = `${session.user.id}.${Math.random().toString(36).slice(2)}`;
-  const base =
-    {
-      GARMIN: "https://connect.garmin.com/oauthConfirm",
-      FITBIT: "https://www.fitbit.com/oauth2/authorize",
-      OURA: "https://cloud.ouraring.com/oauth/authorize",
-      WITHINGS: "https://account.withings.com/oauth2_user/authorize2",
-      POLAR: "https://flow.polar.com/oauth2/authorization",
-      STRAVA: "https://www.strava.com/oauth/authorize",
-    }[provider] ?? null;
+  const OAUTH_BASE: Partial<Record<typeof provider, string>> = {
+    GARMIN: "https://connect.garmin.com/oauthConfirm",
+    FITBIT: "https://www.fitbit.com/oauth2/authorize",
+    OURA: "https://cloud.ouraring.com/oauth/authorize",
+    WITHINGS: "https://account.withings.com/oauth2_user/authorize2",
+    POLAR: "https://flow.polar.com/oauth2/authorization",
+    STRAVA: "https://www.strava.com/oauth/authorize",
+  };
+  const base = OAUTH_BASE[provider];
 
   if (!base) {
     return NextResponse.json({ error: "Provider non supporté." }, { status: 400 });
