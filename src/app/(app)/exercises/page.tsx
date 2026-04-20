@@ -1,15 +1,18 @@
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExerciseIllustration } from "@/components/exercise/exercise-illustration";
 import { TopTabs } from "@/components/app/top-tabs";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
+import { ExerciseDemo } from "@/components/exercise/exercise-demo";
+import { ExerciseVideo } from "@/components/exercise/exercise-video";
 import type { ExerciseCategory } from "@prisma/client";
 
 export const metadata = { title: "Catalogue d'exercices" };
 
 export default async function ExercisesPage() {
-  const exercises = await prisma.exercise.findMany({ orderBy: [{ category: "asc" }, { name: "asc" }] });
+  const exercises = await prisma.exercise.findMany({
+    orderBy: [{ category: "asc" }, { name: "asc" }],
+  });
   const byCategory = exercises.reduce<Record<ExerciseCategory, typeof exercises>>(
     (acc, e) => {
       (acc[e.category] ??= []).push(e);
@@ -27,61 +30,75 @@ export default async function ExercisesPage() {
           { href: "/nutrition", label: "Alimentation" },
         ]}
       />
+
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Catalogue d'exercices</h1>
+        <h1 className="font-display text-display-sm">Bibliothèque d'exercices</h1>
         <p className="text-muted-foreground">
-          {exercises.length} exercices illustrés, classés par zone musculaire.
+          {exercises.length} exercices — photos, vidéos et démonstrations animées.
         </p>
       </div>
 
       {(Object.entries(byCategory) as Array<[ExerciseCategory, typeof exercises]>).map(
         ([cat, list]) => (
           <section key={cat} className="grid gap-3">
-            <h2 className="flex items-center gap-2 text-xl font-semibold">
-              <span className="text-2xl">{CATEGORY_META[cat].emoji}</span>
-              {CATEGORY_META[cat].label}
+            <div className="flex items-baseline justify-between">
+              <h2 className="font-display text-2xl font-bold tracking-tight">
+                <span className="mr-2 align-middle text-2xl">{CATEGORY_META[cat].emoji}</span>
+                {CATEGORY_META[cat].label}
+              </h2>
               <Badge variant="outline">{list.length}</Badge>
-            </h2>
+            </div>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {list.map((e) => (
-                <Card key={e.id}>
-                  <CardHeader className="flex-row items-center gap-3 space-y-0">
-                    <ExerciseIllustration
-                      category={e.category}
-                      slug={e.slug}
-                      imageUrl={e.thumbnailUrl ?? null}
-                      size="sm"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="truncate text-base">{e.name}</CardTitle>
-                      <div className="flex flex-wrap gap-1 pt-1">
-                        <Badge variant="outline" className="text-[10px]">
-                          {e.difficulty}
-                        </Badge>
-                        {e.isOutdoor && (
-                          <Badge variant="secondary" className="text-[10px]">
-                            outdoor
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0 text-xs text-muted-foreground">
-                    <div>
-                      <span className="text-foreground">Muscles :</span>{" "}
-                      {e.primaryMuscles.join(", ")}
-                    </div>
-                    {e.equipment.length > 0 && (
-                      <div>
-                        <span className="text-foreground">Matériel :</span>{" "}
-                        {e.equipment.join(", ")}
-                      </div>
+                <article
+                  key={e.id}
+                  className="group relative overflow-hidden rounded-2xl border border-border bg-card elevated transition hover:-translate-y-0.5 hover:border-primary/50"
+                >
+                  <div className="relative aspect-[16/10] overflow-hidden">
+                    {e.thumbnailUrl ? (
+                      <Image
+                        src={e.thumbnailUrl}
+                        alt={e.name}
+                        fill
+                        sizes="(min-width:1024px) 360px, 100vw"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                        unoptimized
+                      />
+                    ) : (
+                      <ExerciseDemo
+                        category={e.category}
+                        slug={e.slug}
+                        className="h-full w-full rounded-none"
+                      />
                     )}
-                    {e.cues.length > 0 && (
-                      <div className="mt-2 line-clamp-2 italic">{e.cues.join(" · ")}</div>
-                    )}
-                  </CardContent>
-                </Card>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                    <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-2 p-3 text-white">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold">{e.name}</div>
+                        <div className="truncate text-[11px] opacity-80">
+                          {e.primaryMuscles.slice(0, 3).join(" · ")}
+                        </div>
+                      </div>
+                      <Badge className="shrink-0 bg-white/20 text-[10px] backdrop-blur">
+                        {e.difficulty}
+                      </Badge>
+                    </div>
+                  </div>
+                  {process.env.PEXELS_API_KEY && !e.thumbnailUrl ? (
+                    <ExerciseVideo slug={e.slug} className="aspect-[16/10]" />
+                  ) : null}
+                  <div className="flex flex-wrap items-center gap-1.5 p-3 text-xs">
+                    {e.equipment.slice(0, 3).map((eq) => (
+                      <span
+                        key={eq}
+                        className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground"
+                      >
+                        {eq}
+                      </span>
+                    ))}
+                    {e.isOutdoor && <Badge variant="success">outdoor</Badge>}
+                  </div>
+                </article>
               ))}
             </div>
           </section>

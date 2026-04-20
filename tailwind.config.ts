@@ -56,7 +56,21 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
-        display: ["var(--font-display)", "system-ui", "sans-serif"],
+        display: ["Satoshi", "var(--font-sans)", "system-ui", "sans-serif"],
+      },
+      fontSize: {
+        "display-lg": [
+          "clamp(3rem, 6vw, 4.75rem)",
+          { lineHeight: "1", letterSpacing: "-0.035em", fontWeight: "800" },
+        ],
+        "display-md": [
+          "clamp(2.25rem, 4vw, 3.25rem)",
+          { lineHeight: "1.05", letterSpacing: "-0.03em", fontWeight: "800" },
+        ],
+        "display-sm": [
+          "clamp(1.75rem, 3vw, 2.25rem)",
+          { lineHeight: "1.1", letterSpacing: "-0.02em", fontWeight: "800" },
+        ],
       },
       keyframes: {
         "accordion-down": {

@@ -10,6 +10,7 @@ import { CoachChat } from "@/features/coach/coach-chat";
 import { formatDuration } from "@/lib/utils";
 import { Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
+import { MuscleMap, type MuscleKey } from "@/components/anatomy/muscle-map";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -42,11 +43,33 @@ export default async function DashboardPage() {
     }),
     prisma.workout.findMany({
       where: { userId, completedAt: { gte: new Date(Date.now() - 7 * 24 * 3600 * 1000) } },
-      select: { id: true, type: true, durationSec: true, caloriesKcal: true, completedAt: true },
+      select: {
+        id: true,
+        type: true,
+        durationSec: true,
+        caloriesKcal: true,
+        completedAt: true,
+        sets: { select: { exercise: { select: { primaryMuscles: true, category: true } } } },
+      },
     }),
     prisma.streak.findUnique({ where: { userId } }),
     prisma.xPEntry.aggregate({ _sum: { amount: true }, where: { userId } }),
   ]);
+
+  const muscleMap: Partial<Record<MuscleKey, number>> = {};
+  for (const w of last7) {
+    for (const s of w.sets) {
+      for (const m of s.exercise.primaryMuscles) {
+        const key = normalizeMuscle(m);
+        if (!key) continue;
+        muscleMap[key] = (muscleMap[key] ?? 0) + 0.15;
+      }
+    }
+  }
+  Object.keys(muscleMap).forEach((k) => {
+    const v = muscleMap[k as MuscleKey]!;
+    muscleMap[k as MuscleKey] = Math.min(1, v);
+  });
 
   const totalXP = xpSum._sum.amount ?? 0;
   const level = Math.floor(Math.sqrt(totalXP / 50));
@@ -198,6 +221,19 @@ export default async function DashboardPage() {
         </section>
       )}
 
+      {/* Muscles worked this week */}
+      <Card>
+        <CardContent className="grid gap-3 p-5 md:grid-cols-[1fr_auto] md:items-center md:gap-6">
+          <div>
+            <div className="text-lg font-bold">Muscles travaillés · 7 j</div>
+            <p className="text-sm text-muted-foreground">
+              Carte anatomique : plus la zone est teintée, plus elle a été sollicitée.
+            </p>
+          </div>
+          <MuscleMap highlighted={muscleMap} className="scale-90 md:scale-100" />
+        </CardContent>
+      </Card>
+
       {/* Coach assistant */}
       <Card>
         <CardContent className="p-4 md:p-5">
@@ -245,6 +281,27 @@ export default async function DashboardPage() {
       </Card>
     </div>
   );
+}
+
+function normalizeMuscle(name: string): MuscleKey | null {
+  const n = name.toLowerCase();
+  if (n.includes("chest")) return "chest";
+  if (n.includes("front delt")) return "front-delts";
+  if (n.includes("rear delt")) return "rear-delts";
+  if (n.includes("shoulder") || n.includes("delt")) return "front-delts";
+  if (n.includes("bicep")) return "biceps";
+  if (n.includes("tricep")) return "triceps";
+  if (n.includes("forearm") || n.includes("brachialis")) return "forearms";
+  if (n.includes("abs") || n.includes("core")) return "abs";
+  if (n.includes("oblique")) return "obliques";
+  if (n.includes("quad")) return "quads";
+  if (n.includes("hamstring")) return "hamstrings";
+  if (n.includes("calf") || n.includes("calves") || n.includes("soleus")) return "calves";
+  if (n.includes("lat")) return "lats";
+  if (n.includes("glute")) return "glutes";
+  if (n.includes("trap")) return "traps";
+  if (n.includes("back")) return "back";
+  return null;
 }
 
 function Kpi({ label, value, sub, icon }: { label: string; value: string; sub?: string; icon: string }) {

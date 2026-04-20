@@ -12,6 +12,7 @@ import { Volume2, VolumeX, CheckCircle2 } from "lucide-react";
 import type { Workout, WorkoutSet, Exercise, WorkoutFeedback } from "@prisma/client";
 import { FeedbackForm } from "./feedback-form";
 import { ExerciseIllustration } from "@/components/exercise/exercise-illustration";
+import { ExerciseDemo } from "@/components/exercise/exercise-demo";
 
 type SetWithExercise = WorkoutSet & { exercise: Exercise };
 type Props = { workout: Workout & { sets: SetWithExercise[]; feedback: WorkoutFeedback | null } };
@@ -135,23 +136,35 @@ export function WorkoutPlayer({ workout }: Props) {
               animate={{ opacity: 1, y: 0 }}
               className="grid gap-4"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <ExerciseIllustration
-                    category={activeSet.exercise.category}
-                    slug={activeSet.exercise.slug}
-                    imageUrl={activeSet.exercise.thumbnailUrl ?? null}
-                    size="md"
-                  />
-                  <div>
-                    <div className="text-2xl font-bold">{activeSet.exercise.name}</div>
-                    <div className="text-sm text-muted-foreground">
-                      {activeSet.targetSets ?? "?"} × {activeSet.targetReps ?? activeSet.targetTempo ?? "reps"}
-                      {activeSet.targetWeight ? ` @ ${activeSet.targetWeight} kg` : ""}
-                    </div>
+              <div className="grid gap-3">
+                <div className="relative overflow-hidden rounded-2xl">
+                  {activeSet.exercise.thumbnailUrl ? (
+                    <ExerciseIllustration
+                      category={activeSet.exercise.category}
+                      slug={activeSet.exercise.slug}
+                      imageUrl={activeSet.exercise.thumbnailUrl}
+                      size="lg"
+                      className="h-40 w-full !rounded-2xl"
+                    />
+                  ) : (
+                    <ExerciseDemo
+                      category={activeSet.exercise.category}
+                      slug={activeSet.exercise.slug}
+                      size="lg"
+                    />
+                  )}
+                  <Badge className="absolute right-3 top-3">
+                    {activeIdx + 1} / {total}
+                  </Badge>
+                </div>
+                <div>
+                  <div className="font-display text-2xl font-bold">{activeSet.exercise.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {activeSet.targetSets ?? "?"} ×{" "}
+                    {activeSet.targetReps ?? activeSet.targetTempo ?? "reps"}
+                    {activeSet.targetWeight ? ` @ ${activeSet.targetWeight} kg` : ""}
                   </div>
                 </div>
-                <Badge>{activeIdx + 1} / {total}</Badge>
               </div>
 
               <div className="rounded-2xl border border-border/60 bg-secondary/40 p-4 text-sm text-muted-foreground">

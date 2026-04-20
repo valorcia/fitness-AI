@@ -9,8 +9,9 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       <header className="sticky top-0 z-40 border-b border-border/40 bg-background/70 backdrop-blur-xl">
         <nav className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-semibold">
-            <Dumbbell className="h-5 w-5 text-primary" />
-            <span className="gradient-text tracking-tight">CoachMe</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/coachme-mark.svg" alt="" className="h-7 w-7" />
+            <span className="font-display text-lg tracking-tight">CoachMe</span>
           </Link>
           <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
             <Link href="/#features" className="hover:text-foreground">Fonctionnalités</Link>

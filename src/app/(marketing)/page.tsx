@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -62,58 +63,79 @@ const FEATURES = [
   },
 ];
 
+const HERO_LEFT =
+  "https://images.unsplash.com/photo-1540497077202-7c8a3999166f?auto=format&fit=crop&w=900&q=70";
+const HERO_RIGHT =
+  "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=900&q=70";
+const HERO_BOTTOM =
+  "https://images.unsplash.com/photo-1517963879433-6ad2b056d712?auto=format&fit=crop&w=900&q=70";
+
 export default function MarketingHome() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative">
-        <div className="mx-auto max-w-3xl text-center">
-          <Badge variant="outline" className="mx-auto mb-6 border-primary/40 bg-primary/10 text-primary">
-            <Sparkles className="h-3.5 w-3.5" /> Nouveau · Coach vocal IA
-          </Badge>
-          <h1 className="text-balance text-5xl font-bold tracking-tight md:text-7xl">
-            Votre <span className="gradient-text">coach sportif IA</span>
-            <br /> de niveau professionnel.
-          </h1>
-          <p className="mx-auto mt-6 max-w-xl text-pretty text-lg text-muted-foreground">
-            Programmes personnalisés, coaching vocal en temps réel, outdoor GPS, nutrition et
-            récupération. Une expérience premium, disponible partout.
-          </p>
-          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="xl" variant="glow" asChild>
-              <Link href="/register">Essayer gratuitement</Link>
-            </Button>
-            <Button size="xl" variant="outline" asChild>
-              <Link href="/#features">Voir les fonctionnalités</Link>
-            </Button>
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Sans carte bancaire · Annulable à tout moment
-          </p>
+      {/* Hero cinématique */}
+      <section className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-secondary text-secondary-foreground">
+        <div className="absolute inset-0 opacity-70">
+          <Image src={HERO_LEFT} alt="" fill priority className="object-cover object-center" sizes="100vw" unoptimized />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-r from-secondary via-secondary/80 to-secondary/20" />
+        <div className="absolute -right-20 -top-24 h-72 w-72 rounded-full bg-primary/40 blur-3xl" />
+        <div className="relative grid gap-8 p-8 md:grid-cols-[1.1fr_1fr] md:p-14 lg:p-20">
+          <div>
+            <Badge variant="outline" className="mb-6 border-white/30 bg-white/10 text-white">
+              <Sparkles className="h-3.5 w-3.5" /> Nouveau · Coach vocal IA photoréaliste
+            </Badge>
+            <h1 className="text-balance font-display text-display-lg text-white">
+              Votre coach sportif personnel, <span className="gradient-text">24 h / 24</span>.
+            </h1>
+            <p className="mt-6 max-w-xl text-pretty text-lg text-white/80">
+              Programmes adaptatifs, voix humaine ultra-réaliste, démonstrations vidéo de chaque
+              exercice, traçabilité calorique par photo IA. Tout ce qu'un coach privé vous donne —
+              dans votre poche.
+            </p>
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <Button size="xl" variant="glow" asChild>
+                <Link href="/register">Commencer gratuitement</Link>
+              </Button>
+              <Button size="xl" variant="outline" asChild className="border-white/30 bg-white/10 text-white hover:bg-white/20">
+                <Link href="/#features">Voir les fonctionnalités</Link>
+              </Button>
+            </div>
+            <p className="mt-3 text-xs text-white/60">Sans carte bancaire · Annulable à tout moment</p>
 
-        {/* preview blocks */}
-        <div className="relative mx-auto mt-16 grid max-w-5xl grid-cols-2 gap-4 md:grid-cols-4">
-          {[
-            { icon: Activity, label: "Séance adaptée" },
-            { icon: Footprints, label: "Run tracker" },
-            { icon: Bike, label: "Vélo live" },
-            { icon: HeartPulse, label: "Récupération" },
-          ].map(({ icon: Icon, label }) => (
-            <Card key={label} className="glass hover:border-primary/50 transition-colors">
-              <CardContent className="flex flex-col items-center gap-3 p-6">
-                <Icon className="h-6 w-6 text-primary" />
-                <span className="text-sm font-semibold">{label}</span>
-              </CardContent>
-            </Card>
-          ))}
+            <div className="mt-8 grid grid-cols-2 gap-3 text-white">
+              {[
+                { icon: Activity, label: "Séance adaptée" },
+                { icon: Footprints, label: "Run tracker" },
+                { icon: Bike, label: "Vélo live" },
+                { icon: HeartPulse, label: "Récupération" },
+              ].map(({ icon: Icon, label }) => (
+                <div
+                  key={label}
+                  className="flex items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 backdrop-blur"
+                >
+                  <Icon className="h-4 w-4" />
+                  <span className="text-xs font-semibold">{label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative hidden md:block">
+            <div className="absolute -right-4 top-0 h-72 w-48 overflow-hidden rounded-[2rem] border-4 border-white/10 shadow-2xl rotate-3">
+              <Image src={HERO_RIGHT} alt="" fill sizes="400px" className="object-cover" unoptimized />
+            </div>
+            <div className="absolute bottom-0 right-32 h-60 w-40 overflow-hidden rounded-[2rem] border-4 border-white/10 shadow-2xl -rotate-6">
+              <Image src={HERO_BOTTOM} alt="" fill sizes="400px" className="object-cover" unoptimized />
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Features */}
       <section id="features" className="mt-32">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-4xl font-bold tracking-tight">Tout ce qu'il faut pour progresser.</h2>
+          <h2 className="font-display text-display-sm">Tout ce qu'il faut pour progresser.</h2>
           <p className="mt-3 text-muted-foreground">
             Conçu comme une suite complète de coaching : salle, outdoor, santé, sécurité, social.
           </p>
@@ -135,7 +157,7 @@ export default function MarketingHome() {
       {/* Pricing */}
       <section id="pricing" className="mt-32">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-4xl font-bold tracking-tight">Choisissez votre niveau.</h2>
+          <h2 className="font-display text-display-sm">Choisissez votre niveau.</h2>
           <p className="mt-3 text-muted-foreground">Commencez gratuit, passez premium quand vous êtes prêt.</p>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
