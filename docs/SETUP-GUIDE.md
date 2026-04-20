@@ -9,7 +9,13 @@ Total récurrent : ~22 $ / mois.
 1. <https://neon.tech> → Sign up (GitHub).
 2. Create project « coachme » → region `Europe (Frankfurt)` ou `Paris`.
 3. Connection Details → **Pooled connection** = `DATABASE_URL`.
-4. **Direct connection** = `DIRECT_URL`.
+4. **Direct connection** (sans `-pooler` dans l'URL) = `DIRECT_URL`.
+   **Très important** : Prisma `db push` utilise `DIRECT_URL` ; sans cette
+   variable, le build tentera de passer par le pooler qui ne gère pas les DDL.
+5. Neon free tier s'endort après ~5 min d'inactivité. Le script `scripts/
+   db-sync.mjs` retente 4 fois (2 s → 15 s backoff) pour le réveiller, et
+   poursuit le build sans bloquer si la DB reste injoignable — les tables
+   seront synchronisées au redeploy suivant.
 
 ## 2. Voix premium — ElevenLabs (22 $ / mois Creator, ou 5 $ Starter)
 
