@@ -16,6 +16,8 @@ import {
   MessageCircleMore,
   Clock,
   ListIcon,
+  Wand2,
+  PlugZap,
 } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,7 @@ import { ThemeToggle } from "./theme-toggle";
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/workout", label: "Séance", icon: Activity },
+  { href: "/planning", label: "Planification", icon: Wand2 },
   { href: "/exercises", label: "Exercices", icon: Library },
   { href: "/calendar", label: "Calendrier", icon: Calendar },
   { href: "/nutrition", label: "Nutrition", icon: Apple },
@@ -33,6 +36,7 @@ const NAV = [
   { href: "/progression", label: "Progression", icon: Trophy },
   { href: "/community", label: "Communauté", icon: Users },
   { href: "/coach", label: "Coach", icon: MessageCircleMore },
+  { href: "/settings/devices", label: "Appareils", icon: PlugZap },
   { href: "/subscription", label: "Abonnement", icon: CreditCard },
   { href: "/settings", label: "Paramètres", icon: Settings },
 ];

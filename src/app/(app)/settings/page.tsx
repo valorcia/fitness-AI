@@ -6,6 +6,8 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CoachSettings } from "@/features/coach/coach-settings";
 import { ThemeToggle } from "@/components/app/theme-toggle";
+import Link from "next/link";
+import { PlugZap, Wand2 } from "lucide-react";
 
 export const metadata = { title: "Paramètres" };
 
@@ -41,6 +43,39 @@ export default async function SettingsPage() {
           />
         </CardContent>
       </Card>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <Link href="/planning" className="block">
+          <Card className="transition hover:border-primary/50">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <Wand2 className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-semibold">Planification IA</div>
+                <div className="text-xs text-muted-foreground">
+                  Composez votre plan avec le coach.
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/settings/devices" className="block">
+          <Card className="transition hover:border-primary/50">
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <PlugZap className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="font-semibold">Appareils connectés</div>
+                <div className="text-xs text-muted-foreground">
+                  Garmin, Fitbit, Oura, Withings, Strava…
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
 
       <Card>
         <CardHeader>

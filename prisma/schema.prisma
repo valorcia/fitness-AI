@@ -118,6 +118,44 @@ enum SafetyEventKind {
   CHECKIN_OK
 }
 
+enum DeviceProvider {
+  GARMIN
+  FITBIT
+  OURA
+  WITHINGS
+  POLAR
+  STRAVA
+  APPLE_HEALTH
+  GOOGLE_FIT
+  TERRA
+  MANUAL
+}
+
+enum DeviceReadingKind {
+  WEIGHT
+  BODY_FAT
+  HEART_RATE
+  HRV
+  SLEEP
+  STEPS
+  DISTANCE
+  CALORIES
+  VO2_MAX
+  ACTIVITY
+  BLOOD_PRESSURE
+  SPO2
+  RESTING_HR
+  READINESS
+}
+
+enum PlanProposalStatus {
+  DRAFT
+  PENDING_USER
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
 // ─── Auth.js core models ─────────────────────────────────────
 
 model User {
@@ -164,6 +202,9 @@ model User {
   postLikes           PostLike[]
   postComments        PostComment[]
   coachMemories       CoachMemory[]
+  planProposals       PlanProposal[]
+  devices             DeviceConnection[]
+  deviceReadings      DeviceReading[]
 
   @@index([role])
   @@index([deletedAt])
@@ -710,6 +751,66 @@ model CoachMemory {
 
   @@index([userId, kind])
   @@index([userId, createdAt])
+}
+
+model PlanProposal {
+  id              String             @id @default(cuid())
+  userId          String
+  status          PlanProposalStatus @default(PENDING_USER)
+  source          String             @default("coach") // coach | user | automation
+  summary         String             @db.Text
+  constraints     Json                                   // what the user asked for
+  payload         Json                                   // full generated plan (same shape as GeneratedPlan)
+  expiresAt       DateTime?
+  appliedPlanId   String?
+  rejectedReason  String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([userId, createdAt])
+}
+
+model DeviceConnection {
+  id              String         @id @default(cuid())
+  userId          String
+  provider        DeviceProvider
+  externalUserId  String?
+  accessToken     String?        @db.Text
+  refreshToken    String?        @db.Text
+  expiresAt       DateTime?
+  scope           String?
+  status          String         @default("ACTIVE") // ACTIVE | REVOKED | EXPIRED
+  lastSyncAt      DateTime?
+  metadata        Json?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  readings DeviceReading[]
+
+  @@unique([userId, provider])
+  @@index([provider, status])
+}
+
+model DeviceReading {
+  id           String             @id @default(cuid())
+  userId       String
+  connectionId String?
+  provider     DeviceProvider
+  kind         DeviceReadingKind
+  recordedAt   DateTime
+  value        Float
+  unit         String
+  metadata     Json?
+  createdAt    DateTime           @default(now())
+
+  user       User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  connection DeviceConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+
+  @@index([userId, kind, recordedAt])
 }
 
 model FeatureFlag {
