@@ -11,6 +11,7 @@ import { formatDuration } from "@/lib/utils";
 import { Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
 import { MuscleMap, type MuscleKey } from "@/components/anatomy/muscle-map";
+import { ActivityRings } from "@/components/metrics/activity-rings";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -163,12 +164,26 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* KPI row */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Kpi label="Calories brûlées" value={`${caloriesBurned}`} sub="7 derniers jours" icon="🔥" />
-        <Kpi label="Streak" value={`${streak?.current ?? 0} j`} sub={`Record ${streak?.longest ?? 0}`} icon="⚡" />
-        <Kpi label="Niveau" value={`Lvl ${level}`} sub={`${totalXP} XP`} icon="🏆" />
-        <Kpi label="Séances" value={`${completedThisWeek}`} sub="cette semaine" icon="💪" />
+      {/* Activity rings + KPI row */}
+      <div className="grid gap-4 md:grid-cols-[1.1fr_1fr]">
+        <Card>
+          <CardContent className="flex items-center justify-between p-5">
+            <ActivityRings
+              move={{ value: caloriesBurned, target: 2200 }}
+              exercise={{
+                value: Math.round(last7.reduce((a, w) => a + (w.durationSec ?? 0), 0) / 60),
+                target: 180,
+              }}
+              stand={{ value: completedThisWeek, target: 5 }}
+            />
+          </CardContent>
+        </Card>
+        <div className="grid grid-cols-2 gap-3">
+          <Kpi label="Streak" value={`${streak?.current ?? 0} j`} sub={`Record ${streak?.longest ?? 0}`} icon="⚡" />
+          <Kpi label="Niveau" value={`Lvl ${level}`} sub={`${totalXP} XP`} icon="🏆" />
+          <Kpi label="Séances" value={`${completedThisWeek}`} sub="cette semaine" icon="💪" />
+          <Kpi label="Calories" value={`${caloriesBurned}`} sub="7 derniers jours" icon="🔥" />
+        </div>
       </div>
 
       {/* Session roadmap (locked days) */}

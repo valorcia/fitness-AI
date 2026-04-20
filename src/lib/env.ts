@@ -19,6 +19,7 @@ const schema = z.object({
   ELEVENLABS_API_KEY: z.string().optional(),
   HEYGEN_API_KEY: z.string().optional(),
   PEXELS_API_KEY: z.string().optional(),
+  MUSCLE_MOTION_API_KEY: z.string().optional(),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
