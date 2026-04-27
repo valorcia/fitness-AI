@@ -299,17 +299,36 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             {STEPS[step]?.key === "goal" && (
               <>
                 <div>
-                  <Label>Quels sont vos objectifs ?</Label>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Sélectionnez 1 à 3 objectifs. Le premier sélectionné devient l'objectif
-                    principal — c'est lui qui guide la priorité du plan.
-                  </p>
-                  <div className="mt-2 grid gap-2">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <Label>Quels sont vos objectifs ?</Label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        3 objectifs recommandés (jusqu'à 5). Le premier sélectionné devient
+                        l'objectif principal — il guide la priorité du plan.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = state.goals.length === GOALS.length;
+                        update(
+                          "goals",
+                          allSelected ? [] : (GOALS.map((g) => g.value) as Goal[]),
+                        );
+                      }}
+                      className="shrink-0 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15"
+                    >
+                      {state.goals.length === GOALS.length
+                        ? "Tout désélectionner"
+                        : "Tout sélectionner"}
+                    </button>
+                  </div>
+                  <div className="mt-3 grid gap-2">
                     {GOALS.map((g) => {
                       const idx = state.goals.indexOf(g.value as Goal);
                       const selected = idx >= 0;
                       const isPrimary = idx === 0;
-                      const atMax = state.goals.length >= 3 && !selected;
+                      const atMax = state.goals.length >= 5 && !selected;
                       return (
                         <button
                           key={g.value}
