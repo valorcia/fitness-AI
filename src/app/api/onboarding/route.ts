@@ -33,7 +33,8 @@ export async function POST(req: Request) {
           heightCm: data.heightCm,
           weightKg: data.weightKg,
           fitnessLevel: data.fitnessLevel,
-          goal: data.goal,
+          goal: data.goals[0]!,
+          goals: data.goals,
           environment: data.environment,
         },
         create: {
@@ -44,7 +45,8 @@ export async function POST(req: Request) {
           heightCm: data.heightCm,
           weightKg: data.weightKg,
           fitnessLevel: data.fitnessLevel,
-          goal: data.goal,
+          goal: data.goals[0]!,
+          goals: data.goals,
           environment: data.environment,
         },
       });

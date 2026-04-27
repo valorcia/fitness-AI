@@ -139,9 +139,17 @@ export default async function SettingsPage() {
           <CardTitle>Profil fitness</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-2 text-sm">
-          <div className="flex justify-between">
-            <span>Objectif</span>
-            <Badge variant="outline">{profile?.goal}</Badge>
+          <div className="flex items-start justify-between gap-3">
+            <span>Objectifs</span>
+            <div className="flex flex-wrap justify-end gap-1">
+              {(profile?.goals?.length ? profile.goals : profile?.goal ? [profile.goal] : []).map(
+                (g, i) => (
+                  <Badge key={g} variant={i === 0 ? "default" : "outline"}>
+                    {g}
+                  </Badge>
+                ),
+              )}
+            </div>
           </div>
           <div className="flex justify-between">
             <span>Niveau</span>

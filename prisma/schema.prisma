@@ -269,7 +269,8 @@ model Profile {
   heightCm    Int
   weightKg    Float
   fitnessLevel FitnessLevel @default(BEGINNER)
-  goal        Goal
+  goal        Goal                                // primary goal (first in goals)
+  goals       Goal[]       @default([])           // multi-select objectifs
   environment Environment  @default(GYM)
   avatarUrl   String?
   createdAt   DateTime     @default(now())

@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AVATAR_CATALOG } from "@/features/coach/coach-avatar";
 
+type Goal = "WEIGHT_LOSS" | "MUSCLE_GAIN" | "ENDURANCE" | "FITNESS" | "HEALTH";
 type State = {
   firstName: string;
   birthDate: string;
@@ -26,7 +27,7 @@ type State = {
   heightCm: number;
   weightKg: number;
   fitnessLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "ELITE";
-  goal: "WEIGHT_LOSS" | "MUSCLE_GAIN" | "ENDURANCE" | "FITNESS" | "HEALTH" | "";
+  goals: Goal[];
   environment: "HOME" | "GYM" | "OUTDOOR";
   sessionsPerWeek: number;
   sessionDurationMin: number;
@@ -124,7 +125,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     heightCm: 175,
     weightKg: 72,
     fitnessLevel: "BEGINNER",
-    goal: "",
+    goals: [],
     environment: "GYM",
     sessionsPerWeek: 3,
     sessionDurationMin: 45,
@@ -170,7 +171,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       case "body":
         return state.heightCm > 0 && state.weightKg > 0;
       case "goal":
-        return !!state.goal;
+        return state.goals.length > 0;
       case "medical":
       case "lifestyle":
       case "equipment":
@@ -298,24 +299,58 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             {STEPS[step]?.key === "goal" && (
               <>
                 <div>
-                  <Label>Quel est votre objectif ?</Label>
-                  <div className="mt-1 grid gap-2">
-                    {GOALS.map((g) => (
-                      <button
-                        key={g.value}
-                        type="button"
-                        onClick={() => update("goal", g.value)}
-                        className={cn(
-                          "flex items-center gap-3 rounded-xl border p-3 text-left transition",
-                          state.goal === g.value
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-2xl">{g.emoji}</span>
-                        <span className="font-medium">{g.label}</span>
-                      </button>
-                    ))}
+                  <Label>Quels sont vos objectifs ?</Label>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Sélectionnez 1 à 3 objectifs. Le premier sélectionné devient l'objectif
+                    principal — c'est lui qui guide la priorité du plan.
+                  </p>
+                  <div className="mt-2 grid gap-2">
+                    {GOALS.map((g) => {
+                      const idx = state.goals.indexOf(g.value as Goal);
+                      const selected = idx >= 0;
+                      const isPrimary = idx === 0;
+                      const atMax = state.goals.length >= 3 && !selected;
+                      return (
+                        <button
+                          key={g.value}
+                          type="button"
+                          disabled={atMax}
+                          onClick={() => {
+                            if (selected) {
+                              update(
+                                "goals",
+                                state.goals.filter((x) => x !== g.value),
+                              );
+                            } else {
+                              update("goals", [...state.goals, g.value as Goal]);
+                            }
+                          }}
+                          className={cn(
+                            "flex items-center justify-between gap-3 rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-50",
+                            selected
+                              ? "border-primary bg-primary/10"
+                              : "border-border hover:border-primary/50",
+                          )}
+                        >
+                          <span className="flex items-center gap-3">
+                            <span className="text-2xl">{g.emoji}</span>
+                            <span className="font-medium">{g.label}</span>
+                          </span>
+                          {selected && (
+                            <span
+                              className={cn(
+                                "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                                isPrimary
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground",
+                              )}
+                            >
+                              {isPrimary ? "Principal" : `#${idx + 1}`}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <div>

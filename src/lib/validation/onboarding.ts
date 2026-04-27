@@ -12,7 +12,10 @@ export const onboardingSchema = z.object({
   fitnessLevel: z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED", "ELITE"]),
 
   // Goal & context
-  goal: z.enum(["WEIGHT_LOSS", "MUSCLE_GAIN", "ENDURANCE", "FITNESS", "HEALTH"]),
+  goals: z
+    .array(z.enum(["WEIGHT_LOSS", "MUSCLE_GAIN", "ENDURANCE", "FITNESS", "HEALTH"]))
+    .min(1, "Sélectionnez au moins un objectif.")
+    .max(3, "Maximum 3 objectifs simultanés."),
   environment: z.enum(["HOME", "GYM", "OUTDOOR"]),
   sessionsPerWeek: z.number().int().min(1).max(7),
   sessionDurationMin: z.number().int().min(15).max(180).default(45),
