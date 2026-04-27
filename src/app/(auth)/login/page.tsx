@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { CredentialsForm } from "@/features/auth/credentials-form";
 import { OAuthButtons } from "@/features/auth/oauth-buttons";
+import { Sparkles } from "lucide-react";
+import { demoLogin } from "./demo-action";
 
 export const metadata = { title: "Se connecter" };
 
@@ -14,6 +16,7 @@ export default async function LoginPage() {
   if (session?.user?.id) {
     redirect(session.user.hasOnboarded ? "/dashboard" : "/onboarding");
   }
+  const demoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
   return (
     <Card className="w-full max-w-md">
@@ -22,6 +25,17 @@ export default async function LoginPage() {
         <CardDescription>Connectez-vous pour retrouver votre coach.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {demoMode && (
+          <form action={demoLogin}>
+            <Button type="submit" variant="glow" className="w-full">
+              <Sparkles className="h-4 w-4" />
+              Connexion démo (sans compte)
+            </Button>
+            <p className="mt-2 text-center text-xs text-muted-foreground">
+              Compte de test partagé · session 90 jours
+            </p>
+          </form>
+        )}
         <CredentialsForm mode="login" />
         <OAuthSection />
         <Separator />
