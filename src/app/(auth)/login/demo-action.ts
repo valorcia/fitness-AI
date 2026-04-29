@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { signIn } from "@/lib/auth";
 
 export async function demoLogin(): Promise<void> {
-  if (process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "false") {
     return;
   }
 

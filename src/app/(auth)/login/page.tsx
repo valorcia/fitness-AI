@@ -16,7 +16,7 @@ export default async function LoginPage() {
   if (session?.user?.id) {
     redirect(session.user.hasOnboarded ? "/dashboard" : "/onboarding");
   }
-  const demoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
+  const demoMode = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
 
   return (
     <Card className="w-full max-w-md">
