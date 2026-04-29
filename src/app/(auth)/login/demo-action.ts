@@ -4,9 +4,9 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signIn } from "@/lib/auth";
 
-export async function demoLogin() {
+export async function demoLogin(): Promise<void> {
   if (process.env.NEXT_PUBLIC_DEMO_MODE !== "true") {
-    return { ok: false, error: "Mode démo désactivé." };
+    return;
   }
 
   const email = "demo@coachme.local";
@@ -33,5 +33,4 @@ export async function demoLogin() {
     password,
     redirectTo: "/dashboard",
   });
-  return { ok: true };
 }
