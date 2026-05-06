@@ -35,7 +35,8 @@ export async function POST(req: Request) {
           fitnessLevel: data.fitnessLevel,
           goal: data.goals[0]!,
           goals: data.goals,
-          environment: data.environment,
+          environment: data.environments[0] ?? data.environment,
+          environments: data.environments,
         },
         create: {
           userId,
@@ -47,7 +48,8 @@ export async function POST(req: Request) {
           fitnessLevel: data.fitnessLevel,
           goal: data.goals[0]!,
           goals: data.goals,
-          environment: data.environment,
+          environment: data.environments[0] ?? data.environment,
+          environments: data.environments,
         },
       });
 

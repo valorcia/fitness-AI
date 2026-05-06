@@ -155,9 +155,20 @@ export default async function SettingsPage() {
             <span>Niveau</span>
             <Badge variant="outline">{profile?.fitnessLevel}</Badge>
           </div>
-          <div className="flex justify-between">
-            <span>Environnement</span>
-            <Badge variant="outline">{profile?.environment}</Badge>
+          <div className="flex items-start justify-between gap-3">
+            <span>Lieux d'entraînement</span>
+            <div className="flex flex-wrap justify-end gap-1">
+              {(profile?.environments?.length
+                ? profile.environments
+                : profile?.environment
+                  ? [profile.environment]
+                  : []
+              ).map((e, i) => (
+                <Badge key={e} variant={i === 0 ? "default" : "outline"}>
+                  {e}
+                </Badge>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>

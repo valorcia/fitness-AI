@@ -29,6 +29,7 @@ type State = {
   fitnessLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED" | "ELITE";
   goals: Goal[];
   environment: "HOME" | "GYM" | "OUTDOOR";
+  environments: Array<"HOME" | "GYM" | "OUTDOOR">;
   sessionsPerWeek: number;
   sessionDurationMin: number;
   injuries: string[];
@@ -127,6 +128,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     fitnessLevel: "BEGINNER",
     goals: [],
     environment: "GYM",
+    environments: [],
     sessionsPerWeek: 3,
     sessionDurationMin: 45,
     injuries: [],
@@ -171,7 +173,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       case "body":
         return state.heightCm > 0 && state.weightKg > 0;
       case "goal":
-        return state.goals.length > 0;
+        return state.goals.length > 0 && state.environments.length > 0;
       case "medical":
       case "lifestyle":
       case "equipment":
@@ -373,24 +375,72 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                   </div>
                 </div>
                 <div>
-                  <Label>Où vous entraînez-vous ?</Label>
-                  <div className="mt-1 grid grid-cols-3 gap-2">
-                    {ENVIRONMENTS.map((e) => (
-                      <button
-                        key={e.value}
-                        type="button"
-                        onClick={() => update("environment", e.value)}
-                        className={cn(
-                          "flex flex-col items-center gap-1 rounded-xl border p-3 transition",
-                          state.environment === e.value
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border hover:border-primary/50",
-                        )}
-                      >
-                        <span className="text-xl">{e.emoji}</span>
-                        <span className="text-xs font-medium">{e.label}</span>
-                      </button>
-                    ))}
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <Label>Où vous entraînez-vous ?</Label>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Vous pouvez en cocher plusieurs (ex : salle + outdoor + maison).
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = state.environments.length === ENVIRONMENTS.length;
+                        update(
+                          "environments",
+                          allSelected
+                            ? []
+                            : (ENVIRONMENTS.map((e) => e.value) as State["environments"]),
+                        );
+                      }}
+                      className="shrink-0 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/15"
+                    >
+                      {state.environments.length === ENVIRONMENTS.length
+                        ? "Tout désélectionner"
+                        : "Tout sélectionner"}
+                    </button>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2">
+                    {ENVIRONMENTS.map((e) => {
+                      const idx = state.environments.indexOf(e.value);
+                      const selected = idx >= 0;
+                      const isPrimary = idx === 0;
+                      return (
+                        <button
+                          key={e.value}
+                          type="button"
+                          onClick={() => {
+                            const next = selected
+                              ? state.environments.filter((x) => x !== e.value)
+                              : [...state.environments, e.value as State["environments"][number]];
+                            update("environments", next);
+                            // primary stays the first selected
+                            if (next.length > 0) update("environment", next[0]!);
+                          }}
+                          className={cn(
+                            "relative flex flex-col items-center gap-1 rounded-xl border p-3 transition",
+                            selected
+                              ? "border-primary bg-primary/10 text-primary"
+                              : "border-border hover:border-primary/50",
+                          )}
+                        >
+                          <span className="text-xl">{e.emoji}</span>
+                          <span className="text-xs font-medium">{e.label}</span>
+                          {selected && (
+                            <span
+                              className={cn(
+                                "absolute right-1.5 top-1.5 rounded-full px-1.5 text-[9px] font-semibold uppercase",
+                                isPrimary
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-muted-foreground",
+                              )}
+                            >
+                              {isPrimary ? "Principal" : `#${idx + 1}`}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">

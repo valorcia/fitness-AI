@@ -109,13 +109,15 @@ export async function generateConstrainedPlan(input: {
   const age = new Date().getFullYear() - profile.birthDate.getFullYear();
   const goal = constraints.goalOverride ?? profile.goal;
   const allGoals = profile.goals?.length ? profile.goals : [profile.goal];
+  const allEnvs = profile.environments?.length ? profile.environments : [profile.environment];
 
   const catalogHint = exerciseCatalog.slice(0, 120).map((e) => e.slug).join(", ");
 
   const userBlock = `
 Profil utilisateur :
 - Âge ${age}, Sexe ${profile.sex}, ${profile.heightCm} cm / ${profile.weightKg} kg
-- Niveau ${profile.fitnessLevel}, Objectif principal ${goal}, autres objectifs : ${allGoals.filter((g) => g !== goal).join(", ") || "—"}, Environnement ${profile.environment}
+- Niveau ${profile.fitnessLevel}, Objectif principal ${goal}, autres objectifs : ${allGoals.filter((g) => g !== goal).join(", ") || "—"}
+- Lieux d'entraînement : ${allEnvs.join(" + ")}
 - Séances habituelles : ${health.sessionsPerWeek}/sem (${health.sessionDurationMin} min)
 - Matériel : ${health.equipment.join(", ") || "aucun"}
 - Outdoor autorisé : ${health.outdoorAllowed}

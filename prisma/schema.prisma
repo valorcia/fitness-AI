@@ -271,7 +271,8 @@ model Profile {
   fitnessLevel FitnessLevel @default(BEGINNER)
   goal        Goal                                // primary goal (first in goals)
   goals       Goal[]       @default([])           // multi-select objectifs
-  environment Environment  @default(GYM)
+  environment Environment  @default(GYM)           // primary environment (first in environments)
+  environments Environment[] @default([])          // multi-select lieux d'entraînement
   avatarUrl   String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

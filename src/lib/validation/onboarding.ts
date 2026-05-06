@@ -17,6 +17,10 @@ export const onboardingSchema = z.object({
     .min(1, "Sélectionnez au moins un objectif.")
     .max(5, "Au-delà de 5 objectifs, le plan perd en focalisation."),
   environment: z.enum(["HOME", "GYM", "OUTDOOR"]),
+  environments: z
+    .array(z.enum(["HOME", "GYM", "OUTDOOR"]))
+    .min(1, "Sélectionnez au moins un lieu.")
+    .max(3),
   sessionsPerWeek: z.number().int().min(1).max(7),
   sessionDurationMin: z.number().int().min(15).max(180).default(45),
   equipment: z.array(z.string()).default([]),
