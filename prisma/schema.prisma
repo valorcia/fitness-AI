@@ -273,6 +273,7 @@ model Profile {
   goals       Goal[]       @default([])           // multi-select objectifs
   environment Environment  @default(GYM)           // primary environment (first in environments)
   environments Environment[] @default([])          // multi-select lieux d'entraînement
+  customLocations String[]   @default([])          // free-text additional places (piscine, studio yoga…)
   avatarUrl   String?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

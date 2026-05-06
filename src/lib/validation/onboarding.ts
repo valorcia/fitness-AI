@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export const onboardingSchema = z.object({
+export const onboardingSchema = z
+  .object({
   // Identity
   firstName: z.string().min(1).max(60),
   birthDate: z.coerce.date().refine((d) => d < new Date() && d > new Date("1900-01-01")),
@@ -19,8 +20,9 @@ export const onboardingSchema = z.object({
   environment: z.enum(["HOME", "GYM", "OUTDOOR"]),
   environments: z
     .array(z.enum(["HOME", "GYM", "OUTDOOR"]))
-    .min(1, "Sélectionnez au moins un lieu.")
+    .min(0)
     .max(3),
+  customLocations: z.array(z.string().min(1).max(60)).max(5).default([]),
   sessionsPerWeek: z.number().int().min(1).max(7),
   sessionDurationMin: z.number().int().min(15).max(180).default(45),
   equipment: z.array(z.string()).default([]),
@@ -58,6 +60,10 @@ export const onboardingSchema = z.object({
     .boolean()
     .refine((v) => v === true, { message: "Acceptation de l'avertissement médical requise." }),
   consentDoctorCleared: z.boolean().default(false),
-});
+  })
+  .refine((v) => v.environments.length + v.customLocations.length > 0, {
+    message: "Sélectionnez au moins un lieu (ou ajoutez-en un en \"Autre\").",
+    path: ["environments"],
+  });
 
 export type OnboardingInput = z.infer<typeof onboardingSchema>;

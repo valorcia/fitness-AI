@@ -30,6 +30,7 @@ type State = {
   goals: Goal[];
   environment: "HOME" | "GYM" | "OUTDOOR";
   environments: Array<"HOME" | "GYM" | "OUTDOOR">;
+  customLocations: string[];
   sessionsPerWeek: number;
   sessionDurationMin: number;
   injuries: string[];
@@ -119,6 +120,8 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   const [step, setStep] = React.useState(0);
   const [submitting, setSubmitting] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+  const [customOpen, setCustomOpen] = React.useState(false);
+  const [customDraft, setCustomDraft] = React.useState("");
   const [state, setState] = React.useState<State>({
     firstName: firstName ?? "",
     birthDate: "",
@@ -129,6 +132,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     goals: [],
     environment: "GYM",
     environments: [],
+    customLocations: [],
     sessionsPerWeek: 3,
     sessionDurationMin: 45,
     injuries: [],
@@ -157,6 +161,17 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
   });
 
   const update = <K extends keyof State>(k: K, v: State[K]) => setState((s) => ({ ...s, [k]: v }));
+  const addCustom = () => {
+    const v = customDraft.trim();
+    if (!v) return;
+    if (state.customLocations.includes(v)) {
+      setCustomDraft("");
+      return;
+    }
+    if (state.customLocations.length >= 5) return;
+    update("customLocations", [...state.customLocations, v]);
+    setCustomDraft("");
+  };
   const next = () => setStep((s) => Math.min(s + 1, STEPS.length - 1));
   const prev = () => setStep((s) => Math.max(s - 1, 0));
 
@@ -173,7 +188,10 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       case "body":
         return state.heightCm > 0 && state.weightKg > 0;
       case "goal":
-        return state.goals.length > 0 && state.environments.length > 0;
+        return (
+          state.goals.length > 0 &&
+          (state.environments.length > 0 || state.customLocations.length > 0)
+        );
       case "medical":
       case "lifestyle":
       case "equipment":
@@ -400,11 +418,11 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                         : "Tout sélectionner"}
                     </button>
                   </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2">
+                  <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
                     {ENVIRONMENTS.map((e) => {
                       const idx = state.environments.indexOf(e.value);
                       const selected = idx >= 0;
-                      const isPrimary = idx === 0;
+                      const isPrimary = idx === 0 && state.environments.length > 0;
                       return (
                         <button
                           key={e.value}
@@ -441,7 +459,87 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                         </button>
                       );
                     })}
+                    <button
+                      type="button"
+                      onClick={() => setCustomOpen((v) => !v)}
+                      className={cn(
+                        "relative flex flex-col items-center gap-1 rounded-xl border p-3 transition",
+                        state.customLocations.length > 0 || customOpen
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border hover:border-primary/50",
+                      )}
+                    >
+                      <span className="text-xl">📍</span>
+                      <span className="text-xs font-medium">Autre…</span>
+                      {state.customLocations.length > 0 && (
+                        <span className="absolute right-1.5 top-1.5 rounded-full bg-primary px-1.5 text-[9px] font-semibold uppercase text-primary-foreground">
+                          {state.customLocations.length}
+                        </span>
+                      )}
+                    </button>
                   </div>
+
+                  {(customOpen || state.customLocations.length > 0) && (
+                    <div className="mt-3 rounded-xl border border-border/60 bg-muted/40 p-3">
+                      <Label htmlFor="custom-loc" className="text-xs">
+                        Ajouter un autre lieu (ex : piscine, studio yoga, parc d'escalade…)
+                      </Label>
+                      <div className="mt-2 flex gap-2">
+                        <Input
+                          id="custom-loc"
+                          value={customDraft}
+                          maxLength={60}
+                          placeholder="piscine, dojo, studio pilates…"
+                          onChange={(e) => setCustomDraft(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              addCustom();
+                            }
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          size="sm"
+                          onClick={addCustom}
+                          disabled={
+                            !customDraft.trim() || state.customLocations.length >= 5
+                          }
+                        >
+                          Ajouter
+                        </Button>
+                      </div>
+                      {state.customLocations.length > 0 && (
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {state.customLocations.map((loc) => (
+                            <span
+                              key={loc}
+                              className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary"
+                            >
+                              {loc}
+                              <button
+                                type="button"
+                                aria-label={`Retirer ${loc}`}
+                                onClick={() =>
+                                  update(
+                                    "customLocations",
+                                    state.customLocations.filter((x) => x !== loc),
+                                  )
+                                }
+                                className="text-primary/70 hover:text-primary"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <p className="mt-2 text-[11px] text-muted-foreground">
+                        Jusqu'à 5 lieux personnalisés. Le coach les prend en compte pour
+                        composer vos séances.
+                      </p>
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>

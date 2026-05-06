@@ -37,6 +37,7 @@ export async function POST(req: Request) {
           goals: data.goals,
           environment: data.environments[0] ?? data.environment,
           environments: data.environments,
+          customLocations: data.customLocations,
         },
         create: {
           userId,
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
           goals: data.goals,
           environment: data.environments[0] ?? data.environment,
           environments: data.environments,
+          customLocations: data.customLocations,
         },
       });
 

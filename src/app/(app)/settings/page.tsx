@@ -168,6 +168,11 @@ export default async function SettingsPage() {
                   {e}
                 </Badge>
               ))}
+              {profile?.customLocations?.map((loc) => (
+                <Badge key={loc} variant="outline">
+                  {loc}
+                </Badge>
+              ))}
             </div>
           </div>
         </CardContent>
