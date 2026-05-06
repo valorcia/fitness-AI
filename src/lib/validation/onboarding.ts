@@ -47,6 +47,57 @@ export const onboardingSchema = z
   hoursOfSleep: z.number().int().min(3).max(14).default(7),
   stressLevel: z.number().int().min(1).max(10).default(5),
 
+  // Sleep details
+  nightShiftWork: z.boolean().default(false),
+  wakesUpOften: z.boolean().default(false),
+  insomnia: z.boolean().default(false),
+  sleepAids: z.boolean().default(false),
+
+  // Daily activity / work
+  workActivity: z
+    .enum(["sedentary", "moderate", "active", "very_active"])
+    .default("moderate"),
+  canMoveAtWork: z.boolean().default(true),
+
+  // Hydration
+  waterLitersPerDay: z.number().min(0).max(8).default(2),
+  otherDrinks: z.array(z.string().min(1).max(40)).max(8).default([]),
+
+  // Meals
+  mealsPerDay: z.number().int().min(1).max(6).default(3),
+  mealTypes: z
+    .array(z.enum(["BREAKFAST", "LUNCH", "DINNER", "SNACK"]))
+    .max(4)
+    .default([]),
+  skipMealsFrequency: z.enum(["never", "sometimes", "often"]).default("never"),
+  eatingOutPerWeek: z.number().int().min(0).max(21).default(0),
+  mealQuality: z.number().int().min(1).max(10).default(6),
+  snackingFrequency: z.enum(["never", "sometimes", "often"]).default("sometimes"),
+
+  // Diet
+  dietType: z
+    .enum([
+      "omnivore",
+      "vegetarian",
+      "vegan",
+      "pescatarian",
+      "gluten_free",
+      "halal",
+      "kosher",
+      "other",
+    ])
+    .default("omnivore"),
+  pastDiets: z.array(z.string().min(1).max(40)).max(10).default([]),
+  pastDietsSatisfied: z.enum(["yes", "partial", "no"]).optional(),
+  currentDiet: z.string().max(120).optional(),
+
+  // Sports history
+  sportsHistory: z.array(z.string().min(1).max(40)).max(15).default([]),
+  sportLevel: z
+    .enum(["recreational", "club", "competitive", "elite"])
+    .default("recreational"),
+  sportYears: z.number().int().min(0).max(60).default(0),
+
   // Coach preferences
   coachPersona: z.enum(["STRICT", "FUN", "ZEN", "MILITARY", "ELITE"]).default("FUN"),
   coachName: z.string().min(1).max(30).default("Pulse"),

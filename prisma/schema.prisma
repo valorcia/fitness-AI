@@ -293,9 +293,43 @@ model HealthProfile {
   pregnancy          Boolean  @default(false)
   surgeryRecent      Boolean  @default(false)
   smokes             Boolean  @default(false)
-  alcoholUnitsPerWeek Int     @default(0)
+  alcoholUnitsPerWeek Int     @default(0)            // glasses per week (renamed in UI)
   hoursOfSleep       Int      @default(7)
   stressLevel        Int      @default(5) // 1..10
+
+  // Sleep details
+  nightShiftWork     Boolean  @default(false)
+  wakesUpOften       Boolean  @default(false)
+  insomnia           Boolean  @default(false)
+  sleepAids          Boolean  @default(false)         // somnifères / aide pour dormir
+
+  // Daily activity / work
+  workActivity       String   @default("moderate")   // sedentary | moderate | active | very_active
+  canMoveAtWork      Boolean  @default(true)         // if sedentary, can stand up & walk
+
+  // Hydration
+  waterLitersPerDay  Float    @default(2)
+  otherDrinks        String[] @default([])           // café, thé, soda, jus…
+
+  // Meals & eating habits
+  mealsPerDay        Int      @default(3)
+  mealTypes          String[] @default([])           // BREAKFAST | LUNCH | DINNER | SNACK
+  skipMealsFrequency String   @default("never")      // never | sometimes | often
+  eatingOutPerWeek   Int      @default(0)
+  mealQuality        Int      @default(6)            // 1..10
+  snackingFrequency  String   @default("sometimes")  // never | sometimes | often
+
+  // Diet
+  dietType           String   @default("omnivore")    // omnivore | vegetarian | vegan | pescatarian | gluten_free | halal | kosher | other
+  pastDiets          String[] @default([])
+  pastDietsSatisfied String?                          // yes | partial | no
+  currentDiet        String?
+
+  // Sports history
+  sportsHistory      String[] @default([])           // free-text array of past sports
+  sportLevel         String   @default("recreational")  // recreational | club | competitive | elite
+  sportYears         Int      @default(0)
+
   injuries           String[] @default([])
   conditions         String[] @default([])
   medications        String[] @default([])

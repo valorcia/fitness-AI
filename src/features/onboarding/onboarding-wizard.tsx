@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { AVATAR_CATALOG } from "@/features/coach/coach-avatar";
+import { LifestyleStep } from "./lifestyle-step";
 
 type Goal = "WEIGHT_LOSS" | "MUSCLE_GAIN" | "ENDURANCE" | "FITNESS" | "HEALTH";
 type State = {
@@ -48,6 +49,41 @@ type State = {
   alcoholUnitsPerWeek: number;
   hoursOfSleep: number;
   stressLevel: number;
+  // Sleep details
+  nightShiftWork: boolean;
+  wakesUpOften: boolean;
+  insomnia: boolean;
+  sleepAids: boolean;
+  // Work / daily activity
+  workActivity: "sedentary" | "moderate" | "active" | "very_active";
+  canMoveAtWork: boolean;
+  // Hydration
+  waterLitersPerDay: number;
+  otherDrinks: string[];
+  // Meals
+  mealsPerDay: number;
+  mealTypes: Array<"BREAKFAST" | "LUNCH" | "DINNER" | "SNACK">;
+  skipMealsFrequency: "never" | "sometimes" | "often";
+  eatingOutPerWeek: number;
+  mealQuality: number;
+  snackingFrequency: "never" | "sometimes" | "often";
+  // Diet
+  dietType:
+    | "omnivore"
+    | "vegetarian"
+    | "vegan"
+    | "pescatarian"
+    | "gluten_free"
+    | "halal"
+    | "kosher"
+    | "other";
+  pastDiets: string[];
+  pastDietsSatisfied?: "yes" | "partial" | "no";
+  currentDiet: string;
+  // Sport history
+  sportsHistory: string[];
+  sportLevel: "recreational" | "club" | "competitive" | "elite";
+  sportYears: number;
   equipment: string[];
   outdoorAllowed: boolean;
   coachPersona: "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
@@ -150,6 +186,27 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     alcoholUnitsPerWeek: 0,
     hoursOfSleep: 7,
     stressLevel: 5,
+    nightShiftWork: false,
+    wakesUpOften: false,
+    insomnia: false,
+    sleepAids: false,
+    workActivity: "moderate",
+    canMoveAtWork: true,
+    waterLitersPerDay: 2,
+    otherDrinks: [],
+    mealsPerDay: 3,
+    mealTypes: [],
+    skipMealsFrequency: "never",
+    eatingOutPerWeek: 0,
+    mealQuality: 6,
+    snackingFrequency: "sometimes",
+    dietType: "omnivore",
+    pastDiets: [],
+    pastDietsSatisfied: undefined,
+    currentDiet: "",
+    sportsHistory: [],
+    sportLevel: "recreational",
+    sportYears: 0,
     equipment: [],
     outdoorAllowed: true,
     coachPersona: "FUN",
@@ -627,24 +684,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             )}
 
             {STEPS[step]?.key === "lifestyle" && (
-              <>
-                <div className="flex items-center justify-between rounded-xl border border-border p-3">
-                  <Label htmlFor="smokes" className="text-sm">Je fume</Label>
-                  <Checkbox id="smokes" checked={state.smokes} onCheckedChange={(c) => update("smokes", c === true)} />
-                </div>
-                <div>
-                  <Label>Alcool (unités / semaine)</Label>
-                  <Input type="number" min={0} max={60} value={state.alcoholUnitsPerWeek} onChange={(e) => update("alcoholUnitsPerWeek", Number(e.target.value))} />
-                </div>
-                <div>
-                  <Label>Sommeil moyen (heures / nuit) : {state.hoursOfSleep}h</Label>
-                  <input type="range" min={3} max={12} value={state.hoursOfSleep} onChange={(e) => update("hoursOfSleep", Number(e.target.value))} className="w-full accent-primary" />
-                </div>
-                <div>
-                  <Label>Niveau de stress (1 = très détendu, 10 = très stressé) : {state.stressLevel}</Label>
-                  <input type="range" min={1} max={10} value={state.stressLevel} onChange={(e) => update("stressLevel", Number(e.target.value))} className="w-full accent-primary" />
-                </div>
-              </>
+              <LifestyleStep state={state} update={update} />
             )}
 
             {STEPS[step]?.key === "equipment" && (
