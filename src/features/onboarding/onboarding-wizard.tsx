@@ -684,7 +684,15 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             )}
 
             {STEPS[step]?.key === "lifestyle" && (
-              <LifestyleStep state={state} update={update} />
+              <LifestyleStep
+                state={state}
+                update={
+                  update as <K extends keyof import("./lifestyle-step").LifestyleState>(
+                    k: K,
+                    v: import("./lifestyle-step").LifestyleState[K],
+                  ) => void
+                }
+              />
             )}
 
             {STEPS[step]?.key === "equipment" && (
