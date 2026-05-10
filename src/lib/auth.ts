@@ -83,7 +83,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         });
         token.role = dbUser?.role ?? "USER";
         token.hasOnboarded = !!dbUser?.profile;
-      } else if (token.userId && token.hasOnboarded !== true) {
+      } else if (token.userId) {
+        // Always re-check profile presence so onboarding reset flips the flag.
         const hasProfile = await prisma.profile.findUnique({
           where: { userId: token.userId as string },
           select: { id: true },

@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { CoachSettings } from "@/features/coach/coach-settings";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import Link from "next/link";
-import { PlugZap, Wand2 } from "lucide-react";
+import { PlugZap, RotateCcw, Wand2 } from "lucide-react";
+import { resetOnboarding } from "./reset-onboarding-action";
 
 export const metadata = { title: "Paramètres" };
 
@@ -84,6 +85,27 @@ export default async function SettingsPage() {
         </CardHeader>
         <CardContent>
           <ThemeToggle />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <RotateCcw className="h-4 w-4 text-primary" />
+            Refaire le questionnaire
+          </CardTitle>
+          <CardDescription>
+            Réinitialise votre profil santé, le plan en cours et les séances planifiées
+            (l'historique terminé est conservé). Utile pour retester le tunnel d'onboarding.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={resetOnboarding}>
+            <Button type="submit" variant="outline">
+              <RotateCcw className="h-4 w-4" />
+              Recommencer l'inscription
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
