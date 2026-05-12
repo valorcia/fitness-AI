@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Check } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -9,6 +10,7 @@ import {
   SPORTS_CATALOG,
   recommendedEquipmentFor,
 } from "@/lib/onboarding/sports-catalog";
+import { metaFor } from "@/lib/onboarding/equipment-meta";
 
 type Props = {
   sportsInterests: string[];
@@ -183,24 +185,49 @@ function EquipmentGrid({
   highlight?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
       {items.map((eq) => {
         const isOn = selected.includes(eq);
+        const meta = metaFor(eq);
         return (
           <button
             key={eq}
             type="button"
             onClick={() => onToggle(eq)}
             className={cn(
-              "rounded-xl border px-3 py-2 text-left text-sm capitalize transition",
+              "group relative flex gap-3 rounded-2xl border p-3 text-left transition",
               isOn
-                ? "border-primary bg-primary/10 text-primary"
+                ? "border-primary bg-primary/10 ring-1 ring-primary/40"
                 : highlight
                   ? "border-primary/30 hover:border-primary/60"
                   : "border-border hover:border-primary/50",
             )}
           >
-            {eq}
+            <div
+              className={cn(
+                "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl",
+                isOn ? "bg-primary/15" : "bg-muted",
+              )}
+              aria-hidden
+            >
+              {meta.emoji}
+            </div>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-sm font-semibold">{meta.fr}</span>
+                {isOn && (
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Check className="h-3 w-3" />
+                  </span>
+                )}
+              </div>
+              <span className="block text-[10px] uppercase tracking-wide text-muted-foreground">
+                {eq}
+              </span>
+              {meta.hint && (
+                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{meta.hint}</p>
+              )}
+            </div>
           </button>
         );
       })}
