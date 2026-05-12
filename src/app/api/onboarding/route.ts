@@ -90,6 +90,7 @@ export async function POST(req: Request) {
         pastDietsSatisfied: data.pastDietsSatisfied,
         currentDiet: data.currentDiet,
         sportsHistory: data.sportsHistory,
+        sportsInterests: data.sportsInterests,
         sportLevel: data.sportLevel,
         sportYears: data.sportYears,
         sessionsPerWeek: data.sessionsPerWeek,

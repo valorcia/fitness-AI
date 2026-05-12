@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AVATAR_CATALOG } from "@/features/coach/coach-avatar";
 import { LifestyleStep } from "./lifestyle-step";
+import { EquipmentStep } from "./equipment-step";
 
 type Goal = "WEIGHT_LOSS" | "MUSCLE_GAIN" | "ENDURANCE" | "FITNESS" | "HEALTH";
 type State = {
@@ -84,6 +85,7 @@ type State = {
   sportsHistory: string[];
   sportLevel: "recreational" | "club" | "competitive" | "elite";
   sportYears: number;
+  sportsInterests: string[];
   equipment: string[];
   outdoorAllowed: boolean;
   coachPersona: "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
@@ -133,12 +135,6 @@ const PERSONAS = [
   { value: "MILITARY", label: "Militaire", emoji: "🎖️" },
   { value: "ELITE", label: "Elite", emoji: "🏆" },
 ] as const;
-
-const EQUIPMENT_OPTIONS = [
-  "barbell", "dumbbell", "bench", "rack", "pull-up bar", "kettlebell", "bands",
-  "cable machine", "treadmill", "bike", "rower", "assault bike", "box", "jump rope",
-  "medicine ball", "foam roller", "trap bar", "dip bars",
-];
 
 const MEDICAL_FLAGS: Array<{ key: keyof State; label: string; warn?: boolean }> = [
   { key: "cardiacIssues", label: "Problèmes cardiaques connus", warn: true },
@@ -207,6 +203,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     sportsHistory: [],
     sportLevel: "recreational",
     sportYears: 0,
+    sportsInterests: [],
     equipment: [],
     outdoorAllowed: true,
     coachPersona: "FUN",
@@ -696,42 +693,18 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             )}
 
             {STEPS[step]?.key === "equipment" && (
-              <>
-                <div>
-                  <Label>Matériel disponible</Label>
-                  <div className="mt-2 grid grid-cols-2 gap-2">
-                    {EQUIPMENT_OPTIONS.map((eq) => {
-                      const selected = state.equipment.includes(eq);
-                      return (
-                        <button
-                          key={eq}
-                          type="button"
-                          onClick={() =>
-                            update(
-                              "equipment",
-                              selected
-                                ? state.equipment.filter((e) => e !== eq)
-                                : [...state.equipment, eq],
-                            )
-                          }
-                          className={cn(
-                            "rounded-xl border px-3 py-2 text-sm capitalize transition",
-                            selected
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border hover:border-primary/50",
-                          )}
-                        >
-                          {eq}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Checkbox id="outdoor" checked={state.outdoorAllowed} onCheckedChange={(c) => update("outdoorAllowed", c === true)} />
-                  <Label htmlFor="outdoor">Entraînement extérieur autorisé (course, vélo, marche)</Label>
-                </div>
-              </>
+              <EquipmentStep
+                sportsInterests={state.sportsInterests}
+                equipment={state.equipment}
+                outdoorAllowed={state.outdoorAllowed}
+                onChange={(patch) => {
+                  if (patch.sportsInterests !== undefined)
+                    update("sportsInterests", patch.sportsInterests);
+                  if (patch.equipment !== undefined) update("equipment", patch.equipment);
+                  if (patch.outdoorAllowed !== undefined)
+                    update("outdoorAllowed", patch.outdoorAllowed);
+                }}
+              />
             )}
 
             {STEPS[step]?.key === "coach" && (

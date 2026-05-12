@@ -93,6 +93,7 @@ export const onboardingSchema = z
 
   // Sports history
   sportsHistory: z.array(z.string().min(1).max(40)).max(15).default([]),
+  sportsInterests: z.array(z.string().min(1).max(40)).max(15).default([]),
   sportLevel: z
     .enum(["recreational", "club", "competitive", "elite"])
     .default("recreational"),

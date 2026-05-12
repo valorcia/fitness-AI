@@ -327,6 +327,7 @@ model HealthProfile {
 
   // Sports history
   sportsHistory      String[] @default([])           // free-text array of past sports
+  sportsInterests    String[] @default([])           // sports actively practised or wanted
   sportLevel         String   @default("recreational")  // recreational | club | competitive | elite
   sportYears         Int      @default(0)
 
