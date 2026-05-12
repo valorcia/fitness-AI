@@ -1,200 +1,153 @@
 /**
- * Equipment metadata — every entry uses the same illustration style: a white
- * silhouette icon from the `game-icons` Iconify set on a brand-coloured
- * gradient tile. This guarantees a consistent visual base across the whole
- * "Matériel à disposition" + "Autre matériel" sections.
+ * Equipment metadata — each item ships with a curated real-life photo
+ * (Unsplash) so the visual language stays uniform: real product / gym
+ * photography across the whole catalogue.
  *
- * Names are kept in English (the global gym vocabulary), so the icon does
- * the heavy lifting for non-English speakers / beginners.
+ * Names are kept in their canonical English form.
  */
 
-const ICON = (name: string) =>
-  `https://api.iconify.design/game-icons:${name}.svg?color=%23ffffff&height=80`;
+const PHOTO = (id: string) =>
+  `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&h=400&q=70`;
 
 export type EquipmentMeta = {
-  /** Iconify URL (game-icons set, always white silhouette). */
-  iconUrl: string;
-  /** Short usage hint shown under the label. */
+  /** Curated Unsplash photo URL (real product / gym shot). */
+  imageUrl: string;
+  /** Short usage hint shown under the title. */
   hint?: string;
-  /** Gradient (from → to) used as the tile background. */
-  gradient: [string, string];
 };
-
-const STRENGTH: [string, string] = ["#1B3954", "#0F766E"];
-const FREE_WEIGHT: [string, string] = ["#0F172A", "#1B3954"];
-const MACHINE: [string, string] = ["#0EA5E9", "#14B8A6"];
-const PULL: [string, string] = ["#7C3AED", "#A855F7"];
-const CARDIO: [string, string] = ["#10B981", "#22D3EE"];
-const COMBAT: [string, string] = ["#7F1D1D", "#DC2626"];
-const MOBILITY: [string, string] = ["#6366F1", "#A855F7"];
-const CORE: [string, string] = ["#1F2937", "#475569"];
-const OUTDOOR: [string, string] = ["#10B981", "#F59E0B"];
-const FIELD: [string, string] = ["#1F2937", "#10B981"];
 
 export const EQUIPMENT_META: Record<string, EquipmentMeta> = {
   barbell: {
-    iconUrl: ICON("barbell"),
+    imageUrl: PHOTO("1581009146145-b5ef050c2e1e"),
     hint: "Long bar with removable plates — squat, bench, deadlift.",
-    gradient: STRENGTH,
   },
   dumbbell: {
-    iconUrl: ICON("dumbbell"),
+    imageUrl: PHOTO("1583454110551-21f2fa2afe61"),
     hint: "Held in each hand for unilateral training.",
-    gradient: STRENGTH,
   },
   bench: {
-    iconUrl: ICON("weight-lifting-up"),
+    imageUrl: PHOTO("1571019613454-1cb2f99b2d8b"),
     hint: "Flat or inclinable bench for pressing and seated work.",
-    gradient: STRENGTH,
   },
   rack: {
-    iconUrl: ICON("weight-lifting-up"),
+    imageUrl: PHOTO("1534438327276-14e5300c3a48"),
     hint: "Safety cage to lift heavy alone (squat, overhead press).",
-    gradient: STRENGTH,
   },
   machine: {
-    iconUrl: ICON("gears"),
+    imageUrl: PHOTO("1623874514711-0f321325f318"),
     hint: "Guided-motion machine — leg press, chest press, etc.",
-    gradient: MACHINE,
   },
   "cable machine": {
-    iconUrl: ICON("pulley"),
+    imageUrl: PHOTO("1571902943202-507ec2618e8f"),
     hint: "Constant resistance via cables — rows, flyes, triceps.",
-    gradient: PULL,
   },
   "smith machine": {
-    iconUrl: ICON("weight-lifting-up"),
+    imageUrl: PHOTO("1574680096145-d05b474e2155"),
     hint: "Barbell on vertical rails — more stable, less freedom.",
-    gradient: FREE_WEIGHT,
   },
   kettlebell: {
-    iconUrl: ICON("kettlebell"),
+    imageUrl: PHOTO("1604480132715-59c471af6d25"),
     hint: "Cast-iron bell — swings, snatches, goblet squats.",
-    gradient: STRENGTH,
   },
   bands: {
-    iconUrl: ICON("elastic"),
+    imageUrl: PHOTO("1599058917765-a780eda07a3e"),
     hint: "Resistance bands — assistance, mobility, added load.",
-    gradient: MOBILITY,
   },
   rings: {
-    iconUrl: ICON("gymnastics"),
+    imageUrl: PHOTO("1599058917800-7c2c4e8d3a47"),
     hint: "Gymnastic rings — pull-ups, dips, advanced calisthenics.",
-    gradient: MOBILITY,
   },
   parallettes: {
-    iconUrl: ICON("wood-stick"),
+    imageUrl: PHOTO("1604247584233-99c80a8a4659"),
     hint: "Low parallel bars — push-ups, L-sit, planche.",
-    gradient: STRENGTH,
   },
   "pull-up bar": {
-    iconUrl: ICON("wood-stick"),
+    imageUrl: PHOTO("1598971639058-a852862a1633"),
     hint: "Door- or wall-mounted bar for pull-ups and hanging.",
-    gradient: PULL,
   },
   "dip bars": {
-    iconUrl: ICON("wood-stick"),
+    imageUrl: PHOTO("1517836357463-d25dfeac3438"),
     hint: "Parallel bars for dips and L-sits.",
-    gradient: PULL,
   },
   fingerboard: {
-    iconUrl: ICON("hand"),
+    imageUrl: PHOTO("1522163182402-834f871fd851"),
     hint: "Finger-strength board for climbers.",
-    gradient: OUTDOOR,
   },
   "ab wheel": {
-    iconUrl: ICON("car-wheel"),
+    imageUrl: PHOTO("1583500178690-f7fd39157b6a"),
     hint: "Wheel with handles for advanced core rollouts.",
-    gradient: CORE,
   },
   "foam roller": {
-    iconUrl: ICON("bread-slice"),
+    imageUrl: PHOTO("1599901860904-17e6ed7083a0"),
     hint: "Self-massage for recovery and mobility.",
-    gradient: MOBILITY,
   },
   "yoga mat": {
-    iconUrl: ICON("meditation"),
+    imageUrl: PHOTO("1544367567-0f2fcb009e0b"),
     hint: "Non-slip mat for yoga, core work, stretching.",
-    gradient: MOBILITY,
   },
   "medicine ball": {
-    iconUrl: ICON("bowling-ball"),
+    imageUrl: PHOTO("1517438476312-10d11ed53569"),
     hint: "Weighted ball (3–10 kg) — throws, wall balls, core.",
-    gradient: CORE,
   },
   box: {
-    iconUrl: ICON("cardboard-box"),
+    imageUrl: PHOTO("1591291621164-2c6367723315"),
     hint: "Plyo box — box jumps, step-ups, Bulgarian split squats.",
-    gradient: STRENGTH,
   },
   "jump rope": {
-    iconUrl: ICON("rope-coil"),
+    imageUrl: PHOTO("1599058918144-1bdc4f3edc77"),
     hint: "Cardio, warm-up and coordination.",
-    gradient: CARDIO,
   },
   "punching bag": {
-    iconUrl: ICON("punching-bag"),
+    imageUrl: PHOTO("1599058917212-d750089bc07e"),
     hint: "Boxing, kick-boxing, MMA.",
-    gradient: COMBAT,
   },
   "boxing gloves": {
-    iconUrl: ICON("boxing-glove"),
+    imageUrl: PHOTO("1593079831268-3381b0db4a77"),
     hint: "Protect your hands on bag work or sparring.",
-    gradient: COMBAT,
   },
   treadmill: {
-    iconUrl: ICON("run"),
+    imageUrl: PHOTO("1534258936925-c58bed479fcb"),
     hint: "Indoor running with pace and incline control.",
-    gradient: CARDIO,
   },
   bike: {
-    iconUrl: ICON("bicycle"),
+    imageUrl: PHOTO("1532298229144-0ec0c57515c7"),
     hint: "Road, MTB, indoor or spin bike.",
-    gradient: CARDIO,
   },
   rower: {
-    iconUrl: ICON("rowing"),
+    imageUrl: PHOTO("1434596922112-19c563067271"),
     hint: "Low-impact full-body cardio with back & leg work.",
-    gradient: CARDIO,
   },
   "assault bike": {
-    iconUrl: ICON("bicycle"),
+    imageUrl: PHOTO("1571019614242-c5c5dee9f50b"),
     hint: "Air-resistance bike with moving arms — brutal HIIT.",
-    gradient: CARDIO,
   },
   "trap bar": {
-    iconUrl: ICON("barbell"),
+    imageUrl: PHOTO("1517963879433-6ad2b056d712"),
     hint: "Hexagonal bar — safer deadlifts for the back.",
-    gradient: STRENGTH,
   },
   "trail shoes": {
-    iconUrl: ICON("running-shoe"),
+    imageUrl: PHOTO("1542291026-7eec264c27ff"),
     hint: "Grippy shoes for trail running.",
-    gradient: OUTDOOR,
   },
   racket: {
-    iconUrl: ICON("tennis-racket"),
+    imageUrl: PHOTO("1551269901-5c5e14c25df7"),
     hint: "Tennis, padel, badminton.",
-    gradient: FIELD,
   },
   football: {
-    iconUrl: ICON("soccer-ball"),
+    imageUrl: PHOTO("1574629810360-7efbbe195018"),
     hint: "Football, basketball, handball…",
-    gradient: FIELD,
   },
   "shin guards": {
-    iconUrl: ICON("gauntlet"),
+    imageUrl: PHOTO("1551958219-acbc608c6377"),
     hint: "Combat / team-sport leg protection.",
-    gradient: COMBAT,
   },
 };
 
 export function metaFor(slug: string): EquipmentMeta {
   return (
     EQUIPMENT_META[slug] ?? {
-      iconUrl: ICON("gym-bag"),
+      imageUrl: PHOTO("1517836357463-d25dfeac3438"),
       hint: undefined,
-      gradient: STRENGTH,
     }
   );
 }

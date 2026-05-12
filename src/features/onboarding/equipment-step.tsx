@@ -189,7 +189,6 @@ function EquipmentGrid({
       {items.map((eq) => {
         const isOn = selected.includes(eq);
         const meta = metaFor(eq);
-        const [from, to] = meta.gradient;
         return (
           <button
             key={eq}
@@ -204,32 +203,31 @@ function EquipmentGrid({
                   : "border-border hover:border-primary/50",
             )}
           >
-            <div
-              className="relative flex h-28 w-full items-center justify-center"
-              style={{
-                background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
-              }}
-              aria-hidden
-            >
+            <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={meta.iconUrl}
+                src={meta.imageUrl}
                 alt=""
-                className="h-14 w-14 transition group-hover:scale-110"
+                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
                 loading="lazy"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 p-2.5 text-white">
+                <div className="truncate text-sm font-semibold capitalize drop-shadow">
+                  {eq}
+                </div>
+              </div>
               {isOn && (
-                <span className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-white text-primary shadow">
+                <span className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-primary text-primary-foreground shadow">
                   <Check className="h-3.5 w-3.5" />
                 </span>
               )}
             </div>
-            <div className="p-3">
-              <div className="truncate text-sm font-semibold capitalize">{eq}</div>
-              {meta.hint && (
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{meta.hint}</p>
-              )}
-            </div>
+            {meta.hint && (
+              <p className="px-3 py-2 text-xs text-muted-foreground line-clamp-2">
+                {meta.hint}
+              </p>
+            )}
           </button>
         );
       })}
