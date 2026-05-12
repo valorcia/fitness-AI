@@ -1,232 +1,200 @@
 /**
- * Visual + French labels for the equipment catalog. Each entry maps the
- * canonical slug (kept in English / lowercase for storage) to an emoji icon,
- * a French translation, an optional realistic photo and a short usage hint.
+ * Equipment metadata — every entry uses the same illustration style: a white
+ * silhouette icon from the `game-icons` Iconify set on a brand-coloured
+ * gradient tile. This guarantees a consistent visual base across the whole
+ * "Matériel à disposition" + "Autre matériel" sections.
+ *
+ * Names are kept in English (the global gym vocabulary), so the icon does
+ * the heavy lifting for non-English speakers / beginners.
  */
 
-const U = (id: string) =>
-  `https://images.unsplash.com/${id}?auto=format&fit=crop&w=400&q=70`;
+const ICON = (name: string) =>
+  `https://api.iconify.design/game-icons:${name}.svg?color=%23ffffff&height=80`;
 
 export type EquipmentMeta = {
-  /** Emoji shown when no photo is available. */
-  emoji: string;
-  /** French label, plain language. */
-  fr: string;
+  /** Iconify URL (game-icons set, always white silhouette). */
+  iconUrl: string;
   /** Short usage hint shown under the label. */
   hint?: string;
-  /** Gradient (from → to) when no photo, accent colour for tile. */
-  gradient?: [string, string];
-  /** Realistic photo URL (Unsplash). */
-  imageUrl?: string;
+  /** Gradient (from → to) used as the tile background. */
+  gradient: [string, string];
 };
+
+const STRENGTH: [string, string] = ["#1B3954", "#0F766E"];
+const FREE_WEIGHT: [string, string] = ["#0F172A", "#1B3954"];
+const MACHINE: [string, string] = ["#0EA5E9", "#14B8A6"];
+const PULL: [string, string] = ["#7C3AED", "#A855F7"];
+const CARDIO: [string, string] = ["#10B981", "#22D3EE"];
+const COMBAT: [string, string] = ["#7F1D1D", "#DC2626"];
+const MOBILITY: [string, string] = ["#6366F1", "#A855F7"];
+const CORE: [string, string] = ["#1F2937", "#475569"];
+const OUTDOOR: [string, string] = ["#10B981", "#F59E0B"];
+const FIELD: [string, string] = ["#1F2937", "#10B981"];
 
 export const EQUIPMENT_META: Record<string, EquipmentMeta> = {
   barbell: {
-    emoji: "🏋️",
-    fr: "Barre olympique",
-    hint: "Barre longue avec disques amovibles, idéale pour squat, bench, deadlift.",
-    imageUrl: U("photo-1581009146145-b5ef050c2e1e"),
-    gradient: ["#1B3954", "#0F766E"],
+    iconUrl: ICON("barbell"),
+    hint: "Long bar with removable plates — squat, bench, deadlift.",
+    gradient: STRENGTH,
   },
   dumbbell: {
-    emoji: "🏋️‍♂️",
-    fr: "Haltères",
-    hint: "Paires de poids tenus en main, un par bras.",
-    imageUrl: U("photo-1583454110551-21f2fa2afe61"),
-    gradient: ["#0F766E", "#14B8A6"],
+    iconUrl: ICON("dumbbell"),
+    hint: "Held in each hand for unilateral training.",
+    gradient: STRENGTH,
   },
   bench: {
-    emoji: "🛋️",
-    fr: "Banc de musculation",
-    hint: "Plat ou inclinable, pour développé couché et exercices assis.",
-    imageUrl: U("photo-1571019613454-1cb2f99b2d8b"),
-    gradient: ["#1B3954", "#2563EB"],
+    iconUrl: ICON("weight-lifting-up"),
+    hint: "Flat or inclinable bench for pressing and seated work.",
+    gradient: STRENGTH,
   },
   rack: {
-    emoji: "⛩️",
-    fr: "Cage à squat",
-    hint: "Structure de sécurité pour soulever lourd seul (squat, overhead).",
-    imageUrl: U("photo-1534438327276-14e5300c3a48"),
-    gradient: ["#1F2937", "#1B3954"],
+    iconUrl: ICON("weight-lifting-up"),
+    hint: "Safety cage to lift heavy alone (squat, overhead press).",
+    gradient: STRENGTH,
   },
   machine: {
-    emoji: "⚙️",
-    fr: "Machine guidée",
-    hint: "Mouvement contraint par la machine — leg press, chest press, etc.",
-    imageUrl: U("photo-1623874514711-0f321325f318"),
-    gradient: ["#0EA5E9", "#14B8A6"],
+    iconUrl: ICON("gears"),
+    hint: "Guided-motion machine — leg press, chest press, etc.",
+    gradient: MACHINE,
   },
   "cable machine": {
-    emoji: "🪢",
-    fr: "Poulie à câbles",
-    hint: "Résistance par poulie, pour tirages, écartés, triceps…",
-    imageUrl: U("photo-1571902943202-507ec2618e8f"),
-    gradient: ["#7C3AED", "#A855F7"],
+    iconUrl: ICON("pulley"),
+    hint: "Constant resistance via cables — rows, flyes, triceps.",
+    gradient: PULL,
   },
   "smith machine": {
-    emoji: "🔩",
-    fr: "Smith machine",
-    hint: "Barre guidée verticalement, plus stable mais moins libre.",
-    imageUrl: U("photo-1574680096145-d05b474e2155"),
-    gradient: ["#1F2937", "#3B82F6"],
+    iconUrl: ICON("weight-lifting-up"),
+    hint: "Barbell on vertical rails — more stable, less freedom.",
+    gradient: FREE_WEIGHT,
   },
   kettlebell: {
-    emoji: "🔔",
-    fr: "Kettlebell",
-    hint: "Poids en cloche avec poignée — swings, snatch, gainage.",
-    imageUrl: U("photo-1604480132715-59c471af6d25"),
-    gradient: ["#F59E0B", "#EF4444"],
+    iconUrl: ICON("kettlebell"),
+    hint: "Cast-iron bell — swings, snatches, goblet squats.",
+    gradient: STRENGTH,
   },
   bands: {
-    emoji: "➰",
-    fr: "Élastiques",
-    hint: "Bandes de résistance pour mobilité, assistance ou ajout de charge.",
-    gradient: ["#EC4899", "#F472B6"],
+    iconUrl: ICON("elastic"),
+    hint: "Resistance bands — assistance, mobility, added load.",
+    gradient: MOBILITY,
   },
   rings: {
-    emoji: "⭕",
-    fr: "Anneaux de gymnastique",
-    hint: "Pour tractions, dips et calisthenics avancé.",
-    gradient: ["#A16207", "#F59E0B"],
+    iconUrl: ICON("gymnastics"),
+    hint: "Gymnastic rings — pull-ups, dips, advanced calisthenics.",
+    gradient: MOBILITY,
   },
   parallettes: {
-    emoji: "🅿️",
-    fr: "Parallettes",
-    hint: "Petites barres parallèles bas du sol — pompes, L-sit, planche.",
-    gradient: ["#0F766E", "#22D3EE"],
+    iconUrl: ICON("wood-stick"),
+    hint: "Low parallel bars — push-ups, L-sit, planche.",
+    gradient: STRENGTH,
   },
   "pull-up bar": {
-    emoji: "🚪",
-    fr: "Barre de tractions",
-    hint: "Fixée en porte ou au mur, pour tractions et hanging.",
-    imageUrl: U("photo-1598971639058-a852862a1633"),
-    gradient: ["#1B3954", "#0EA5E9"],
+    iconUrl: ICON("wood-stick"),
+    hint: "Door- or wall-mounted bar for pull-ups and hanging.",
+    gradient: PULL,
   },
   "dip bars": {
-    emoji: "⫼",
-    fr: "Barres parallèles (dips)",
-    hint: "Fixes ou portables, pour dips et L-sit.",
-    gradient: ["#0F172A", "#1B3954"],
+    iconUrl: ICON("wood-stick"),
+    hint: "Parallel bars for dips and L-sits.",
+    gradient: PULL,
   },
   fingerboard: {
-    emoji: "🧗",
-    fr: "Fingerboard",
-    hint: "Petite poutre d'entraînement de doigts pour grimpeurs.",
-    gradient: ["#92400E", "#EAB308"],
+    iconUrl: ICON("hand"),
+    hint: "Finger-strength board for climbers.",
+    gradient: OUTDOOR,
   },
   "ab wheel": {
-    emoji: "🛞",
-    fr: "Roue abdominale",
-    hint: "Petite roue avec poignées — gainage avancé du tronc.",
-    gradient: ["#1F2937", "#475569"],
+    iconUrl: ICON("car-wheel"),
+    hint: "Wheel with handles for advanced core rollouts.",
+    gradient: CORE,
   },
   "foam roller": {
-    emoji: "🧻",
-    fr: "Rouleau de massage",
-    hint: "Auto-massage pour récupération et mobilité.",
-    gradient: ["#6366F1", "#A855F7"],
+    iconUrl: ICON("bread-slice"),
+    hint: "Self-massage for recovery and mobility.",
+    gradient: MOBILITY,
   },
   "yoga mat": {
-    emoji: "🧘",
-    fr: "Tapis de yoga",
-    hint: "Tapis antidérapant pour yoga, gainage, étirements.",
-    imageUrl: U("photo-1544367567-0f2fcb009e0b"),
-    gradient: ["#6366F1", "#A855F7"],
+    iconUrl: ICON("meditation"),
+    hint: "Non-slip mat for yoga, core work, stretching.",
+    gradient: MOBILITY,
   },
   "medicine ball": {
-    emoji: "🏐",
-    fr: "Ballon lesté",
-    hint: "Ballon plein (3 à 10 kg) — lancers, wall balls, gainage.",
-    gradient: ["#DC2626", "#F97316"],
+    iconUrl: ICON("bowling-ball"),
+    hint: "Weighted ball (3–10 kg) — throws, wall balls, core.",
+    gradient: CORE,
   },
   box: {
-    emoji: "📦",
-    fr: "Box (caisse pliométrique)",
-    hint: "Box jump, step-up, bulgarian split squat.",
-    gradient: ["#92400E", "#F59E0B"],
+    iconUrl: ICON("cardboard-box"),
+    hint: "Plyo box — box jumps, step-ups, Bulgarian split squats.",
+    gradient: STRENGTH,
   },
   "jump rope": {
-    emoji: "🪢",
-    fr: "Corde à sauter",
-    hint: "Cardio explosif, échauffement, coordination.",
-    gradient: ["#14B8A6", "#22D3EE"],
+    iconUrl: ICON("rope-coil"),
+    hint: "Cardio, warm-up and coordination.",
+    gradient: CARDIO,
   },
   "punching bag": {
-    emoji: "🥊",
-    fr: "Sac de frappe",
-    hint: "Boxe, kick-boxing, MMA.",
-    gradient: ["#7F1D1D", "#DC2626"],
+    iconUrl: ICON("punching-bag"),
+    hint: "Boxing, kick-boxing, MMA.",
+    gradient: COMBAT,
   },
   "boxing gloves": {
-    emoji: "🥊",
-    fr: "Gants de boxe",
-    hint: "Protègent vos mains au sac ou en sparring.",
-    gradient: ["#DC2626", "#F97316"],
+    iconUrl: ICON("boxing-glove"),
+    hint: "Protect your hands on bag work or sparring.",
+    gradient: COMBAT,
   },
   treadmill: {
-    emoji: "🏃‍♀️",
-    fr: "Tapis de course",
-    hint: "Course indoor avec contrôle d'allure et d'inclinaison.",
-    imageUrl: U("photo-1534258936925-c58bed479fcb"),
-    gradient: ["#10B981", "#22D3EE"],
+    iconUrl: ICON("run"),
+    hint: "Indoor running with pace and incline control.",
+    gradient: CARDIO,
   },
   bike: {
-    emoji: "🚴",
-    fr: "Vélo",
-    hint: "Route, VTT, ou vélo d'appartement / spin.",
-    imageUrl: U("photo-1517836357463-d25dfeac3438"),
-    gradient: ["#0EA5E9", "#22D3EE"],
+    iconUrl: ICON("bicycle"),
+    hint: "Road, MTB, indoor or spin bike.",
+    gradient: CARDIO,
   },
   rower: {
-    emoji: "🚣",
-    fr: "Rameur",
-    hint: "Cardio + renforcement dos / jambes, faible impact.",
-    imageUrl: U("photo-1434596922112-19c563067271"),
-    gradient: ["#0F766E", "#10B981"],
+    iconUrl: ICON("rowing"),
+    hint: "Low-impact full-body cardio with back & leg work.",
+    gradient: CARDIO,
   },
   "assault bike": {
-    emoji: "💨",
-    fr: "Assault bike",
-    hint: "Vélo à résistance d'air avec bras — HIIT intense.",
-    gradient: ["#1F2937", "#0EA5E9"],
+    iconUrl: ICON("bicycle"),
+    hint: "Air-resistance bike with moving arms — brutal HIIT.",
+    gradient: CARDIO,
   },
   "trap bar": {
-    emoji: "🔷",
-    fr: "Barre hexagonale (trap)",
-    hint: "Soulevés de terre plus sûrs pour le dos.",
-    gradient: ["#1B3954", "#0F766E"],
+    iconUrl: ICON("barbell"),
+    hint: "Hexagonal bar — safer deadlifts for the back.",
+    gradient: STRENGTH,
   },
   "trail shoes": {
-    emoji: "👟",
-    fr: "Chaussures trail",
-    hint: "Course nature / sentiers.",
-    gradient: ["#10B981", "#F59E0B"],
+    iconUrl: ICON("running-shoe"),
+    hint: "Grippy shoes for trail running.",
+    gradient: OUTDOOR,
   },
   racket: {
-    emoji: "🎾",
-    fr: "Raquette",
+    iconUrl: ICON("tennis-racket"),
     hint: "Tennis, padel, badminton.",
-    gradient: ["#84CC16", "#A3E635"],
+    gradient: FIELD,
   },
   football: {
-    emoji: "⚽",
-    fr: "Ballon",
-    hint: "Foot, basket, hand…",
-    gradient: ["#1F2937", "#10B981"],
+    iconUrl: ICON("soccer-ball"),
+    hint: "Football, basketball, handball…",
+    gradient: FIELD,
   },
   "shin guards": {
-    emoji: "🛡️",
-    fr: "Protège-tibias",
-    hint: "Sports de contact / arts martiaux.",
-    gradient: ["#0EA5E9", "#1B3954"],
+    iconUrl: ICON("gauntlet"),
+    hint: "Combat / team-sport leg protection.",
+    gradient: COMBAT,
   },
 };
 
 export function metaFor(slug: string): EquipmentMeta {
   return (
     EQUIPMENT_META[slug] ?? {
-      emoji: "🧰",
-      fr: slug,
+      iconUrl: ICON("gym-bag"),
+      hint: undefined,
+      gradient: STRENGTH,
     }
   );
 }

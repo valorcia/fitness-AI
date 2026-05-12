@@ -18,6 +18,7 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.pulsecoach.ai" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
+      { protocol: "https", hostname: "api.iconify.design" },
     ],
   },
   async rewrites() {
