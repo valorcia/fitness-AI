@@ -185,45 +185,56 @@ function EquipmentGrid({
   highlight?: boolean;
 }) {
   return (
-    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
       {items.map((eq) => {
         const isOn = selected.includes(eq);
         const meta = metaFor(eq);
+        const gradient = meta.gradient ?? ["#1B3954", "#14B8A6"];
         return (
           <button
             key={eq}
             type="button"
             onClick={() => onToggle(eq)}
             className={cn(
-              "group relative flex gap-3 rounded-2xl border p-3 text-left transition",
+              "group relative overflow-hidden rounded-2xl border bg-card text-left transition",
               isOn
-                ? "border-primary bg-primary/10 ring-1 ring-primary/40"
+                ? "border-primary ring-2 ring-primary/50"
                 : highlight
                   ? "border-primary/30 hover:border-primary/60"
                   : "border-border hover:border-primary/50",
             )}
           >
             <div
-              className={cn(
-                "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-2xl",
-                isOn ? "bg-primary/15" : "bg-muted",
-              )}
+              className="relative h-24 w-full overflow-hidden"
+              style={{
+                background: `linear-gradient(135deg, ${gradient[0]} 0%, ${gradient[1]} 100%)`,
+              }}
               aria-hidden
             >
-              {meta.emoji}
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-1.5">
-                <span className="truncate text-sm font-semibold">{meta.fr}</span>
-                {isOn && (
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Check className="h-3 w-3" />
-                  </span>
-                )}
-              </div>
-              <span className="block text-[10px] uppercase tracking-wide text-muted-foreground">
-                {eq}
+              {meta.imageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={meta.imageUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover opacity-80 transition group-hover:scale-105 group-hover:opacity-100"
+                  loading="lazy"
+                />
+              ) : null}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+              <span className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 text-xl shadow">
+                {meta.emoji}
               </span>
+              {isOn && (
+                <span className="absolute left-2 top-2 inline-flex h-7 items-center gap-1 rounded-full bg-primary px-2 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow">
+                  <Check className="h-3 w-3" /> Choisi
+                </span>
+              )}
+            </div>
+            <div className="p-3">
+              <div className="truncate text-sm font-semibold">{meta.fr}</div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                {eq}
+              </div>
               {meta.hint && (
                 <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{meta.hint}</p>
               )}
