@@ -20,6 +20,8 @@ const nextConfig = {
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "api.iconify.design" },
       { protocol: "https", hostname: "api.dicebear.com" },
+      { protocol: "https", hostname: "replicate.delivery" },
+      { protocol: "https", hostname: "*.replicate.delivery" },
     ],
   },
   async rewrites() {
