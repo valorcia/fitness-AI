@@ -12,11 +12,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
   title: {
-    default: "CoachMe — Coach sportif IA premium",
-    template: "%s · CoachMe",
+    default: "Coachmii-fit — Coach sportif IA premium",
+    template: "%s · Coachmii-fit",
   },
   description:
-    "CoachMe, votre coach sportif intelligent : programmes personnalisés, coaching vocal, outdoor GPS, nutrition, gamification.",
+    "Coachmii-fit, votre coach sportif intelligent : programmes personnalisés, coaching vocal, outdoor GPS, nutrition, gamification.",
   keywords: [
     "coach IA sport",
     "application fitness IA",
@@ -25,15 +25,15 @@ export const metadata: Metadata = {
     "coach vocal fitness",
   ],
   openGraph: {
-    title: "CoachMe",
+    title: "Coachmii-fit",
     description:
       "Coach sportif IA premium — plans adaptatifs, coach vocal, GPS outdoor, nutrition et gamification.",
     type: "website",
     locale: "fr_FR",
     url: "/",
-    siteName: "CoachMe",
+    siteName: "Coachmii-fit",
   },
-  twitter: { card: "summary_large_image", title: "CoachMe" },
+  twitter: { card: "summary_large_image", title: "Coachmii-fit" },
   manifest: "/manifest.webmanifest",
   icons: { icon: "/favicon.svg" },
 };

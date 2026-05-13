@@ -1,4 +1,4 @@
-# CoachMe — Décisions design en attente
+# Coachmii-fit — Décisions design en attente
 
 Document de travail pour aligner direction créative + budget. Chaque ligne est
 non-bloquante : je livre en parallèle tout ce qui ne dépend pas de ces
@@ -29,7 +29,7 @@ Cochez 1 ou 2 (je m'aligne dessus) :
 - [ ] Cal Sans display + Inter texte (gratuit).
 - [ ] Premium : Söhne / Nohemi / Pangea (payant ~300–800 $).
 
-## 4. Logo CoachMe
+## 4. Logo Coachmii-fit
 
 - [ ] Laisse-moi proposer 3 directions (typographique, icône battement
       cardiaque, monogramme "CM").

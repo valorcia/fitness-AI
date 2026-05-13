@@ -9,7 +9,7 @@ export async function demoLogin(): Promise<void> {
     return;
   }
 
-  const email = "demo@coachme.local";
+  const email = "demo@coachmii-fit.local";
   const password = "demo-account-2026";
 
   let user = await prisma.user.findUnique({ where: { email } });

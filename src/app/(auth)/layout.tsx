@@ -7,8 +7,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <header className="container flex h-16 items-center">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/coachme-mark.svg" alt="" className="h-7 w-7" />
-          <span className="font-display text-lg tracking-tight">CoachMe</span>
+          <img src="/coachmii-fit-mark.svg" alt="" className="h-7 w-7" />
+          <span className="font-display text-lg tracking-tight">Coachmii-fit</span>
         </Link>
       </header>
       <main className="container flex min-h-[calc(100vh-4rem)] items-center justify-center py-10">

@@ -5,7 +5,7 @@ export default function TermsPage() {
     <article className="prose prose-invert mx-auto max-w-3xl">
       <h1>Conditions générales d'utilisation</h1>
       <p>
-        En utilisant CoachMe vous acceptez ces conditions. Les programmes générés ne
+        En utilisant Coachmii-fit vous acceptez ces conditions. Les programmes générés ne
         remplacent pas un avis médical.
       </p>
       <h2>Abonnement</h2>

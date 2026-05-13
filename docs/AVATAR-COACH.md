@@ -1,6 +1,6 @@
 # Avatar Coach — Architecture & roadmap
 
-> Le coach est le **cœur** de CoachMe. Voix ultra-réaliste + avatar photoréaliste + personnalité
+> Le coach est le **cœur** de Coachmii-fit. Voix ultra-réaliste + avatar photoréaliste + personnalité
 > cohérente + expertise réelle. Chaque décision technique doit préserver cet objectif.
 
 ---

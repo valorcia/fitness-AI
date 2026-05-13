@@ -52,8 +52,8 @@ export async function AppShell({ children }: { children: ReactNode }) {
           className="flex items-center gap-2 border-b border-border px-5 py-4 text-base font-semibold"
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/coachme-mark.svg" alt="" className="h-8 w-8" />
-          <span className="font-display text-lg tracking-tight">CoachMe</span>
+          <img src="/coachmii-fit-mark.svg" alt="" className="h-8 w-8" />
+          <span className="font-display text-lg tracking-tight">Coachmii-fit</span>
         </Link>
         <nav className="flex-1 space-y-1 p-3 text-sm">
           {NAV.map(({ href, label, icon: Icon }) => (

@@ -7,7 +7,7 @@ export const metadata = { title: "Manuel" };
 const GUIDES = [
   {
     icon: Sparkles,
-    title: "Démarrer avec CoachMe",
+    title: "Démarrer avec Coachmii-fit",
     desc: "Comprendre votre plan personnalisé, votre coach IA et les premières étapes.",
     href: "/exercises",
   },
@@ -45,7 +45,7 @@ export default function ManualPage() {
           <BookOpen className="h-6 w-6" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Manuel CoachMe</h1>
+          <h1 className="text-2xl font-bold">Manuel Coachmii-fit</h1>
           <p className="text-sm text-muted-foreground">Guides, astuces, protocole santé.</p>
         </div>
       </div>

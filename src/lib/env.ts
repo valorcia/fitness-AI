@@ -3,7 +3,7 @@ import { z } from "zod";
 const schema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
   NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
-  NEXT_PUBLIC_APP_NAME: z.string().default("CoachMe"),
+  NEXT_PUBLIC_APP_NAME: z.string().default("Coachmii-fit"),
   DATABASE_URL: z.string().optional(),
   AUTH_SECRET: z.string().optional(),
   STRIPE_SECRET_KEY: z.string().optional(),

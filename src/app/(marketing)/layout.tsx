@@ -10,8 +10,8 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <nav className="container flex h-16 items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-semibold">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/coachme-mark.svg" alt="" className="h-7 w-7" />
-            <span className="font-display text-lg tracking-tight">CoachMe</span>
+            <img src="/coachmii-fit-mark.svg" alt="" className="h-7 w-7" />
+            <span className="font-display text-lg tracking-tight">Coachmii-fit</span>
           </Link>
           <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
             <Link href="/#features" className="hover:text-foreground">Fonctionnalités</Link>
@@ -34,7 +34,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
         <div className="container flex flex-col items-start justify-between gap-6 text-sm text-muted-foreground md:flex-row">
           <div>
             <div className="mb-2 flex items-center gap-2 font-semibold text-foreground">
-              <Dumbbell className="h-4 w-4 text-primary" /> CoachMe
+              <Dumbbell className="h-4 w-4 text-primary" /> Coachmii-fit
             </div>
             <p className="max-w-sm">
               Le coach sportif intelligent pour votre performance, votre santé et votre plaisir du mouvement.
@@ -45,7 +45,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
             <Link href="/legal/privacy">Confidentialité</Link>
             <Link href="/legal/processors">Sous-traitants</Link>
           </div>
-          <div className="text-xs">© {new Date().getFullYear()} CoachMe. Tous droits réservés.</div>
+          <div className="text-xs">© {new Date().getFullYear()} Coachmii-fit. Tous droits réservés.</div>
         </div>
       </footer>
     </div>

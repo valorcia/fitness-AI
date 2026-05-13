@@ -119,7 +119,7 @@ export function LifestyleStep({ state, update }: Props) {
         <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
         <div>
           <p className="font-semibold">
-            Chaque réponse est importante, confidentielle et utilisée uniquement par CoachMe pour
+            Chaque réponse est importante, confidentielle et utilisée uniquement par Coachmii-fit pour
             adapter votre coaching.
           </p>
           <p className="mt-1 opacity-80">

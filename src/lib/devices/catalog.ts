@@ -126,7 +126,7 @@ export const DEVICE_CATALOG: DeviceProviderMeta[] = [
     provider: "MANUAL",
     label: "Saisie manuelle",
     tagline: "Poids, sommeil, pas — toujours disponible.",
-    logo: "/coachme-mark.svg",
+    logo: "/coachmii-fit-mark.svg",
     color: "#14B8A6",
     capabilities: ["weight", "sleep", "steps", "blood_pressure"],
     integrationMode: "manual",

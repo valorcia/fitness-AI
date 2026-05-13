@@ -1,4 +1,4 @@
-# Prompt Stitch — CoachMe
+# Prompt Stitch — Coachmii-fit
 
 Copier-coller dans [Stitch](https://stitch.withgoogle.com/). Inspiré des captures
 "Entraînements / Tableau de bord / Calendrier" de l'app de référence, avec un
@@ -8,7 +8,7 @@ angle **coaching IA premium** beaucoup plus affirmé que les apps concurrentes.
 
 ## Prompt maître
 
-> **Design a premium AI personal coaching app called "CoachMe"** (mobile-first,
+> **Design a premium AI personal coaching app called "Coachmii-fit"** (mobile-first,
 > iOS and Android + responsive web).
 >
 > ## Brand
@@ -119,7 +119,7 @@ angle **coaching IA premium** beaucoup plus affirmé que les apps concurrentes.
 >   comment counters.
 >
 > ## Manuel (onglet bas)
-> - Cartes guides : démarrer CoachMe, bien utiliser les machines, traçabilité
+> - Cartes guides : démarrer Coachmii-fit, bien utiliser les machines, traçabilité
 >   calories, outdoor, sécurité & urgence.
 >
 > ## Plus

@@ -1,4 +1,4 @@
-# CoachMe — Guide de démarrage (budget mini)
+# Coachmii-fit — Guide de démarrage (budget mini)
 
 Trois intégrations suffisent pour que l'app respire en production : **base de
 données** (Neon), **voix premium** (ElevenLabs), **vidéos d'exercice** (Pexels).
@@ -7,7 +7,7 @@ Total récurrent : ~22 $ / mois.
 ## 1. Base de données — Neon (gratuit)
 
 1. <https://neon.tech> → Sign up (GitHub).
-2. Create project « coachme » → region `Europe (Frankfurt)` ou `Paris`.
+2. Create project « coachmii-fit » → region `Europe (Frankfurt)` ou `Paris`.
 3. Connection Details → **Pooled connection** = `DATABASE_URL`.
 4. **Direct connection** (sans `-pooler` dans l'URL) = `DIRECT_URL`.
    **Très important** : Prisma `db push` utilise `DIRECT_URL` ; sans cette

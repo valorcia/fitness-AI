@@ -20,7 +20,7 @@ export default async function RegisterPage() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle className="text-2xl">Rejoignez CoachMe.</CardTitle>
+        <CardTitle className="text-2xl">Rejoignez Coachmii-fit.</CardTitle>
         <CardDescription>Essai gratuit, sans carte bancaire.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">

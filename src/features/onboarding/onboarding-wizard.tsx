@@ -775,7 +775,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                 <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground">
                   <p className="mb-2 font-semibold text-foreground">Avertissement médical important</p>
                   <p>
-                    CoachMe ne remplace ni un avis, ni un suivi médical. Les recommandations fournies
+                    Coachmii-fit ne remplace ni un avis, ni un suivi médical. Les recommandations fournies
                     s'appuient sur vos déclarations et ne constituent pas un diagnostic. En cas de
                     douleur aiguë, d'étourdissements ou de symptômes inhabituels : arrêtez l'activité
                     et consultez un professionnel de santé. Les numéros d'urgence sont le 15 (SAMU) ou
@@ -791,7 +791,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                 <div className="flex items-center gap-3">
                   <Checkbox id="c-data" checked={state.consentHealthData} onCheckedChange={(c) => update("consentHealthData", c === true)} />
                   <Label htmlFor="c-data">
-                    J'autorise CoachMe à traiter mes données santé pour personnaliser mon coaching.
+                    J'autorise Coachmii-fit à traiter mes données santé pour personnaliser mon coaching.
                   </Label>
                 </div>
                 {hasHighRiskMedical && (
