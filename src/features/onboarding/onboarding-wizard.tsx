@@ -371,6 +371,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                     <Input type="number" step="0.1" value={state.weightKg} onChange={(e) => update("weightKg", Number(e.target.value))} />
                   </div>
                 </div>
+                <BmiCard heightCm={state.heightCm} weightKg={state.weightKg} />
                 <div>
                   <Label>Niveau sportif</Label>
                   <div className="mt-1 grid grid-cols-2 gap-2">
@@ -829,5 +830,113 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+type BmiCategory = {
+  label: string;
+  hint: string;
+  tone: "ok" | "warn" | "alert";
+  /** range in BMI value, used to position the marker on the strip */
+  min: number;
+  max: number;
+};
+
+const BMI_RANGES: BmiCategory[] = [
+  { label: "Insuffisance sévère", hint: "Risque de carences — consultez un professionnel.", tone: "alert", min: 0, max: 16.5 },
+  { label: "Insuffisance pondérale", hint: "Légèrement en dessous — un suivi nutritionnel peut aider.", tone: "warn", min: 16.5, max: 18.5 },
+  { label: "Corpulence normale", hint: "Zone recommandée par l'OMS — continuez comme ça.", tone: "ok", min: 18.5, max: 25 },
+  { label: "Surpoids", hint: "Modéré — l'activité régulière fera la différence.", tone: "warn", min: 25, max: 30 },
+  { label: "Obésité modérée", hint: "Un accompagnement médical est recommandé.", tone: "alert", min: 30, max: 35 },
+  { label: "Obésité sévère", hint: "Consultez un professionnel de santé avant tout effort intense.", tone: "alert", min: 35, max: 100 },
+];
+
+const TONE_STYLES: Record<BmiCategory["tone"], { bg: string; text: string; ring: string; badge: string }> = {
+  ok: {
+    bg: "bg-emerald-50 dark:bg-emerald-500/10",
+    text: "text-emerald-700 dark:text-emerald-300",
+    ring: "ring-emerald-400/50",
+    badge: "bg-emerald-500 text-white",
+  },
+  warn: {
+    bg: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-700 dark:text-amber-300",
+    ring: "ring-amber-400/60",
+    badge: "bg-amber-500 text-white",
+  },
+  alert: {
+    bg: "bg-rose-50 dark:bg-rose-500/10",
+    text: "text-rose-700 dark:text-rose-300",
+    ring: "ring-rose-400/60",
+    badge: "bg-rose-500 text-white",
+  },
+};
+
+function classifyBmi(bmi: number): BmiCategory {
+  return (
+    BMI_RANGES.find((r) => bmi >= r.min && bmi < r.max) ??
+    BMI_RANGES[BMI_RANGES.length - 1]!
+  );
+}
+
+function BmiCard({ heightCm, weightKg }: { heightCm: number; weightKg: number }) {
+  if (!heightCm || !weightKg || heightCm < 80 || weightKg < 25) {
+    return null;
+  }
+  const bmi = weightKg / Math.pow(heightCm / 100, 2);
+  const rounded = Math.round(bmi * 10) / 10;
+  const cat = classifyBmi(bmi);
+  const tone = TONE_STYLES[cat.tone];
+  // marker position 12 → 40 BMI range on the strip
+  const minScale = 14;
+  const maxScale = 38;
+  const pct = Math.max(0, Math.min(100, ((bmi - minScale) / (maxScale - minScale)) * 100));
+
+  return (
+    <div className={cn("rounded-2xl border p-4 ring-1", tone.bg, tone.ring)}>
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-wide text-muted-foreground">
+            IMC (indice de masse corporelle)
+          </div>
+          <div className={cn("mt-1 flex items-baseline gap-2 text-3xl font-bold", tone.text)}>
+            {rounded.toFixed(1)}
+            <span className="text-xs font-medium uppercase tracking-wide">
+              kg/m²
+            </span>
+          </div>
+        </div>
+        <span
+          className={cn(
+            "rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide",
+            tone.badge,
+          )}
+        >
+          {cat.label}
+        </span>
+      </div>
+
+      <div className="mt-3">
+        <div className="relative h-2 w-full overflow-hidden rounded-full bg-gradient-to-r from-rose-400 via-amber-400 via-emerald-400 via-amber-400 to-rose-500">
+          <div
+            className="absolute top-1/2 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-foreground shadow"
+            style={{ left: `${pct}%` }}
+            aria-hidden
+          />
+        </div>
+        <div className="mt-1 flex justify-between text-[10px] text-muted-foreground">
+          <span>16</span>
+          <span>18.5</span>
+          <span>25</span>
+          <span>30</span>
+          <span>35+</span>
+        </div>
+      </div>
+
+      <p className={cn("mt-3 text-xs", tone.text)}>{cat.hint}</p>
+      <p className="mt-1 text-[11px] italic text-muted-foreground">
+        L'IMC est une indication générale et ne remplace pas un avis médical.
+      </p>
+    </div>
   );
 }
