@@ -17,7 +17,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { AVATAR_CATALOG } from "@/features/coach/coach-avatar";
 import { LifestyleStep } from "./lifestyle-step";
 import { EquipmentStep } from "./equipment-step";
 
@@ -737,32 +736,6 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                 <div>
                   <Label>Nom de votre coach</Label>
                   <Input value={state.coachName} onChange={(e) => update("coachName", e.target.value)} maxLength={30} />
-                </div>
-                <div>
-                  <Label>Choisissez un avatar</Label>
-                  <div className="mt-2 grid grid-cols-5 gap-2">
-                    {AVATAR_CATALOG.map((a) => (
-                      <button
-                        key={a.key}
-                        type="button"
-                        onClick={() => update("coachAvatar", a.key)}
-                        className={cn(
-                          "flex flex-col items-center gap-1 rounded-xl border p-2 transition",
-                          state.coachAvatar === a.key
-                            ? "border-primary bg-primary/10"
-                            : "border-border hover:border-primary/50",
-                        )}
-                      >
-                        <div
-                          className="flex h-10 w-10 items-center justify-center rounded-full text-lg"
-                          style={{ background: `linear-gradient(135deg, ${a.from}, ${a.to})` }}
-                        >
-                          {a.emoji}
-                        </div>
-                        <span className="text-[10px]">{a.label}</span>
-                      </button>
-                    ))}
-                  </div>
                 </div>
                 <div>
                   <Label>Personnalité du coach</Label>
