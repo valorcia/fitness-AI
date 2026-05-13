@@ -8,7 +8,8 @@
 const PHOTO = (id: string) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=600&h=400&q=70`;
 
-// Proven photo IDs (verified working — used elsewhere in the app)
+// Photo IDs verified to load (seen in user screenshots / used elsewhere
+// in seed / dashboard / plan page).
 const IMG = {
   barbellFloor: PHOTO("1581009146145-b5ef050c2e1e"),
   dumbbellPair: PHOTO("1583454110551-21f2fa2afe61"),
@@ -26,9 +27,6 @@ const IMG = {
   athlete: PHOTO("1532029837206-abbe2b7620e3"),
   hackSquat: PHOTO("1579758629938-03607ccdbaba"),
   inclineGym: PHOTO("1594737625785-a6cbdabd333c"),
-  climber: PHOTO("1522163182402-834f871fd851"),
-  gymRed: PHOTO("1605296867304-46d5465a13f1"),
-  recovery: PHOTO("1506629905607-ac3d75c40ffa"),
 };
 
 export type EquipmentMeta = {
@@ -86,11 +84,11 @@ export const EQUIPMENT_META: Record<string, EquipmentMeta> = {
     hint: "Barre fixée porte ou mur pour tractions et hanging.",
   },
   "dip bars": {
-    imageUrl: IMG.gymRed,
+    imageUrl: IMG.gymWalk,
     hint: "Barres parallèles pour dips et L-sits.",
   },
   fingerboard: {
-    imageUrl: IMG.climber,
+    imageUrl: IMG.athlete,
     hint: "Poutre d'entraînement des doigts pour grimpeurs.",
   },
   "ab wheel": {
@@ -118,11 +116,11 @@ export const EQUIPMENT_META: Record<string, EquipmentMeta> = {
     hint: "Cardio explosif, échauffement, coordination.",
   },
   "punching bag": {
-    imageUrl: IMG.gymRed,
+    imageUrl: IMG.gymWalk,
     hint: "Boxe, kick-boxing, MMA.",
   },
   "boxing gloves": {
-    imageUrl: IMG.recovery,
+    imageUrl: IMG.hackSquat,
     hint: "Protègent vos mains au sac ou en sparring.",
   },
   treadmill: {
@@ -130,7 +128,7 @@ export const EQUIPMENT_META: Record<string, EquipmentMeta> = {
     hint: "Course indoor avec contrôle d'allure et d'inclinaison.",
   },
   bike: {
-    imageUrl: IMG.gymRed,
+    imageUrl: IMG.inclineGym,
     hint: "Route, VTT, vélo d'appartement ou spinning.",
   },
   rower: {
@@ -158,7 +156,7 @@ export const EQUIPMENT_META: Record<string, EquipmentMeta> = {
     hint: "Football, basket, hand…",
   },
   "shin guards": {
-    imageUrl: IMG.gymRed,
+    imageUrl: IMG.hackSquat,
     hint: "Protection des tibias pour combat / sports collectifs.",
   },
 };
