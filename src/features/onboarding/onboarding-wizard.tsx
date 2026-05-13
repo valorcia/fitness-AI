@@ -806,6 +806,8 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                       v: import("./coach-appearance-step").CoachAppearanceState[K],
                     ) => void
                   }
+                  persona={state.coachPersona}
+                  coachName={state.coachName}
                 />
               </>
             )}

@@ -19,6 +19,7 @@ const nextConfig = {
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "api.iconify.design" },
+      { protocol: "https", hostname: "api.dicebear.com" },
     ],
   },
   async rewrites() {

@@ -22,6 +22,7 @@ import {
   SKIN_TONE_OPTIONS,
   type Option,
 } from "@/lib/onboarding/coach-appearance";
+import { CoachAvatarPreview } from "./coach-avatar-preview";
 
 export type CoachAppearanceState = {
   coachPreferredGender: string;
@@ -41,26 +42,31 @@ export type CoachAppearanceState = {
   coachOutfitStyle: string;
 };
 
+type Persona = "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
+
 type Props = {
   state: CoachAppearanceState;
   update: <K extends keyof CoachAppearanceState>(k: K, v: CoachAppearanceState[K]) => void;
+  persona: Persona;
+  coachName: string;
 };
 
-export function CoachAppearanceStep({ state, update }: Props) {
+export function CoachAppearanceStep({ state, update, persona, coachName }: Props) {
   return (
-    <div className="grid gap-5">
-      <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
-        <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        <div>
-          <p className="font-semibold">
-            Composez l'apparence physique de votre coach.
-          </p>
-          <p className="mt-1 opacity-80">
-            Un visage photoréaliste IA sera généré sur la base de vos critères. Indifférent =
-            l'IA choisit pour vous.
-          </p>
+    <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
+      <div className="grid gap-5">
+        <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
+          <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          <div>
+            <p className="font-semibold">
+              Composez l'apparence physique de votre coach.
+            </p>
+            <p className="mt-1 opacity-80">
+              Un visage photoréaliste IA sera généré sur la base de vos critères. Indifférent =
+              l'IA choisit pour vous.
+            </p>
+          </div>
         </div>
-      </div>
 
       <Section title="Identité" emoji="🪪">
         <Picker
@@ -170,6 +176,15 @@ export function CoachAppearanceStep({ state, update }: Props) {
           onChange={(v) => update("coachOutfitStyle", v)}
         />
       </Section>
+      </div>
+
+      <aside className="order-first lg:order-last">
+        <CoachAvatarPreview
+          appearance={state}
+          persona={persona}
+          coachName={coachName}
+        />
+      </aside>
     </div>
   );
 }
