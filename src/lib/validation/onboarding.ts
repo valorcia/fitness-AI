@@ -117,7 +117,8 @@ export const onboardingSchema = z
   coachPreferredNose: z.string().max(30).optional(),
   coachPreferredBodyHeight: z.string().max(30).optional(),
   coachPreferredBodyShape: z.string().max(30).optional(),
-  coachOutfitType: z.string().max(30).optional(),
+  coachOutfitTop: z.string().max(30).optional(),
+  coachOutfitBottom: z.string().max(30).optional(),
   coachOutfitColor: z.string().max(30).optional(),
   coachOutfitStyle: z.string().max(30).optional(),
 

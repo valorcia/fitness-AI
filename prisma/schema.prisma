@@ -372,9 +372,11 @@ model Preference {
   coachPreferredBodyHeight String? // any | short | average | tall
   coachPreferredBodyShape String?  // any | slim | athletic | muscular | curvy | stocky
   // Tenue sportive du coach
-  coachOutfitType   String?        // any | tank | tee | hoodie | crop | longsleeve | jacket | tracksuit
-  coachOutfitColor  String?        // any | black | white | grey | navy | red | teal | yellow | pink | purple
+  coachOutfitTop    String?        // any | tank | tee | crop | longsleeve | hoodie | jacket | sweatshirt | polo | zip
+  coachOutfitBottom String?        // any | shorts | leggings | jogger | cycling | capri | track-pants | skort
+  coachOutfitColor  String?        // any | black | white | grey | navy | red | teal | yellow | pink | purple | orange | green
   coachOutfitStyle  String?        // any | minimal | streetwear | premium | bold | vintage | technical
+  coachOutfitType   String?        // legacy field, kept for backward compatibility
   voiceEnabled    Boolean       @default(true)
   voiceId         String?
   notifications   Json          @default("{}")

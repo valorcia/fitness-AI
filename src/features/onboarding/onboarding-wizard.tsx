@@ -103,7 +103,8 @@ type State = {
   coachPreferredNose: string;
   coachPreferredBodyHeight: string;
   coachPreferredBodyShape: string;
-  coachOutfitType: string;
+  coachOutfitTop: string;
+  coachOutfitBottom: string;
   coachOutfitColor: string;
   coachOutfitStyle: string;
   consentHealthData: boolean;
@@ -261,7 +262,8 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     coachPreferredNose: "any",
     coachPreferredBodyHeight: "any",
     coachPreferredBodyShape: "any",
-    coachOutfitType: "any",
+    coachOutfitTop: "any",
+    coachOutfitBottom: "any",
     coachOutfitColor: "any",
     coachOutfitStyle: "any",
     consentHealthData: false,

@@ -135,15 +135,28 @@ export const BODY_SHAPE_OPTIONS: Option<string>[] = [
 ];
 
 // ─── Tenue sportive ───────────────────────────────────────────
-export const OUTFIT_TYPE_OPTIONS: Option<string>[] = [
+export const OUTFIT_TOP_OPTIONS: Option<string>[] = [
   ANY,
   { value: "tank", label: "Débardeur", emoji: "🎽" },
   { value: "tee", label: "T-shirt sport", emoji: "👕" },
+  { value: "polo", label: "Polo", emoji: "🥻" },
   { value: "crop", label: "Brassière / crop", emoji: "🩱" },
-  { value: "longsleeve", label: "Manches longues", emoji: "🧥" },
-  { value: "hoodie", label: "Hoodie", emoji: "🧶" },
-  { value: "jacket", label: "Veste technique", emoji: "🧥" },
-  { value: "tracksuit", label: "Survêtement", emoji: "🩳" },
+  { value: "longsleeve", label: "Manches longues", emoji: "👔" },
+  { value: "sweatshirt", label: "Sweat / pull", emoji: "🧶" },
+  { value: "hoodie", label: "Hoodie à capuche", emoji: "🧥" },
+  { value: "zip", label: "Veste zippée", emoji: "🦺" },
+  { value: "jacket", label: "Veste technique / coupe-vent", emoji: "🧥" },
+];
+
+export const OUTFIT_BOTTOM_OPTIONS: Option<string>[] = [
+  ANY,
+  { value: "shorts", label: "Short", emoji: "🩳" },
+  { value: "cycling", label: "Cuissard", emoji: "🚴" },
+  { value: "leggings", label: "Legging", emoji: "🧘" },
+  { value: "capri", label: "Pantacourt", emoji: "🦵" },
+  { value: "jogger", label: "Jogger", emoji: "🏃" },
+  { value: "track-pants", label: "Pantalon de survêtement", emoji: "🧦" },
+  { value: "skort", label: "Skort / jupe-short", emoji: "🩰" },
 ];
 
 export const OUTFIT_COLOR_OPTIONS: Option<string>[] = [
@@ -153,7 +166,9 @@ export const OUTFIT_COLOR_OPTIONS: Option<string>[] = [
   { value: "grey", label: "Gris", swatch: "#9CA3AF" },
   { value: "navy", label: "Bleu marine", swatch: "#1B3954" },
   { value: "teal", label: "Teal", swatch: "#14B8A6" },
+  { value: "green", label: "Vert", swatch: "#16A34A" },
   { value: "red", label: "Rouge", swatch: "#DC2626" },
+  { value: "orange", label: "Orange", swatch: "#F97316" },
   { value: "yellow", label: "Jaune", swatch: "#F59E0B" },
   { value: "pink", label: "Rose", swatch: "#EC4899" },
   { value: "purple", label: "Violet", swatch: "#8B5CF6" },
@@ -182,9 +197,11 @@ export type CoachAppearance = {
   coachPreferredNose?: string;
   coachPreferredBodyHeight?: string;
   coachPreferredBodyShape?: string;
-  coachOutfitType?: string;
+  coachOutfitTop?: string;
+  coachOutfitBottom?: string;
   coachOutfitColor?: string;
   coachOutfitStyle?: string;
+  coachOutfitType?: string; // legacy
 };
 
 export const COACH_APPEARANCE_DEFAULT: CoachAppearance = {
@@ -200,7 +217,8 @@ export const COACH_APPEARANCE_DEFAULT: CoachAppearance = {
   coachPreferredNose: "any",
   coachPreferredBodyHeight: "any",
   coachPreferredBodyShape: "any",
-  coachOutfitType: "any",
+  coachOutfitTop: "any",
+  coachOutfitBottom: "any",
   coachOutfitColor: "any",
   coachOutfitStyle: "any",
 };

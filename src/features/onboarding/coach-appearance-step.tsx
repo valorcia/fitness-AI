@@ -16,9 +16,10 @@ import {
   HAIR_STYLE_OPTIONS,
   MOUTH_OPTIONS,
   NOSE_OPTIONS,
+  OUTFIT_BOTTOM_OPTIONS,
   OUTFIT_COLOR_OPTIONS,
   OUTFIT_STYLE_OPTIONS,
-  OUTFIT_TYPE_OPTIONS,
+  OUTFIT_TOP_OPTIONS,
   SKIN_TONE_OPTIONS,
   type Option,
 } from "@/lib/onboarding/coach-appearance";
@@ -37,7 +38,8 @@ export type CoachAppearanceState = {
   coachPreferredNose: string;
   coachPreferredBodyHeight: string;
   coachPreferredBodyShape: string;
-  coachOutfitType: string;
+  coachOutfitTop: string;
+  coachOutfitBottom: string;
   coachOutfitColor: string;
   coachOutfitStyle: string;
 };
@@ -53,8 +55,8 @@ type Props = {
 
 export function CoachAppearanceStep({ state, update, persona, coachName }: Props) {
   return (
-    <div className="grid gap-5 lg:grid-cols-[1fr_300px]">
-      <div className="grid gap-5">
+    <div className="relative grid gap-5 lg:grid-cols-[1fr_320px]">
+      <div className="grid gap-5 lg:pr-2">
         <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
           <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <div>
@@ -63,7 +65,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
             </p>
             <p className="mt-1 opacity-80">
               Un visage photoréaliste IA sera généré sur la base de vos critères. Indifférent =
-              l'IA choisit pour vous.
+              l'IA choisit pour vous. Le rendu se met à jour à chaque modification.
             </p>
           </div>
         </div>
@@ -157,10 +159,16 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
 
       <Section title="Tenue sportive" emoji="👕">
         <Picker
-          label="Type de vêtement"
-          options={OUTFIT_TYPE_OPTIONS}
-          value={state.coachOutfitType}
-          onChange={(v) => update("coachOutfitType", v)}
+          label="Haut"
+          options={OUTFIT_TOP_OPTIONS}
+          value={state.coachOutfitTop}
+          onChange={(v) => update("coachOutfitTop", v)}
+        />
+        <Picker
+          label="Bas"
+          options={OUTFIT_BOTTOM_OPTIONS}
+          value={state.coachOutfitBottom}
+          onChange={(v) => update("coachOutfitBottom", v)}
         />
         <Picker
           label="Couleur dominante"
@@ -170,7 +178,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           variant="swatch"
         />
         <Picker
-          label="Style"
+          label="Style général"
           options={OUTFIT_STYLE_OPTIONS}
           value={state.coachOutfitStyle}
           onChange={(v) => update("coachOutfitStyle", v)}
@@ -178,13 +186,22 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       </div>
 
-      <aside className="order-first lg:order-last">
-        <CoachAvatarPreview
-          appearance={state}
-          persona={persona}
-          coachName={coachName}
-        />
+      {/* Desktop: sticky right column. Mobile: fixed floating bottom-right. */}
+      <aside className="hidden lg:block">
+        <div className="sticky top-4">
+          <CoachAvatarPreview appearance={state} persona={persona} coachName={coachName} />
+        </div>
       </aside>
+      <div className="pointer-events-none fixed bottom-20 right-3 z-30 w-[150px] sm:w-[180px] lg:hidden">
+        <div className="pointer-events-auto">
+          <CoachAvatarPreview
+            appearance={state}
+            persona={persona}
+            coachName={coachName}
+            className="!p-2 !rounded-2xl"
+          />
+        </div>
+      </div>
     </div>
   );
 }

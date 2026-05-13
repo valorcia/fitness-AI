@@ -124,7 +124,8 @@ export async function POST(req: Request) {
         coachPreferredNose: data.coachPreferredNose,
         coachPreferredBodyHeight: data.coachPreferredBodyHeight,
         coachPreferredBodyShape: data.coachPreferredBodyShape,
-        coachOutfitType: data.coachOutfitType,
+        coachOutfitTop: data.coachOutfitTop,
+        coachOutfitBottom: data.coachOutfitBottom,
         coachOutfitColor: data.coachOutfitColor,
         coachOutfitStyle: data.coachOutfitStyle,
       };
