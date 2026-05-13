@@ -129,11 +129,36 @@ const LEVELS = [
 ] as const;
 
 const PERSONAS = [
-  { value: "FUN", label: "Fun", emoji: "😄" },
-  { value: "STRICT", label: "Strict", emoji: "🎯" },
-  { value: "ZEN", label: "Zen", emoji: "🧘" },
-  { value: "MILITARY", label: "Militaire", emoji: "🎖️" },
-  { value: "ELITE", label: "Elite", emoji: "🏆" },
+  {
+    value: "FUN",
+    label: "Bienveillant",
+    emoji: "🤗",
+    desc: "Chaleureux et encourageant — célèbre chaque progrès.",
+  },
+  {
+    value: "STRICT",
+    label: "Exigeant",
+    emoji: "🎯",
+    desc: "Direct et sans concession — discipline et résultats.",
+  },
+  {
+    value: "ZEN",
+    label: "Apaisant",
+    emoji: "🧘",
+    desc: "Posé et inspirant — souffle, posture, régularité.",
+  },
+  {
+    value: "MILITARY",
+    label: "Coach militaire",
+    emoji: "🎖️",
+    desc: "Cadence ferme et précise — efficacité avant tout.",
+  },
+  {
+    value: "ELITE",
+    label: "Mentor expert",
+    emoji: "🏆",
+    desc: "Approche scientifique — données, RPE, périodisation.",
+  },
 ] as const;
 
 const MEDICAL_FLAGS: Array<{ key: keyof State; label: string; warn?: boolean }> = [
@@ -741,21 +766,29 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                 </div>
                 <div>
                   <Label>Personnalité du coach</Label>
-                  <div className="mt-2 grid grid-cols-2 gap-2 md:grid-cols-5">
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Le ton avec lequel votre coach va vous parler au quotidien.
+                  </p>
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {PERSONAS.map((p) => (
                       <button
                         key={p.value}
                         type="button"
                         onClick={() => update("coachPersona", p.value)}
                         className={cn(
-                          "rounded-xl border p-3 text-sm font-medium transition",
+                          "flex flex-col items-start gap-1 rounded-xl border p-3 text-left transition",
                           state.coachPersona === p.value
-                            ? "border-primary bg-primary/10 text-primary"
+                            ? "border-primary bg-primary/10"
                             : "border-border hover:border-primary/50",
                         )}
                       >
-                        <div className="text-lg">{p.emoji}</div>
-                        {p.label}
+                        <span className="flex items-center gap-2 text-sm font-semibold">
+                          <span className="text-xl">{p.emoji}</span>
+                          {p.label}
+                        </span>
+                        <span className="text-xs leading-snug text-muted-foreground">
+                          {p.desc}
+                        </span>
                       </button>
                     ))}
                   </div>
