@@ -19,6 +19,7 @@ import {
 import { cn } from "@/lib/utils";
 import { LifestyleStep } from "./lifestyle-step";
 import { EquipmentStep } from "./equipment-step";
+import { CoachAppearanceStep } from "./coach-appearance-step";
 
 type Goal = "WEIGHT_LOSS" | "MUSCLE_GAIN" | "ENDURANCE" | "FITNESS" | "HEALTH";
 type State = {
@@ -90,6 +91,21 @@ type State = {
   coachPersona: "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
   coachName: string;
   coachAvatar: string;
+  coachPreferredGender: string;
+  coachPreferredEthnicity: string;
+  coachPreferredHairColor: string;
+  coachPreferredHairStyle: string;
+  coachPreferredFaceShape: string;
+  coachPreferredEyeColor: string;
+  coachPreferredEyeShape: string;
+  coachPreferredSkinTone: string;
+  coachPreferredMouth: string;
+  coachPreferredNose: string;
+  coachPreferredBodyHeight: string;
+  coachPreferredBodyShape: string;
+  coachOutfitType: string;
+  coachOutfitColor: string;
+  coachOutfitStyle: string;
   consentHealthData: boolean;
   consentMedicalDisclaimer: boolean;
   consentDoctorCleared: boolean;
@@ -233,6 +249,21 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     coachPersona: "FUN",
     coachName: "Pulse",
     coachAvatar: "default",
+    coachPreferredGender: "any",
+    coachPreferredEthnicity: "any",
+    coachPreferredHairColor: "any",
+    coachPreferredHairStyle: "any",
+    coachPreferredFaceShape: "any",
+    coachPreferredEyeColor: "any",
+    coachPreferredEyeShape: "any",
+    coachPreferredSkinTone: "any",
+    coachPreferredMouth: "any",
+    coachPreferredNose: "any",
+    coachPreferredBodyHeight: "any",
+    coachPreferredBodyShape: "any",
+    coachOutfitType: "any",
+    coachOutfitColor: "any",
+    coachOutfitStyle: "any",
     consentHealthData: false,
     consentMedicalDisclaimer: false,
     consentDoctorCleared: false,
@@ -767,6 +798,15 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                     ))}
                   </div>
                 </div>
+                <CoachAppearanceStep
+                  state={state}
+                  update={
+                    update as <K extends keyof import("./coach-appearance-step").CoachAppearanceState>(
+                      k: K,
+                      v: import("./coach-appearance-step").CoachAppearanceState[K],
+                    ) => void
+                  }
+                />
               </>
             )}
 

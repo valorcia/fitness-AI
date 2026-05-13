@@ -108,19 +108,30 @@ export async function POST(req: Request) {
         create: { userId, ...healthData },
       });
 
+      const coachPrefs = {
+        coachPersona: data.coachPersona,
+        coachName: data.coachName,
+        coachAvatar: data.coachAvatar,
+        coachPreferredGender: data.coachPreferredGender,
+        coachPreferredEthnicity: data.coachPreferredEthnicity,
+        coachPreferredHairColor: data.coachPreferredHairColor,
+        coachPreferredHairStyle: data.coachPreferredHairStyle,
+        coachPreferredFaceShape: data.coachPreferredFaceShape,
+        coachPreferredEyeColor: data.coachPreferredEyeColor,
+        coachPreferredEyeShape: data.coachPreferredEyeShape,
+        coachPreferredSkinTone: data.coachPreferredSkinTone,
+        coachPreferredMouth: data.coachPreferredMouth,
+        coachPreferredNose: data.coachPreferredNose,
+        coachPreferredBodyHeight: data.coachPreferredBodyHeight,
+        coachPreferredBodyShape: data.coachPreferredBodyShape,
+        coachOutfitType: data.coachOutfitType,
+        coachOutfitColor: data.coachOutfitColor,
+        coachOutfitStyle: data.coachOutfitStyle,
+      };
       await tx.preference.upsert({
         where: { userId },
-        update: {
-          coachPersona: data.coachPersona,
-          coachName: data.coachName,
-          coachAvatar: data.coachAvatar,
-        },
-        create: {
-          userId,
-          coachPersona: data.coachPersona,
-          coachName: data.coachName,
-          coachAvatar: data.coachAvatar,
-        },
+        update: coachPrefs,
+        create: { userId, ...coachPrefs },
       });
 
       await tx.consent.createMany({

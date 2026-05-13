@@ -104,6 +104,23 @@ export const onboardingSchema = z
   coachName: z.string().min(1).max(30).default("Pulse"),
   coachAvatar: z.string().min(1).max(30).default("default"),
 
+  // Coach appearance (sent as plain strings — catalog enforced client-side)
+  coachPreferredGender: z.string().max(30).optional(),
+  coachPreferredEthnicity: z.string().max(30).optional(),
+  coachPreferredHairColor: z.string().max(30).optional(),
+  coachPreferredHairStyle: z.string().max(30).optional(),
+  coachPreferredFaceShape: z.string().max(30).optional(),
+  coachPreferredEyeColor: z.string().max(30).optional(),
+  coachPreferredEyeShape: z.string().max(30).optional(),
+  coachPreferredSkinTone: z.string().max(30).optional(),
+  coachPreferredMouth: z.string().max(30).optional(),
+  coachPreferredNose: z.string().max(30).optional(),
+  coachPreferredBodyHeight: z.string().max(30).optional(),
+  coachPreferredBodyShape: z.string().max(30).optional(),
+  coachOutfitType: z.string().max(30).optional(),
+  coachOutfitColor: z.string().max(30).optional(),
+  coachOutfitStyle: z.string().max(30).optional(),
+
   // Consents
   consentHealthData: z
     .boolean()
