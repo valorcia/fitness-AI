@@ -218,12 +218,13 @@ export function buildCoachPrompt(appearance: CoachAppearance, persona: Persona):
     .join(", ");
 
   const prompt = [
-    `Full-body photorealistic portrait of a ${subject}.`,
+    `Full body photograph of a ${subject}, shown from head to toe, entire figure visible.`,
     features ? `${features}.` : "",
     bodyClause ? `${bodyClause}.` : "",
     outfitClause ? `${outfitClause}${styleClause}.` : "",
-    `${PERSONA_VIBE[persona]}, standing confidently, looking directly at camera.`,
-    "Modern bright gym studio background, soft natural daylight, shallow depth of field, sharp focus on face and full body, hyperrealistic, professional fashion photography, 35mm full body shot, vertical portrait orientation, ultra detailed skin texture, 8k.",
+    `${PERSONA_VIBE[persona]}, standing in a relaxed athletic pose, looking directly at camera.`,
+    "Whole body framing from head to feet, full length view, feet visible at the bottom of the frame, no cropping of the head or feet.",
+    "Modern bright gym studio background with seamless light grey backdrop, soft natural daylight, sharp focus on the entire body, hyperrealistic editorial fitness photography, 35mm wide lens full body shot, tall vertical 9:16 framing, ultra detailed skin texture, 8k.",
   ]
     .filter(Boolean)
     .join(" ");

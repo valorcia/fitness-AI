@@ -23,7 +23,7 @@ import {
   SKIN_TONE_OPTIONS,
   type Option,
 } from "@/lib/onboarding/coach-appearance";
-import { CoachAvatarPreview } from "./coach-avatar-preview";
+import { CoachAvatarPreview, useCoachPreview } from "./coach-avatar-preview";
 
 export type CoachAppearanceState = {
   coachPreferredGender: string;
@@ -54,6 +54,8 @@ type Props = {
 };
 
 export function CoachAppearanceStep({ state, update, persona, coachName }: Props) {
+  const generation = useCoachPreview(state, persona);
+
   return (
     <div className="relative grid gap-5 lg:grid-cols-[1fr_320px]">
       <div className="grid gap-5 lg:pr-2">
@@ -189,7 +191,12 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       {/* Desktop: sticky right column. Mobile: fixed floating bottom-right. */}
       <aside className="hidden lg:block">
         <div className="sticky top-4">
-          <CoachAvatarPreview appearance={state} persona={persona} coachName={coachName} />
+          <CoachAvatarPreview
+            appearance={state}
+            persona={persona}
+            coachName={coachName}
+            generation={generation}
+          />
         </div>
       </aside>
       <div className="pointer-events-none fixed bottom-20 right-3 z-30 w-[150px] sm:w-[180px] lg:hidden">
@@ -198,6 +205,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
             appearance={state}
             persona={persona}
             coachName={coachName}
+            generation={generation}
             className="!p-2 !rounded-2xl"
           />
         </div>

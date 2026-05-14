@@ -73,7 +73,7 @@ export async function POST(req: Request) {
           input: {
             prompt,
             negative_prompt: COACH_NEGATIVE_PROMPT,
-            aspect_ratio: "2:3",
+            aspect_ratio: "9:16",
             num_outputs: 1,
             output_format: "webp",
             output_quality: 85,
