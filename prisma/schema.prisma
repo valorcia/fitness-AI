@@ -356,6 +356,9 @@ model Preference {
   coachPersona    CoachPersona  @default(FUN)
   coachName       String        @default("Pulse")
   coachAvatar     String        @default("default") // legacy avatar key
+  coachAvatarUrl  String?                            // persistent URL of the generated avatar (HeyGen)
+  coachAvatarProvider String?                        // "heygen" | "replicate" | …
+  coachAvatarGeneratedAt DateTime?                   // when the image was produced
   coachProfileSlug String?                           // selected CoachProfile.slug
   coachVoiceMode  String        @default("tts")      // tts | avatar | text
   // ─── Apparence du coach (avatar customisé) ──────────────────

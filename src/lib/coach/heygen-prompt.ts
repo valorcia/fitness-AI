@@ -2,19 +2,47 @@ import type { CoachAppearance } from "@/lib/onboarding/coach-appearance";
 
 type Persona = "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
 
-const GENDER: Record<string, string> = {
-  male: "man",
-  female: "woman",
-  neutral: "androgynous person",
+/**
+ * Maps onboarding choices to the payload expected by HeyGen Photo Avatar API:
+ *   POST https://api.heygen.com/v2/photo_avatar/photo/generate
+ *
+ * The API accepts `gender`, `age`, `ethnicity`, `pose`, `orientation`, `style`
+ * and a free-text `appearance` field. We translate every UI choice into the
+ * narrowest schema field when possible, and stuff the rest into `appearance`.
+ *
+ * Reference: https://docs.heygen.com/reference/photo-avatar-api
+ */
+
+type HeyGenGender = "Man" | "Woman" | "Unspecified";
+type HeyGenAge = "Young Adult" | "Adult" | "Senior";
+type HeyGenEthnicity =
+  | "White"
+  | "Black"
+  | "Asian American"
+  | "East Asian"
+  | "South Asian"
+  | "Southeast Asian"
+  | "Middle Eastern"
+  | "Hispanic"
+  | "Pacific Islander"
+  | "Mixed";
+type HeyGenPose = "half_body" | "close_up" | "full_body";
+type HeyGenOrientation = "square" | "vertical" | "horizontal";
+type HeyGenStyle = "Realistic" | "Pixar" | "Cinematic" | "Vintage" | "Noir" | "Cyberpunk" | "Pop Art";
+
+const GENDER_MAP: Record<string, HeyGenGender> = {
+  male: "Man",
+  female: "Woman",
+  neutral: "Unspecified",
 };
 
-const ETHNICITY: Record<string, string> = {
-  european: "European",
-  african: "Black African",
+const ETHNICITY_MAP: Record<string, HeyGenEthnicity> = {
+  european: "White",
+  african: "Black",
   asian: "East Asian",
-  maghrebi: "Middle Eastern / North African",
-  latino: "Latino",
-  mixed: "mixed-race",
+  maghrebi: "Middle Eastern",
+  latino: "Hispanic",
+  mixed: "Mixed",
 };
 
 const HAIR_COLOR: Record<string, string> = {
@@ -34,8 +62,8 @@ const HAIR_STYLE: Record<string, string> = {
   curly: "curly textured",
   straight: "sleek straight",
   braided: "braided",
-  ponytail: "tied in a high ponytail",
-  bun: "tied in a neat bun",
+  ponytail: "high ponytail",
+  bun: "neat bun",
   shaved: "shaved buzz cut",
 };
 
@@ -49,30 +77,30 @@ const FACE_SHAPE: Record<string, string> = {
 };
 
 const EYE_COLOR: Record<string, string> = {
-  brown: "warm brown",
-  blue: "bright blue",
-  green: "emerald green",
-  hazel: "hazel",
-  grey: "steel grey",
-  black: "dark",
+  brown: "warm brown eyes",
+  blue: "bright blue eyes",
+  green: "emerald green eyes",
+  hazel: "hazel eyes",
+  grey: "steel grey eyes",
+  black: "dark eyes",
 };
 
 const EYE_SHAPE: Record<string, string> = {
-  round: "round",
-  almond: "almond-shaped",
-  hooded: "hooded",
-  monolid: "monolid",
-  downturned: "slightly downturned",
-  upturned: "upturned",
+  round: "round eyes",
+  almond: "almond-shaped eyes",
+  hooded: "hooded eyes",
+  monolid: "monolid eyes",
+  downturned: "slightly downturned eyes",
+  upturned: "upturned eyes",
 };
 
 const SKIN_TONE: Record<string, string> = {
-  fair: "very fair porcelain",
-  light: "light",
-  medium: "medium",
-  tan: "tan",
-  dark: "dark brown",
-  deep: "deep ebony",
+  fair: "very fair porcelain skin",
+  light: "light skin",
+  medium: "medium skin",
+  tan: "tan skin",
+  dark: "dark brown skin",
+  deep: "deep ebony skin",
 };
 
 const MOUTH: Record<string, string> = {
@@ -90,17 +118,17 @@ const NOSE: Record<string, string> = {
 };
 
 const BODY_HEIGHT: Record<string, string> = {
-  short: "short",
+  short: "short stature",
   average: "average height",
-  tall: "tall",
+  tall: "tall stature",
 };
 
 const BODY_SHAPE: Record<string, string> = {
-  slim: "slim lean",
-  athletic: "athletic toned",
-  muscular: "muscular",
-  curvy: "curvy",
-  stocky: "stocky strong",
+  slim: "slim lean build",
+  athletic: "athletic toned build",
+  muscular: "muscular build",
+  curvy: "curvy build",
+  stocky: "stocky strong build",
 };
 
 const OUTFIT_TOP: Record<string, string> = {
@@ -150,8 +178,8 @@ const OUTFIT_STYLE: Record<string, string> = {
 
 const PERSONA_VIBE: Record<Persona, string> = {
   FUN: "warm friendly smile, approachable expression",
-  STRICT: "intense focused gaze, serious expression, confident posture",
-  ZEN: "calm serene expression, peaceful aura",
+  STRICT: "intense focused gaze, serious expression",
+  ZEN: "calm serene expression, peaceful posture",
   MILITARY: "disciplined determined expression, upright posture",
   ELITE: "confident accomplished expression, refined demeanor",
 };
@@ -161,15 +189,30 @@ function pick<T extends string>(value: string | undefined, map: Record<string, T
   return map[value] ?? null;
 }
 
-export type BuiltPrompt = {
-  prompt: string;
+export type HeyGenPhotoRequest = {
+  name: string;
+  age: HeyGenAge;
+  gender: HeyGenGender;
+  ethnicity: HeyGenEthnicity;
+  orientation: HeyGenOrientation;
+  pose: HeyGenPose;
+  style: HeyGenStyle;
+  appearance: string;
+};
+
+export type BuiltHeyGenPrompt = {
+  request: HeyGenPhotoRequest;
   /** Stable signature for caching. */
   signature: string;
 };
 
-export function buildCoachPrompt(appearance: CoachAppearance, persona: Persona): BuiltPrompt {
-  const gender = pick(appearance.coachPreferredGender, GENDER) ?? "person";
-  const ethnicity = pick(appearance.coachPreferredEthnicity, ETHNICITY);
+export function buildHeyGenPhotoRequest(
+  appearance: CoachAppearance,
+  persona: Persona,
+  coachName: string,
+): BuiltHeyGenPrompt {
+  const gender = pick(appearance.coachPreferredGender, GENDER_MAP) ?? "Unspecified";
+  const ethnicity = pick(appearance.coachPreferredEthnicity, ETHNICITY_MAP) ?? "Mixed";
   const hairColor = pick(appearance.coachPreferredHairColor, HAIR_COLOR);
   const hairStyle = pick(appearance.coachPreferredHairStyle, HAIR_STYLE);
   const faceShape = pick(appearance.coachPreferredFaceShape, FACE_SHAPE);
@@ -185,49 +228,40 @@ export function buildCoachPrompt(appearance: CoachAppearance, persona: Persona):
   const color = pick(appearance.coachOutfitColor, OUTFIT_COLOR);
   const style = pick(appearance.coachOutfitStyle, OUTFIT_STYLE);
 
-  // Hair clause
   const hair = [hairColor, hairStyle].filter(Boolean).join(" ");
   const hairClause = hair ? `${hair} hair` : null;
+  const bodyClause = [bodyHeight, bodyShape].filter(Boolean).join(", ") || null;
 
-  // Eye clause
-  const eyes = [eyeColor, eyeShape].filter(Boolean).join(" ");
-  const eyesClause = eyes ? `${eyes} eyes` : null;
-
-  // Body clause
-  const body = [bodyHeight, bodyShape].filter(Boolean).join(" ");
-  const bodyClause = body ? `${body} build` : null;
-
-  // Outfit clause
   const topClause = top ? (color ? `${color} ${top}` : top) : null;
   const bottomClause = bottom ? (color ? `${color} ${bottom}` : bottom) : null;
   const outfitParts = [topClause, bottomClause].filter(Boolean);
   const outfitClause = outfitParts.length > 0 ? `wearing ${outfitParts.join(" and ")}` : null;
   const styleClause = style ? `, ${style} sportswear style` : "";
 
-  const subject = [
-    "professional fitness coach,",
-    ethnicity ? `${ethnicity}` : null,
+  const appearanceParts = [
+    skinTone,
+    hairClause,
+    eyeColor,
+    eyeShape,
+    faceShape,
+    mouth,
+    nose,
+    bodyClause,
+    outfitClause ? `${outfitClause}${styleClause}` : null,
+    PERSONA_VIBE[persona],
+    "professional fitness coach standing in a bright modern gym studio, soft natural daylight, sharp focus on the entire body from head to feet, editorial fitness photography",
+  ].filter(Boolean);
+
+  const request: HeyGenPhotoRequest = {
+    name: coachName || "Coach",
+    age: "Adult",
     gender,
-    "in their late 20s to mid 30s",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  const features = [skinTone ? `${skinTone} skin` : null, hairClause, eyesClause, faceShape, mouth, nose]
-    .filter(Boolean)
-    .join(", ");
-
-  const prompt = [
-    `Full body photograph of a ${subject}, shown from head to toe, entire figure visible.`,
-    features ? `${features}.` : "",
-    bodyClause ? `${bodyClause}.` : "",
-    outfitClause ? `${outfitClause}${styleClause}.` : "",
-    `${PERSONA_VIBE[persona]}, standing in a relaxed athletic pose, looking directly at camera.`,
-    "Whole body framing from head to feet, full length view, feet visible at the bottom of the frame, no cropping of the head or feet.",
-    "Modern bright gym studio background with seamless light grey backdrop, soft natural daylight, sharp focus on the entire body, hyperrealistic editorial fitness photography, 35mm wide lens full body shot, tall vertical 9:16 framing, ultra detailed skin texture, 8k.",
-  ]
-    .filter(Boolean)
-    .join(" ");
+    ethnicity,
+    orientation: "vertical",
+    pose: "full_body",
+    style: "Realistic",
+    appearance: appearanceParts.join(", "),
+  };
 
   const signature = [
     persona,
@@ -251,8 +285,5 @@ export function buildCoachPrompt(appearance: CoachAppearance, persona: Persona):
     .map((v) => v ?? "any")
     .join("|");
 
-  return { prompt, signature };
+  return { request, signature };
 }
-
-export const COACH_NEGATIVE_PROMPT =
-  "cartoon, anime, illustration, painting, render, 3d, cgi, low quality, blurry, deformed, disfigured, extra limbs, watermark, text, logo, multiple people";

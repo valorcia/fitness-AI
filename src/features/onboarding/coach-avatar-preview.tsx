@@ -77,15 +77,42 @@ export function appearanceSignature(a: CoachAppearance, persona: Persona) {
  * Shared hook so multiple <CoachAvatarPreview /> instances (sticky desktop +
  * floating mobile) reuse a single fetch and stay perfectly in sync.
  */
-export function useCoachPreview(appearance: CoachAppearance, persona: Persona): GenerationState {
+export function useCoachPreview(
+  appearance: CoachAppearance,
+  persona: Persona,
+  coachName: string,
+): GenerationState {
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
   const [errorReason, setErrorReason] = React.useState<string | null>(null);
+  const bootstrapped = React.useRef(false);
 
   const sig = appearanceSignature(appearance, persona);
   const lastFetchedSig = React.useRef<string | null>(null);
   const abortRef = React.useRef<AbortController | null>(null);
+
+  // Bootstrap from the persisted avatar (Preference.coachAvatarUrl) so the user
+  // sees their previously-generated coach immediately on mount and we don't burn
+  // a new HeyGen credit unless they actually change something.
+  React.useEffect(() => {
+    if (bootstrapped.current) return;
+    bootstrapped.current = true;
+    fetch("/api/coach-avatar", { method: "GET" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data: { url: string | null } | null) => {
+        if (data?.url) {
+          setImageUrl(data.url);
+          lastFetchedSig.current = sig;
+        }
+      })
+      .catch(() => {
+        /* silent — bootstrap is best-effort */
+      });
+    // intentionally run once on mount; the next user change will trigger the
+    // generation effect below using the latest sig.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   React.useEffect(() => {
     if (sig === lastFetchedSig.current) return;
@@ -98,10 +125,10 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
       setFailed(false);
       setErrorReason(null);
 
-      fetch("/api/coach-preview", {
+      fetch("/api/coach-avatar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ appearance, persona }),
+        body: JSON.stringify({ appearance, persona, coachName }),
         signal: ac.signal,
       })
         .then(async (res) => {
@@ -125,7 +152,7 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
     }, 700);
 
     return () => window.clearTimeout(handle);
-  }, [sig, appearance, persona]);
+  }, [sig, appearance, persona, coachName]);
 
   return { imageUrl, loading, failed, generated: imageUrl !== null, errorReason };
 }

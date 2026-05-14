@@ -54,7 +54,7 @@ type Props = {
 };
 
 export function CoachAppearanceStep({ state, update, persona, coachName }: Props) {
-  const generation = useCoachPreview(state, persona);
+  const generation = useCoachPreview(state, persona, coachName);
 
   return (
     <div className="relative grid gap-5 lg:grid-cols-[1fr_320px]">
