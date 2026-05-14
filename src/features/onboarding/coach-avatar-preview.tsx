@@ -14,6 +14,8 @@ type GenerationState = {
   loading: boolean;
   failed: boolean;
   generated: boolean;
+  /** Human-readable reason when failed=true (HTTP status + server message). */
+  errorReason: string | null;
 };
 
 type Props = {
@@ -79,6 +81,7 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
   const [imageUrl, setImageUrl] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
+  const [errorReason, setErrorReason] = React.useState<string | null>(null);
 
   const sig = appearanceSignature(appearance, persona);
   const lastFetchedSig = React.useRef<string | null>(null);
@@ -93,6 +96,7 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
       abortRef.current = ac;
       setLoading(true);
       setFailed(false);
+      setErrorReason(null);
 
       fetch("/api/coach-preview", {
         method: "POST",
@@ -101,7 +105,11 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
         signal: ac.signal,
       })
         .then(async (res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) {
+            const payload = await res.json().catch(() => null);
+            const serverMsg = payload?.error ?? `HTTP ${res.status}`;
+            throw new Error(`${res.status} — ${serverMsg}`);
+          }
           return res.json() as Promise<{ url: string }>;
         })
         .then(({ url }) => {
@@ -111,6 +119,7 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
         .catch((err: unknown) => {
           if (err instanceof DOMException && err.name === "AbortError") return;
           setFailed(true);
+          setErrorReason(err instanceof Error ? err.message : String(err));
         })
         .finally(() => setLoading(false));
     }, 700);
@@ -118,7 +127,7 @@ export function useCoachPreview(appearance: CoachAppearance, persona: Persona): 
     return () => window.clearTimeout(handle);
   }, [sig, appearance, persona]);
 
-  return { imageUrl, loading, failed, generated: imageUrl !== null };
+  return { imageUrl, loading, failed, generated: imageUrl !== null, errorReason };
 }
 
 export function CoachAvatarPreview({
@@ -192,7 +201,7 @@ export function CoachAvatarPreview({
 
       <p className="mt-3 px-1 text-center text-[11px] leading-snug text-muted-foreground">
         {generation.failed
-          ? "Génération IA indisponible — un visuel approchant est affiché en attendant."
+          ? `Génération IA indisponible — visuel d'approche affiché. (${generation.errorReason ?? "raison inconnue"})`
           : generation.generated
             ? "Portrait généré par IA d'après tes critères. Modifie un attribut pour relancer."
             : "Aperçu provisoire. Le portrait IA se génère dès que tu ajustes un critère."}
