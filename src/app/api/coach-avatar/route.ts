@@ -9,9 +9,9 @@ export const runtime = "nodejs";
 export const maxDuration = 60;
 
 const bodySchema = z.object({
-  appearance: z.record(z.string(), z.string().optional()),
+  appearance: z.record(z.string(), z.string().nullish()).default({}),
   persona: z.enum(["STRICT", "FUN", "ZEN", "MILITARY", "ELITE"]).default("FUN"),
-  coachName: z.string().min(1).max(40).default("Coach"),
+  coachName: z.string().max(40).optional().default("Coach"),
 });
 
 type CacheEntry = { url: string; expiresAt: number };
@@ -104,13 +104,24 @@ export async function POST(req: Request) {
   const json = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(json);
   if (!parsed.success) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    const fieldErrors = parsed.error.issues
+      .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
+      .join("; ");
+    logger.warn("coach_avatar_invalid_input", { fieldErrors, bodyKeys: json && typeof json === "object" ? Object.keys(json) : null });
+    return NextResponse.json({ error: `Invalid input — ${fieldErrors}` }, { status: 400 });
   }
 
+  // Strip null values from the appearance record before passing downstream
+  // (the mapper treats undefined/missing as "any").
+  const appearance = Object.fromEntries(
+    Object.entries(parsed.data.appearance).filter(([, v]) => v != null),
+  ) as Record<string, string>;
+  const coachName = parsed.data.coachName?.trim() || "Coach";
+
   const { request: heygenReq, signature } = buildHeyGenPhotoRequest(
-    parsed.data.appearance,
+    appearance,
     parsed.data.persona,
-    parsed.data.coachName,
+    coachName,
   );
 
   const key = cacheKey(userId, signature);
