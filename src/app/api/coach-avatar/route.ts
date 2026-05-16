@@ -132,57 +132,99 @@ export async function POST(req: Request) {
   // whose face is inspired by the uploaded photo. Facial attributes from the
   // wizard are intentionally absent from the prompt (the face comes from the
   // group); we only describe body, outfit, scene, and persona vibe.
+  //
+  // If the group isn't ready yet (training) or the call fails for any reason
+  // we fall through silently to Branch B (text-only). This makes generation
+  // always succeed regardless of group state.
+  let usedFaceLock = false;
   if (groupId) {
+    // 1. Verify the avatar group is trained/ready before calling look/generate.
+    let groupIsReady = false;
     try {
-      const submit = await fetch("https://api.heygen.com/v2/photo_avatar/look/generate", {
-        method: "POST",
-        headers: {
-          "X-Api-Key": apiKey,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          group_id: groupId,
-          prompt: heygenReq.appearance,
-          orientation: heygenReq.orientation,
-          pose: heygenReq.pose,
-          style: heygenReq.style,
-          name: heygenReq.name,
-        }),
-      });
-      if (!submit.ok) {
-        const text = await submit.text();
-        logger.error("coach_avatar_look_submit_http", {
-          status: submit.status,
-          body: text.slice(0, 500),
-          groupId,
-        });
-        return NextResponse.json(
-          { error: `HeyGen look submit failed (HTTP ${submit.status}) — ${text.slice(0, 200)}` },
-          { status: 502 },
-        );
+      const statusRes = await fetch(
+        `https://api.heygen.com/v2/photo_avatar/avatar_group/${groupId}`,
+        { headers: { "X-Api-Key": apiKey, Accept: "application/json" } },
+      );
+      if (statusRes.ok) {
+        const statusText = await statusRes.text();
+        logger.info("coach_avatar_group_status_check", { body: statusText.slice(0, 300), groupId });
+        const statusData = JSON.parse(statusText) as {
+          data?: { train_status?: string; status?: string };
+        };
+        const ts = statusData.data?.train_status ?? statusData.data?.status ?? null;
+        groupIsReady = Boolean(ts && ["success", "ready", "done", "completed"].includes(ts));
+        // If group training failed (e.g. face not detected), evict it from DB
+        // so future requests don't waste time checking it.
+        if (ts && ["failed", "error", "cancelled"].includes(ts)) {
+          await prisma.preference
+            .update({ where: { userId }, data: { coachAvatarGroupId: null } })
+            .catch(() => null);
+        }
       }
-      const submitJson = (await submit.json()) as {
-        data?: { generation_id?: string; id?: string };
-      };
-      const generationId = submitJson.data?.generation_id ?? submitJson.data?.id;
-      if (!generationId) {
-        logger.error("coach_avatar_look_no_task", { body: submitJson });
-        return NextResponse.json(
-          { error: "HeyGen look returned no task id" },
-          { status: 502 },
-        );
-      }
-      return NextResponse.json({ generationId, signature: fullSignature, cached: false });
     } catch (e) {
-      logger.error("coach_avatar_look_failed", {
+      logger.warn("coach_avatar_group_status_check_failed", {
         error: e instanceof Error ? e.message : String(e),
       });
-      return NextResponse.json({ error: "Look generation failed" }, { status: 500 });
+    }
+
+    if (groupIsReady) {
+      // 2. Submit look generation
+      try {
+        const submit = await fetch("https://api.heygen.com/v2/photo_avatar/look/generate", {
+          method: "POST",
+          headers: {
+            "X-Api-Key": apiKey,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({
+            group_id: groupId,
+            prompt: heygenReq.appearance,
+            orientation: heygenReq.orientation,
+            pose: heygenReq.pose,
+            style: heygenReq.style,
+            name: heygenReq.name,
+          }),
+        });
+        const submitText = await submit.text();
+        logger.info("coach_avatar_look_submit_raw", {
+          status: submit.status,
+          body: submitText.slice(0, 500),
+          groupId,
+        });
+        if (submit.ok) {
+          const submitJson = JSON.parse(submitText) as {
+            data?: { generation_id?: string; id?: string };
+          };
+          const generationId = submitJson.data?.generation_id ?? submitJson.data?.id;
+          if (generationId) {
+            usedFaceLock = true;
+            return NextResponse.json({
+              generationId,
+              signature: fullSignature,
+              cached: false,
+              faceLocked: true,
+            });
+          }
+        }
+        // look/generate failed → fall through to text generation below
+        logger.warn("coach_avatar_look_fallback", {
+          status: submit.status,
+          body: submitText.slice(0, 300),
+          groupId,
+        });
+      } catch (e) {
+        logger.warn("coach_avatar_look_exception_fallback", {
+          error: e instanceof Error ? e.message : String(e),
+        });
+      }
+    } else {
+      logger.info("coach_avatar_group_not_ready_fallback", { groupId });
     }
   }
+  void usedFaceLock; // used above when returning early
 
-  // ── Branch B — text-only generation (no source photo) ───────────────────
+  // ── Branch B — text-only generation (no source photo, or group fallback) ──
   try {
     const submit = await fetch("https://api.heygen.com/v2/photo_avatar/photo/generate", {
       method: "POST",

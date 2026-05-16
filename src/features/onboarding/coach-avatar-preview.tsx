@@ -187,9 +187,16 @@ export function useCoachPreview(
         sourceUrl: string;
         groupId: string | null;
         groupReady: boolean;
+        groupFailReason?: string | null;
       };
       setSourcePhotoUrl(data.sourceUrl);
       setHasFaceLockedGroup(data.groupReady);
+      // Warn if HeyGen rejected the group (face not detected, etc.)
+      if (!data.groupReady && data.groupFailReason) {
+        setUploadError(
+          `Photo uploadée mais HeyGen n'a pas pu préparer le modèle (${data.groupFailReason}). La génération utilisera tes critères textuels.`,
+        );
+      }
       // Generated avatar is now stale relative to the new face — clear it so
       // the preview shows the silhouette/source-photo state until the user
       // clicks "Generate" again.
