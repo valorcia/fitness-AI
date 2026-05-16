@@ -4,7 +4,6 @@ import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Loader2, Sparkles } from "lucide-react";
 import type { CoachAppearance } from "@/lib/onboarding/coach-appearance";
-import { pickBestPortrait } from "@/lib/onboarding/portrait-catalog";
 import { cn } from "@/lib/utils";
 
 type Persona = "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
@@ -253,6 +252,33 @@ export function useCoachPreview(
   };
 }
 
+/** Full-body human silhouette shown before any AI avatar is generated. */
+function CoachSilhouette({ accentColor }: { accentColor: string }) {
+  return (
+    <svg
+      viewBox="0 0 100 220"
+      className="absolute inset-0 m-auto h-[85%] w-auto"
+      fill={accentColor}
+      aria-hidden
+    >
+      {/* head */}
+      <ellipse cx="50" cy="22" rx="16" ry="18" opacity="0.25" />
+      {/* neck */}
+      <rect x="44" y="38" width="12" height="10" rx="4" opacity="0.22" />
+      {/* torso */}
+      <ellipse cx="50" cy="82" rx="22" ry="30" opacity="0.2" />
+      {/* left arm */}
+      <rect x="24" y="50" width="10" height="52" rx="5" transform="rotate(-8 29 76)" opacity="0.18" />
+      {/* right arm */}
+      <rect x="66" y="50" width="10" height="52" rx="5" transform="rotate(8 71 76)" opacity="0.18" />
+      {/* left leg */}
+      <rect x="32" y="110" width="14" height="68" rx="7" transform="rotate(-3 39 144)" opacity="0.2" />
+      {/* right leg */}
+      <rect x="54" y="110" width="14" height="68" rx="7" transform="rotate(3 61 144)" opacity="0.2" />
+    </svg>
+  );
+}
+
 export function CoachAvatarPreview({
   appearance,
   persona,
@@ -260,46 +286,56 @@ export function CoachAvatarPreview({
   className,
   generation,
 }: Props) {
-  const fallback = React.useMemo(() => pickBestPortrait(appearance), [appearance]);
-
   const accent =
     appearance.coachOutfitColor && appearance.coachOutfitColor !== "any"
       ? OUTFIT_COLOR_HEX[appearance.coachOutfitColor] ?? "#14B8A6"
       : "#14B8A6";
 
-  const imageUrl = generation.imageUrl ?? fallback.imageUrl;
-  const imageKey = generation.imageUrl ?? fallback.id;
-
   return (
     <div className={cn("rounded-3xl border border-border bg-card p-4 shadow-xl", className)}>
+      {/*
+       * `isolate` creates a new stacking context so `overflow-hidden` correctly
+       * clips the CSS scale() transform applied by framer-motion in all browsers
+       * (Safari and some Chromium versions otherwise bleed the scaled image
+       * slightly past the rounded corners).
+       */}
       <div
-        className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl"
+        className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl isolate"
         style={{ background: `linear-gradient(180deg, ${accent}22 0%, ${accent}66 100%)` }}
       >
         <AnimatePresence mode="wait">
-          <motion.div
-            key={imageKey}
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              scale: [1, 1.012, 1],
-              y: [0, -2, 0],
-            }}
-            exit={{ opacity: 0 }}
-            transition={{
-              opacity: { duration: 0.35 },
-              scale: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
-              y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
-            }}
-          >
-            <img
-              src={imageUrl}
-              alt={`Aperçu du coach ${coachName}`}
-              className="absolute inset-0 h-full w-full object-cover object-top"
-              loading="eager"
-            />
-          </motion.div>
+          {generation.imageUrl ? (
+            <motion.div
+              key={generation.imageUrl}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, scale: [1, 1.012, 1], y: [0, -2, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{
+                opacity: { duration: 0.35 },
+                scale: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
+                y: { duration: 4.5, repeat: Infinity, ease: "easeInOut" },
+              }}
+            >
+              <img
+                src={generation.imageUrl}
+                alt={`Portrait IA du coach ${coachName}`}
+                className="absolute inset-0 h-full w-full object-cover object-top"
+                loading="eager"
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="placeholder"
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <CoachSilhouette accentColor={accent} />
+            </motion.div>
+          )}
         </AnimatePresence>
 
         {generation.loading && (
@@ -324,10 +360,10 @@ export function CoachAvatarPreview({
 
       <p className="mt-3 px-1 text-center text-[11px] leading-snug text-muted-foreground">
         {generation.failed
-          ? `Génération IA indisponible — visuel d'approche affiché. (${generation.errorReason ?? "raison inconnue"})`
+          ? `Génération IA indisponible. (${generation.errorReason ?? "raison inconnue"})`
           : generation.generated
             ? "Portrait IA. Modifie un attribut puis relance la génération si besoin."
-            : "Sélectionne tes critères ci-contre puis clique sur « Générer mon avatar »."}
+            : "Sélectionne tes critères ci-contre puis clique sur « Générer mon avatar »."}
       </p>
     </div>
   );
