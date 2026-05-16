@@ -6,7 +6,9 @@ import { logger } from "@/lib/logger";
 import { buildHeyGenPhotoRequest } from "@/lib/coach/heygen-prompt";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Each request to this route hits HeyGen once (submit OR a single status
+// poll). Both calls finish well under the Vercel Hobby 10s limit.
+export const maxDuration = 15;
 
 const bodySchema = z.object({
   appearance: z.record(z.string(), z.string().nullish()).default({}),
@@ -37,7 +39,6 @@ function writeCache(key: string, url: string) {
   CACHE.set(key, { url, expiresAt: Date.now() + CACHE_TTL_MS });
 }
 
-/** Cache key is scoped by userId so two users with identical choices still get separate generations. */
 function cacheKey(userId: string, signature: string) {
   return `${userId}::${signature}`;
 }
@@ -60,32 +61,10 @@ async function persistOnPreference(userId: string, url: string) {
 }
 
 /**
- * Polls HeyGen for the generated image. The Photo Generation API returns a
- * task id; we poll the status endpoint until the image is ready.
+ * POST — submit a HeyGen generation request and return the task id immediately.
+ * Polling for completion is the client's job (GET ?id=…) so we never get
+ * killed by Vercel Hobby's 10s function timeout.
  */
-async function pollHeyGenPhoto(taskId: string, apiKey: string): Promise<string | null> {
-  const url = `https://api.heygen.com/v2/photo_avatar/generation/${taskId}`;
-  const deadline = Date.now() + 55_000;
-  while (Date.now() < deadline) {
-    const res = await fetch(url, { headers: { "X-Api-Key": apiKey, Accept: "application/json" } });
-    if (!res.ok) {
-      logger.warn("heygen_poll_http", { status: res.status });
-      await new Promise((r) => setTimeout(r, 1500));
-      continue;
-    }
-    const json = (await res.json()) as {
-      data?: { status?: string; image_url_list?: string[]; image_url?: string };
-    };
-    const status = json.data?.status;
-    if (status === "success") {
-      return json.data?.image_url_list?.[0] ?? json.data?.image_url ?? null;
-    }
-    if (status === "failed") return null;
-    await new Promise((r) => setTimeout(r, 1500));
-  }
-  return null;
-}
-
 export async function POST(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
@@ -107,12 +86,13 @@ export async function POST(req: Request) {
     const fieldErrors = parsed.error.issues
       .map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`)
       .join("; ");
-    logger.warn("coach_avatar_invalid_input", { fieldErrors, bodyKeys: json && typeof json === "object" ? Object.keys(json) : null });
+    logger.warn("coach_avatar_invalid_input", {
+      fieldErrors,
+      bodyKeys: json && typeof json === "object" ? Object.keys(json) : null,
+    });
     return NextResponse.json({ error: `Invalid input — ${fieldErrors}` }, { status: 400 });
   }
 
-  // Strip null values from the appearance record before passing downstream
-  // (the mapper treats undefined/missing as "any").
   const appearance = Object.fromEntries(
     Object.entries(parsed.data.appearance).filter(([, v]) => v != null),
   ) as Record<string, string>;
@@ -124,11 +104,14 @@ export async function POST(req: Request) {
     coachName,
   );
 
+  // Cache hit short-circuits HeyGen entirely.
   const key = cacheKey(userId, signature);
   const cached = readCache(key);
   if (cached) {
     await persistOnPreference(userId, cached).catch((e) =>
-      logger.warn("coach_avatar_persist_failed", { error: e instanceof Error ? e.message : String(e) }),
+      logger.warn("coach_avatar_persist_failed", {
+        error: e instanceof Error ? e.message : String(e),
+      }),
     );
     return NextResponse.json({ url: cached, cached: true });
   }
@@ -151,7 +134,6 @@ export async function POST(req: Request) {
         body: text.slice(0, 500),
         sentPayload: heygenReq,
       });
-      // Try to extract a structured message from HeyGen's response.
       let detail: string | null = null;
       try {
         const j = JSON.parse(text) as {
@@ -178,8 +160,8 @@ export async function POST(req: Request) {
       data?: { generation_id?: string };
       error?: { message?: string } | null;
     };
-    const taskId = submitJson.data?.generation_id;
-    if (!taskId) {
+    const generationId = submitJson.data?.generation_id;
+    if (!generationId) {
       logger.error("coach_avatar_heygen_no_task", { body: submitJson });
       return NextResponse.json(
         { error: submitJson.error?.message ?? "HeyGen returned no task id" },
@@ -187,17 +169,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const imageUrl = await pollHeyGenPhoto(taskId, apiKey);
-    if (!imageUrl) {
-      return NextResponse.json({ error: "HeyGen generation timed out" }, { status: 504 });
-    }
-
-    writeCache(key, imageUrl);
-    await persistOnPreference(userId, imageUrl).catch((e) =>
-      logger.warn("coach_avatar_persist_failed", { error: e instanceof Error ? e.message : String(e) }),
-    );
-
-    return NextResponse.json({ url: imageUrl, cached: false });
+    return NextResponse.json({ generationId, signature, cached: false });
   } catch (e) {
     logger.error("coach_avatar_failed", { error: e instanceof Error ? e.message : String(e) });
     return NextResponse.json({ error: "Generation failed" }, { status: 500 });
@@ -205,22 +177,95 @@ export async function POST(req: Request) {
 }
 
 /**
- * GET — returns the persisted avatar URL for the current user, if any.
- * The onboarding screen calls this on mount so users don't have to regenerate
- * after a login.
+ * GET — two modes:
+ *
+ *  - no query params → returns the persisted avatar URL for the current user
+ *    (used by the onboarding step on mount to skip regeneration)
+ *  - ?id=<generation_id>&sig=<signature> → polls HeyGen *once* for the task
+ *    status. The client loops this every ~1.5s until status is "success" or
+ *    "failed". Each call stays well under the Vercel Hobby timeout.
  */
-export async function GET() {
+export async function GET(req: Request) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const pref = await prisma.preference.findUnique({
-    where: { userId: session.user.id },
-    select: { coachAvatarUrl: true, coachAvatarGeneratedAt: true, coachAvatarProvider: true },
-  });
-  return NextResponse.json({
-    url: pref?.coachAvatarUrl ?? null,
-    generatedAt: pref?.coachAvatarGeneratedAt ?? null,
-    provider: pref?.coachAvatarProvider ?? null,
-  });
+  const userId = session.user.id;
+
+  const url = new URL(req.url);
+  const generationId = url.searchParams.get("id");
+  const signature = url.searchParams.get("sig");
+
+  if (!generationId) {
+    const pref = await prisma.preference.findUnique({
+      where: { userId },
+      select: { coachAvatarUrl: true, coachAvatarGeneratedAt: true, coachAvatarProvider: true },
+    });
+    return NextResponse.json({
+      url: pref?.coachAvatarUrl ?? null,
+      generatedAt: pref?.coachAvatarGeneratedAt ?? null,
+      provider: pref?.coachAvatarProvider ?? null,
+    });
+  }
+
+  const apiKey = process.env.HEYGEN_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "Generation disabled (HEYGEN_API_KEY missing)" },
+      { status: 503 },
+    );
+  }
+
+  try {
+    const res = await fetch(
+      `https://api.heygen.com/v2/photo_avatar/generation/${generationId}`,
+      { headers: { "X-Api-Key": apiKey, Accept: "application/json" } },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      logger.warn("coach_avatar_poll_http", { status: res.status, body: text.slice(0, 200) });
+      return NextResponse.json(
+        { status: "pending", error: `HeyGen poll HTTP ${res.status}` },
+        { status: 200 },
+      );
+    }
+    const json = (await res.json()) as {
+      data?: { status?: string; image_url_list?: string[]; image_url?: string; msg?: string | null };
+    };
+    const status = json.data?.status ?? "pending";
+
+    if (status === "success") {
+      const imageUrl = json.data?.image_url_list?.[0] ?? json.data?.image_url ?? null;
+      if (!imageUrl) {
+        return NextResponse.json(
+          { status: "failed", error: "HeyGen success without image_url" },
+          { status: 200 },
+        );
+      }
+      if (signature) writeCache(cacheKey(userId, signature), imageUrl);
+      await persistOnPreference(userId, imageUrl).catch((e) =>
+        logger.warn("coach_avatar_persist_failed", {
+          error: e instanceof Error ? e.message : String(e),
+        }),
+      );
+      return NextResponse.json({ status: "success", url: imageUrl });
+    }
+
+    if (status === "failed") {
+      return NextResponse.json(
+        { status: "failed", error: json.data?.msg ?? "HeyGen generation failed" },
+        { status: 200 },
+      );
+    }
+
+    return NextResponse.json({ status: "pending" });
+  } catch (e) {
+    logger.error("coach_avatar_poll_failed", {
+      error: e instanceof Error ? e.message : String(e),
+    });
+    return NextResponse.json(
+      { status: "pending", error: "Poll request failed" },
+      { status: 200 },
+    );
+  }
 }

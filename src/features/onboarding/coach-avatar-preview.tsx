@@ -165,27 +165,81 @@ export function useCoachPreview(
       coachName: latest.current.coachName,
     });
 
-    fetch("/api/coach-avatar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      signal: ac.signal,
-    })
-      .then(async (res) => {
-        if (!res.ok) {
-          const payload = await res.json().catch(() => null);
-          const serverMsg = payload?.error ?? `HTTP ${res.status}`;
-          throw new Error(`${res.status} — ${serverMsg}`);
+    const POLL_INTERVAL_MS = 2000;
+    const POLL_DEADLINE_MS = 90_000; // 90s total budget client-side
+
+    const pollUntilDone = async (
+      generationId: string,
+      signature: string | undefined,
+      deadline: number,
+    ): Promise<string> => {
+      while (Date.now() < deadline) {
+        if (ac.signal.aborted) throw new DOMException("Aborted", "AbortError");
+        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+        const params = new URLSearchParams({ id: generationId });
+        if (signature) params.set("sig", signature);
+        const res = await fetch(`/api/coach-avatar?${params.toString()}`, {
+          method: "GET",
+          signal: ac.signal,
+        });
+        if (!res.ok) continue;
+        const data = (await res.json()) as {
+          status?: string;
+          url?: string;
+          error?: string;
+        };
+        if (data.status === "success" && data.url) return data.url;
+        if (data.status === "failed") {
+          throw new Error(data.error ?? "HeyGen generation failed");
         }
-        return res.json() as Promise<{ url: string }>;
-      })
-      .then(({ url }) => setImageUrl(url))
-      .catch((err: unknown) => {
+      }
+      throw new Error("Generation timed out (90s)");
+    };
+
+    (async () => {
+      try {
+        const submitRes = await fetch("/api/coach-avatar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          signal: ac.signal,
+        });
+        if (!submitRes.ok) {
+          const payload = await submitRes.json().catch(() => null);
+          const serverMsg = payload?.error ?? `HTTP ${submitRes.status}`;
+          throw new Error(`${submitRes.status} — ${serverMsg}`);
+        }
+        const submitData = (await submitRes.json()) as {
+          url?: string;
+          generationId?: string;
+          signature?: string;
+          cached?: boolean;
+        };
+
+        // Cache hit short-circuit — server already had the URL.
+        if (submitData.url) {
+          setImageUrl(submitData.url);
+          return;
+        }
+
+        if (!submitData.generationId) {
+          throw new Error("No generationId returned");
+        }
+
+        const finalUrl = await pollUntilDone(
+          submitData.generationId,
+          submitData.signature,
+          Date.now() + POLL_DEADLINE_MS,
+        );
+        setImageUrl(finalUrl);
+      } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setFailed(true);
         setErrorReason(err instanceof Error ? err.message : String(err));
-      })
-      .finally(() => setLoading(false));
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, []);
 
   return {
