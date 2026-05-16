@@ -14,7 +14,7 @@ type Persona = "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
  */
 
 type HeyGenGender = "Man" | "Woman" | "Unspecified";
-type HeyGenAge = "Young Adult" | "Adult" | "Senior";
+type HeyGenAge = "Young Adult" | "Early Middle Age" | "Late Middle Age" | "Senior" | "Unspecified";
 type HeyGenEthnicity =
   | "White"
   | "Black"
@@ -254,7 +254,7 @@ export function buildHeyGenPhotoRequest(
 
   const request: HeyGenPhotoRequest = {
     name: coachName || "Coach",
-    age: "Adult",
+    age: "Young Adult",
     gender,
     ethnicity,
     orientation: "vertical",
