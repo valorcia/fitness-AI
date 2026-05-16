@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Sparkles, Loader2, Wand2 } from "lucide-react";
+import { Sparkles, Loader2, Wand2, Upload, X, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -73,6 +73,9 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           </div>
         </div>
 
+        <PhotoUploadCard generation={generation} />
+
+      {!generation.sourcePhotoUrl && (
       <Section title="Identité" emoji="🪪">
         <Picker
           label="Sexe"
@@ -87,6 +90,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           onChange={(v) => update("coachPreferredEthnicity", v)}
         />
       </Section>
+      )}
 
       <Section title="Cheveux" emoji="💇">
         <Picker
@@ -104,6 +108,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
         />
       </Section>
 
+      {!generation.sourcePhotoUrl && (
       <Section title="Visage" emoji="🙂">
         <Picker
           label="Forme du visage"
@@ -144,6 +149,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           onChange={(v) => update("coachPreferredNose", v)}
         />
       </Section>
+      )}
 
       <Section title="Corps" emoji="🏋️">
         <Picker
@@ -214,6 +220,99 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
         </div>
       </div>
     </div>
+  );
+}
+
+function PhotoUploadCard({
+  generation,
+}: {
+  generation: ReturnType<typeof useCoachPreview>;
+}) {
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const hasPhoto = Boolean(generation.sourcePhotoUrl);
+
+  const onPick = () => inputRef.current?.click();
+  const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-uploading the same filename
+    if (file) void generation.uploadPhoto(file);
+  };
+
+  return (
+    <section
+      className={cn(
+        "rounded-2xl border p-4 transition",
+        hasPhoto ? "border-primary/40 bg-primary/5" : "border-dashed border-border bg-card",
+      )}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={onFile}
+      />
+      <div className="flex items-start gap-3">
+        {hasPhoto && generation.sourcePhotoUrl ? (
+          <img
+            src={generation.sourcePhotoUrl}
+            alt="Photo source"
+            className="h-16 w-16 shrink-0 rounded-xl object-cover ring-2 ring-primary/40"
+          />
+        ) : (
+          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <ImageIcon className="h-7 w-7" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
+            <span className="text-base">📸</span>
+            Photo d'inspiration
+            <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+              Optionnel
+            </span>
+          </h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {hasPhoto
+              ? "L'IA s'inspire de ce visage. Le coach généré ne sera pas identique : c'est une réinterprétation, jamais une copie."
+              : "Importe un visage que tu trouves inspirant. HeyGen génère un coach proche, sans copier les traits à l'identique."}
+          </p>
+          {generation.uploadError && (
+            <p className="mt-1 text-xs text-destructive">{generation.uploadError}</p>
+          )}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant={hasPhoto ? "outline" : "default"}
+              size="sm"
+              className="text-xs"
+              onClick={onPick}
+              disabled={generation.uploading || !generation.bootstrapped}
+            >
+              {generation.uploading ? (
+                <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Upload className="mr-1.5 h-3.5 w-3.5" />
+              )}
+              {hasPhoto ? "Remplacer la photo" : "Importer une photo"}
+            </Button>
+            {hasPhoto && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="text-xs text-muted-foreground"
+                onClick={() => void generation.removePhoto()}
+                disabled={generation.uploading}
+              >
+                <X className="mr-1 h-3.5 w-3.5" />
+                Retirer
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
   );
 }
 

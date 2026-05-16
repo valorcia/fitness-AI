@@ -104,8 +104,19 @@ export async function POST(req: Request) {
     coachName,
   );
 
-  // Cache hit short-circuits HeyGen entirely.
-  const key = cacheKey(userId, signature);
+  // If the user uploaded a source photo, HeyGen returns a group_id we reuse
+  // to generate face-conditioned looks. Bring in both that id and the source
+  // URL so we can fall back to the photo when generation fails.
+  const pref = await prisma.preference.findUnique({
+    where: { userId },
+    select: { coachAvatarGroupId: true, coachAvatarSourceUrl: true },
+  });
+  const groupId = pref?.coachAvatarGroupId ?? null;
+
+  // Cache key incorporates the group so identical text params on different
+  // source photos don't collide.
+  const fullSignature = groupId ? `${signature}::g:${groupId}` : signature;
+  const key = cacheKey(userId, fullSignature);
   const cached = readCache(key);
   if (cached) {
     await persistOnPreference(userId, cached).catch((e) =>
@@ -116,6 +127,62 @@ export async function POST(req: Request) {
     return NextResponse.json({ url: cached, cached: true });
   }
 
+  // ── Branch A — photo-conditioned look generation ────────────────────────
+  // We have a HeyGen avatar group; let it generate a new fitness coach look
+  // whose face is inspired by the uploaded photo. Facial attributes from the
+  // wizard are intentionally absent from the prompt (the face comes from the
+  // group); we only describe body, outfit, scene, and persona vibe.
+  if (groupId) {
+    try {
+      const submit = await fetch("https://api.heygen.com/v2/photo_avatar/look/generate", {
+        method: "POST",
+        headers: {
+          "X-Api-Key": apiKey,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          group_id: groupId,
+          prompt: heygenReq.appearance,
+          orientation: heygenReq.orientation,
+          pose: heygenReq.pose,
+          style: heygenReq.style,
+          name: heygenReq.name,
+        }),
+      });
+      if (!submit.ok) {
+        const text = await submit.text();
+        logger.error("coach_avatar_look_submit_http", {
+          status: submit.status,
+          body: text.slice(0, 500),
+          groupId,
+        });
+        return NextResponse.json(
+          { error: `HeyGen look submit failed (HTTP ${submit.status}) — ${text.slice(0, 200)}` },
+          { status: 502 },
+        );
+      }
+      const submitJson = (await submit.json()) as {
+        data?: { generation_id?: string; id?: string };
+      };
+      const generationId = submitJson.data?.generation_id ?? submitJson.data?.id;
+      if (!generationId) {
+        logger.error("coach_avatar_look_no_task", { body: submitJson });
+        return NextResponse.json(
+          { error: "HeyGen look returned no task id" },
+          { status: 502 },
+        );
+      }
+      return NextResponse.json({ generationId, signature: fullSignature, cached: false });
+    } catch (e) {
+      logger.error("coach_avatar_look_failed", {
+        error: e instanceof Error ? e.message : String(e),
+      });
+      return NextResponse.json({ error: "Look generation failed" }, { status: 500 });
+    }
+  }
+
+  // ── Branch B — text-only generation (no source photo) ───────────────────
   try {
     const submit = await fetch("https://api.heygen.com/v2/photo_avatar/photo/generate", {
       method: "POST",
@@ -199,12 +266,20 @@ export async function GET(req: Request) {
   if (!generationId) {
     const pref = await prisma.preference.findUnique({
       where: { userId },
-      select: { coachAvatarUrl: true, coachAvatarGeneratedAt: true, coachAvatarProvider: true },
+      select: {
+        coachAvatarUrl: true,
+        coachAvatarGeneratedAt: true,
+        coachAvatarProvider: true,
+        coachAvatarSourceUrl: true,
+        coachAvatarGroupId: true,
+      },
     });
     return NextResponse.json({
       url: pref?.coachAvatarUrl ?? null,
       generatedAt: pref?.coachAvatarGeneratedAt ?? null,
       provider: pref?.coachAvatarProvider ?? null,
+      sourcePhotoUrl: pref?.coachAvatarSourceUrl ?? null,
+      hasFaceLockedGroup: Boolean(pref?.coachAvatarGroupId),
     });
   }
 

@@ -19,6 +19,18 @@ type GenerationState = {
   generate: () => void;
   /** True once the persisted-avatar bootstrap GET has resolved. */
   bootstrapped: boolean;
+  /** URL of the user-uploaded source photo (null when not uploaded). */
+  sourcePhotoUrl: string | null;
+  /** True when HeyGen accepted the photo and created a face-conditioned group. */
+  hasFaceLockedGroup: boolean;
+  /** Upload a new source photo. Returns once HeyGen has registered it. */
+  uploadPhoto: (file: File) => Promise<void>;
+  /** Remove the source photo + group from the user's profile. */
+  removePhoto: () => Promise<void>;
+  /** True while an upload or removal is in flight. */
+  uploading: boolean;
+  /** Last upload/remove failure reason, surfaced in the UI. */
+  uploadError: string | null;
 };
 
 type Props = {
@@ -125,6 +137,10 @@ export function useCoachPreview(
   const [failed, setFailed] = React.useState(false);
   const [errorReason, setErrorReason] = React.useState<string | null>(null);
   const [bootstrapped, setBootstrapped] = React.useState(false);
+  const [sourcePhotoUrl, setSourcePhotoUrl] = React.useState<string | null>(null);
+  const [hasFaceLockedGroup, setHasFaceLockedGroup] = React.useState(false);
+  const [uploading, setUploading] = React.useState(false);
+  const [uploadError, setUploadError] = React.useState<string | null>(null);
   const bootstrapStarted = React.useRef(false);
   const abortRef = React.useRef<AbortController | null>(null);
 
@@ -139,13 +155,68 @@ export function useCoachPreview(
     bootstrapStarted.current = true;
     fetch("/api/coach-avatar", { method: "GET" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((data: { url: string | null } | null) => {
-        if (data?.url) setImageUrl(data.url);
-      })
+      .then(
+        (data: {
+          url: string | null;
+          sourcePhotoUrl?: string | null;
+          hasFaceLockedGroup?: boolean;
+        } | null) => {
+          if (data?.url) setImageUrl(data.url);
+          if (data?.sourcePhotoUrl) setSourcePhotoUrl(data.sourcePhotoUrl);
+          if (data?.hasFaceLockedGroup) setHasFaceLockedGroup(true);
+        },
+      )
       .catch(() => {
         /* silent — bootstrap is best-effort */
       })
       .finally(() => setBootstrapped(true));
+  }, []);
+
+  const uploadPhoto = React.useCallback(async (file: File) => {
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const form = new FormData();
+      form.append("photo", file);
+      const res = await fetch("/api/coach-avatar/upload", { method: "POST", body: form });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error ?? `HTTP ${res.status}`);
+      }
+      const data = (await res.json()) as {
+        sourceUrl: string;
+        groupId: string | null;
+        groupReady: boolean;
+      };
+      setSourcePhotoUrl(data.sourceUrl);
+      setHasFaceLockedGroup(data.groupReady);
+      // Generated avatar is now stale relative to the new face — clear it so
+      // the preview shows the silhouette/source-photo state until the user
+      // clicks "Generate" again.
+      setImageUrl(null);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setUploading(false);
+    }
+  }, []);
+
+  const removePhoto = React.useCallback(async () => {
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const res = await fetch("/api/coach-avatar/upload", { method: "DELETE" });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error ?? `HTTP ${res.status}`);
+      }
+      setSourcePhotoUrl(null);
+      setHasFaceLockedGroup(false);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setUploading(false);
+    }
   }, []);
 
   const generate = React.useCallback(() => {
@@ -249,6 +320,12 @@ export function useCoachPreview(
     errorReason,
     generate,
     bootstrapped,
+    sourcePhotoUrl,
+    hasFaceLockedGroup,
+    uploadPhoto,
+    removePhoto,
+    uploading,
+    uploadError,
   };
 }
 
@@ -324,6 +401,23 @@ export function CoachAvatarPreview({
                 loading="eager"
               />
             </motion.div>
+          ) : generation.sourcePhotoUrl ? (
+            <motion.div
+              key={`src-${generation.sourcePhotoUrl}`}
+              className="absolute inset-0"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.35 }}
+            >
+              <img
+                src={generation.sourcePhotoUrl}
+                alt="Photo source du coach"
+                className="absolute inset-0 h-full w-full object-cover object-center"
+                loading="eager"
+              />
+              <div className="absolute inset-0 bg-black/15" aria-hidden />
+            </motion.div>
           ) : (
             <motion.div
               key="placeholder"
@@ -354,7 +448,11 @@ export function CoachAvatarPreview({
 
         <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-primary shadow">
           <Sparkles className="h-3 w-3" />
-          {generation.generated ? "IA" : "Aperçu"}
+          {generation.generated
+            ? "IA"
+            : generation.sourcePhotoUrl
+              ? "Photo source"
+              : "Aperçu"}
         </span>
       </div>
 
@@ -362,7 +460,9 @@ export function CoachAvatarPreview({
         {generation.failed
           ? `Génération IA indisponible. (${generation.errorReason ?? "raison inconnue"})`
           : generation.generated
-            ? "Portrait IA. Modifie un attribut puis relance la génération si besoin."
+            ? "Portrait IA inspiré de tes choix. Modifie un attribut puis relance la génération si besoin."
+            : generation.sourcePhotoUrl
+              ? "Photo enregistrée. Clique sur « Générer » pour créer un coach inspiré de ce visage."
             : "Sélectionne tes critères ci-contre puis clique sur « Générer mon avatar »."}
       </p>
     </div>
