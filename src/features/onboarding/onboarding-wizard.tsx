@@ -20,6 +20,8 @@ import { cn } from "@/lib/utils";
 import { LifestyleStep } from "./lifestyle-step";
 import { EquipmentStep } from "./equipment-step";
 import { CoachAppearanceStep } from "./coach-appearance-step";
+import { NotificationPreferences } from "@/features/notifications/notification-preferences";
+import type { NotificationPrefs } from "@/lib/notifications/config";
 
 type Goal = "WEIGHT_LOSS" | "MUSCLE_GAIN" | "ENDURANCE" | "FITNESS" | "HEALTH";
 type State = {
@@ -107,6 +109,15 @@ type State = {
   coachOutfitBottom: string;
   coachOutfitColor: string;
   coachOutfitStyle: string;
+  notificationsEnabled: boolean;
+  notifWater: boolean;
+  notifInactivity: boolean;
+  notifSleep: boolean;
+  notifSessionFeedback: boolean;
+  notifUpcomingSession: boolean;
+  notifEnergyCheckin: boolean;
+  notifStreak: boolean;
+  notifWeeklyRecap: boolean;
   consentHealthData: boolean;
   consentMedicalDisclaimer: boolean;
   consentDoctorCleared: boolean;
@@ -124,6 +135,7 @@ const STEPS = [
   { key: "lifestyle", label: "Hygiène de vie" },
   { key: "equipment", label: "Matériel" },
   { key: "coach", label: "Mon coach" },
+  { key: "notifications", label: "Notifications" },
   { key: "consent", label: "Consentement" },
 ];
 
@@ -270,6 +282,15 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     coachOutfitBottom: "any",
     coachOutfitColor: "any",
     coachOutfitStyle: "any",
+    notificationsEnabled: true,
+    notifWater: true,
+    notifInactivity: true,
+    notifSleep: true,
+    notifSessionFeedback: true,
+    notifUpcomingSession: true,
+    notifEnergyCheckin: true,
+    notifStreak: true,
+    notifWeeklyRecap: false,
     consentHealthData: false,
     consentMedicalDisclaimer: false,
     consentDoctorCleared: false,
@@ -314,6 +335,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       case "medical":
       case "lifestyle":
       case "equipment":
+      case "notifications":
         return true;
       case "coach":
         return state.coachName.trim().length > 0;
@@ -822,6 +844,44 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                   coachName={state.coachName}
                 />
               </>
+            )}
+
+            {STEPS[step]?.key === "notifications" && (
+              <div className="grid gap-4">
+                <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
+                  <span className="mt-0.5 text-base">🔔</span>
+                  <div>
+                    <p className="font-semibold">Choisissez vos rappels.</p>
+                    <p className="mt-1 opacity-80">
+                      Modifiables à tout moment depuis vos paramètres.
+                    </p>
+                  </div>
+                </div>
+                <NotificationPreferences
+                  value={{
+                    enabled: state.notificationsEnabled,
+                    water: state.notifWater,
+                    inactivity: state.notifInactivity,
+                    sleep: state.notifSleep,
+                    sessionFeedback: state.notifSessionFeedback,
+                    upcomingSession: state.notifUpcomingSession,
+                    energyCheckin: state.notifEnergyCheckin,
+                    streak: state.notifStreak,
+                    weeklyRecap: state.notifWeeklyRecap,
+                  }}
+                  onChange={(p: NotificationPrefs) => {
+                    update("notificationsEnabled", p.enabled);
+                    update("notifWater", p.water);
+                    update("notifInactivity", p.inactivity);
+                    update("notifSleep", p.sleep);
+                    update("notifSessionFeedback", p.sessionFeedback);
+                    update("notifUpcomingSession", p.upcomingSession);
+                    update("notifEnergyCheckin", p.energyCheckin);
+                    update("notifStreak", p.streak);
+                    update("notifWeeklyRecap", p.weeklyRecap);
+                  }}
+                />
+              </div>
             )}
 
             {STEPS[step]?.key === "consent" && (

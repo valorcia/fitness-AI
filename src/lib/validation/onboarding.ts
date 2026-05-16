@@ -122,6 +122,17 @@ export const onboardingSchema = z
   coachOutfitColor: z.string().max(30).optional(),
   coachOutfitStyle: z.string().max(30).optional(),
 
+  // Notification preferences
+  notificationsEnabled: z.boolean().default(true),
+  notifWater: z.boolean().default(true),
+  notifInactivity: z.boolean().default(true),
+  notifSleep: z.boolean().default(true),
+  notifSessionFeedback: z.boolean().default(true),
+  notifUpcomingSession: z.boolean().default(true),
+  notifEnergyCheckin: z.boolean().default(true),
+  notifStreak: z.boolean().default(true),
+  notifWeeklyRecap: z.boolean().default(false),
+
   // Consents
   consentMedicalDisclaimer: z
     .boolean()

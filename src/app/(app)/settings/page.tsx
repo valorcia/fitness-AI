@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { CoachSettings } from "@/features/coach/coach-settings";
 import { ThemeToggle } from "@/components/app/theme-toggle";
+import { NotificationSettings } from "@/features/notifications/notification-settings";
 import Link from "next/link";
 import { PlugZap, RotateCcw, Wand2 } from "lucide-react";
 import { resetOnboarding } from "./reset-onboarding-action";
@@ -77,6 +78,16 @@ export default async function SettingsPage() {
           </Card>
         </Link>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Notifications</CardTitle>
+          <CardDescription>Choisissez les rappels que vous souhaitez recevoir.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <NotificationSettings initial={prefs?.notifications ?? {}} />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -108,6 +108,18 @@ export async function POST(req: Request) {
         create: { userId, ...healthData },
       });
 
+      const notifications = {
+        enabled: data.notificationsEnabled,
+        water: data.notifWater,
+        inactivity: data.notifInactivity,
+        sleep: data.notifSleep,
+        sessionFeedback: data.notifSessionFeedback,
+        upcomingSession: data.notifUpcomingSession,
+        energyCheckin: data.notifEnergyCheckin,
+        streak: data.notifStreak,
+        weeklyRecap: data.notifWeeklyRecap,
+      };
+
       const coachPrefs = {
         coachPersona: data.coachPersona,
         coachName: data.coachName,
@@ -128,6 +140,7 @@ export async function POST(req: Request) {
         coachOutfitBottom: data.coachOutfitBottom,
         coachOutfitColor: data.coachOutfitColor,
         coachOutfitStyle: data.coachOutfitStyle,
+        notifications,
       };
       await tx.preference.upsert({
         where: { userId },
