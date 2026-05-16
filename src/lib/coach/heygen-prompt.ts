@@ -21,11 +21,11 @@ type HeyGenEthnicity =
   | "Asian American"
   | "East Asian"
   | "South Asian"
-  | "Southeast Asian"
+  | "South East Asian"
   | "Middle Eastern"
   | "Hispanic"
-  | "Pacific Islander"
-  | "Mixed";
+  | "Pacific"
+  | "Unspecified";
 type HeyGenPose = "half_body" | "close_up" | "full_body";
 type HeyGenOrientation = "square" | "vertical" | "horizontal";
 type HeyGenStyle = "Realistic" | "Pixar" | "Cinematic" | "Vintage" | "Noir" | "Cyberpunk" | "Pop Art";
@@ -40,9 +40,13 @@ const ETHNICITY_MAP: Record<string, HeyGenEthnicity> = {
   european: "White",
   african: "Black",
   asian: "East Asian",
+  "asian-american": "Asian American",
+  "south-asian": "South Asian",
+  "southeast-asian": "South East Asian",
   maghrebi: "Middle Eastern",
   latino: "Hispanic",
-  mixed: "Mixed",
+  pacific: "Pacific",
+  mixed: "Unspecified",
 };
 
 const HAIR_COLOR: Record<string, string> = {
@@ -212,7 +216,7 @@ export function buildHeyGenPhotoRequest(
   coachName: string,
 ): BuiltHeyGenPrompt {
   const gender = pick(appearance.coachPreferredGender, GENDER_MAP) ?? "Unspecified";
-  const ethnicity = pick(appearance.coachPreferredEthnicity, ETHNICITY_MAP) ?? "Mixed";
+  const ethnicity = pick(appearance.coachPreferredEthnicity, ETHNICITY_MAP) ?? "Unspecified";
   const hairColor = pick(appearance.coachPreferredHairColor, HAIR_COLOR);
   const hairStyle = pick(appearance.coachPreferredHairStyle, HAIR_STYLE);
   const faceShape = pick(appearance.coachPreferredFaceShape, FACE_SHAPE);
