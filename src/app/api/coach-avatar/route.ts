@@ -149,9 +149,27 @@ export async function POST(req: Request) {
       logger.error("coach_avatar_heygen_submit_http", {
         status: submit.status,
         body: text.slice(0, 500),
+        sentPayload: heygenReq,
       });
+      // Try to extract a structured message from HeyGen's response.
+      let detail: string | null = null;
+      try {
+        const j = JSON.parse(text) as {
+          error?: { message?: string; code?: string } | string;
+          message?: string;
+        };
+        detail =
+          typeof j.error === "string"
+            ? j.error
+            : j.error?.message ?? j.message ?? null;
+      } catch {
+        detail = text.slice(0, 200);
+      }
       return NextResponse.json(
-        { error: `HeyGen submit failed (HTTP ${submit.status})` },
+        {
+          error: `HeyGen submit failed (HTTP ${submit.status})${detail ? ` — ${detail}` : ""}`,
+          sentPayload: heygenReq,
+        },
         { status: 502 },
       );
     }
