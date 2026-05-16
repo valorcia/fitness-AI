@@ -137,8 +137,12 @@ export async function POST(req: Request) {
 
       await tx.consent.createMany({
         data: [
-          { userId, kind: "health_data", granted: data.consentHealthData, version: "1.0" },
           { userId, kind: "medical_disclaimer", granted: data.consentMedicalDisclaimer, version: "1.0" },
+          { userId, kind: "physical_data", granted: data.consentPhysicalData, version: "1.0" },
+          { userId, kind: "health_data", granted: data.consentHealthData, version: "1.0" },
+          { userId, kind: "training_data", granted: data.consentTrainingData, version: "1.0" },
+          { userId, kind: "coach_ai", granted: data.consentCoachAI, version: "1.0" },
+          { userId, kind: "analytics", granted: data.consentAnalytics, version: "1.0" },
           { userId, kind: "doctor_cleared", granted: data.consentDoctorCleared, version: "1.0" },
         ],
       });

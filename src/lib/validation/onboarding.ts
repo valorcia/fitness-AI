@@ -123,13 +123,21 @@ export const onboardingSchema = z
   coachOutfitStyle: z.string().max(30).optional(),
 
   // Consents
-  consentHealthData: z
-    .boolean()
-    .refine((v) => v === true, { message: "Consentement données santé requis." }),
   consentMedicalDisclaimer: z
     .boolean()
     .refine((v) => v === true, { message: "Acceptation de l'avertissement médical requise." }),
+  consentPhysicalData: z
+    .boolean()
+    .refine((v) => v === true, { message: "Consentement données physiques requis." }),
+  consentHealthData: z
+    .boolean()
+    .refine((v) => v === true, { message: "Consentement données santé requis." }),
+  consentCoachAI: z
+    .boolean()
+    .refine((v) => v === true, { message: "Consentement génération coach IA requis." }),
   consentDoctorCleared: z.boolean().default(false),
+  consentTrainingData: z.boolean().default(false),
+  consentAnalytics: z.boolean().default(false),
   })
   .refine((v) => v.environments.length + v.customLocations.length > 0, {
     message: "Sélectionnez au moins un lieu (ou ajoutez-en un en \"Autre\").",

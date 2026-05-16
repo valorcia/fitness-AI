@@ -110,6 +110,10 @@ type State = {
   consentHealthData: boolean;
   consentMedicalDisclaimer: boolean;
   consentDoctorCleared: boolean;
+  consentPhysicalData: boolean;
+  consentTrainingData: boolean;
+  consentCoachAI: boolean;
+  consentAnalytics: boolean;
 };
 
 const STEPS = [
@@ -269,6 +273,10 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     consentHealthData: false,
     consentMedicalDisclaimer: false,
     consentDoctorCleared: false,
+    consentPhysicalData: false,
+    consentTrainingData: false,
+    consentCoachAI: false,
+    consentAnalytics: false,
   });
 
   const update = <K extends keyof State>(k: K, v: State[K]) => setState((s) => ({ ...s, [k]: v }));
@@ -311,8 +319,10 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
         return state.coachName.trim().length > 0;
       case "consent":
         return (
-          state.consentHealthData &&
           state.consentMedicalDisclaimer &&
+          state.consentPhysicalData &&
+          state.consentHealthData &&
+          state.consentCoachAI &&
           (!hasHighRiskMedical || state.consentDoctorCleared)
         );
     }
@@ -815,39 +825,95 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
             )}
 
             {STEPS[step]?.key === "consent" && (
-              <>
-                <div className="rounded-xl border border-border p-4 text-sm text-muted-foreground">
-                  <p className="mb-2 font-semibold text-foreground">Avertissement médical important</p>
+              <div className="grid gap-4">
+                {/* Medical disclaimer */}
+                <div className="rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
+                  <p className="mb-1 font-semibold text-foreground">⚕️ Avertissement médical important</p>
                   <p>
                     Coachmii-fit ne remplace ni un avis, ni un suivi médical. Les recommandations fournies
                     s'appuient sur vos déclarations et ne constituent pas un diagnostic. En cas de
                     douleur aiguë, d'étourdissements ou de symptômes inhabituels : arrêtez l'activité
-                    et consultez un professionnel de santé. Les numéros d'urgence sont le 15 (SAMU) ou
-                    le 112 en Europe.
+                    et consultez un professionnel de santé (15 — SAMU, 112 — Europe).
                   </p>
+                  <div className="mt-3 flex items-start gap-3">
+                    <Checkbox id="c-med" checked={state.consentMedicalDisclaimer} onCheckedChange={(c) => update("consentMedicalDisclaimer", c === true)} />
+                    <Label htmlFor="c-med" className="cursor-pointer leading-snug">
+                      J'ai lu et je comprends l'avertissement médical ci-dessus. <span className="text-destructive">*</span>
+                    </Label>
+                  </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Checkbox id="c-med" checked={state.consentMedicalDisclaimer} onCheckedChange={(c) => update("consentMedicalDisclaimer", c === true)} />
-                  <Label htmlFor="c-med">
-                    J'ai lu et je comprends l'avertissement médical ci-dessus.
-                  </Label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Checkbox id="c-data" checked={state.consentHealthData} onCheckedChange={(c) => update("consentHealthData", c === true)} />
-                  <Label htmlFor="c-data">
-                    J'autorise Coachmii-fit à traiter mes données santé pour personnaliser mon coaching.
-                  </Label>
-                </div>
+
+                <p className="text-xs text-muted-foreground">
+                  Conformément au RGPD (Art. 6, 7 et 9), vous consentez librement aux traitements
+                  suivants. Les cases marquées <span className="text-destructive font-semibold">*</span> sont requises pour utiliser l'application.
+                  Vous pouvez retirer vos consentements à tout moment depuis vos paramètres.
+                </p>
+
+                {/* C1 — Physical data */}
+                <ConsentRow
+                  id="c-physical"
+                  checked={state.consentPhysicalData}
+                  onChange={(v) => update("consentPhysicalData", v)}
+                  required
+                  title="Données de condition physique"
+                  description="Poids, taille, IMC, niveau d'activité et objectifs sportifs — utilisés pour personnaliser votre programme."
+                />
+
+                {/* C2 — Health data */}
+                <ConsentRow
+                  id="c-data"
+                  checked={state.consentHealthData}
+                  onChange={(v) => update("consentHealthData", v)}
+                  required
+                  title="Données de santé déclarées"
+                  description="Pathologies, blessures et contre-indications médicales éventuellement renseignées — utilisées uniquement pour adapter les recommandations et afficher des avertissements de sécurité. Ces données ne sont jamais revendues ni communiquées à des tiers sans votre accord."
+                />
+
+                {/* C3 — Training & third-party apps */}
+                <ConsentRow
+                  id="c-training"
+                  checked={state.consentTrainingData}
+                  onChange={(v) => update("consentTrainingData", v)}
+                  required={false}
+                  title="Données d'entraînement et applications tierces"
+                  description="Séances, performance, fréquence cardiaque et, si vous le décidez, synchronisation avec Apple Health, Google Fit ou Strava pour enrichir votre suivi. Facultatif — révocable à tout moment."
+                />
+
+                {/* C4 — Coach AI */}
+                <ConsentRow
+                  id="c-coach"
+                  checked={state.consentCoachAI}
+                  onChange={(v) => update("consentCoachAI", v)}
+                  required
+                  title="Génération du coach IA personnalisé"
+                  description="Vos préférences d'apparence et, si vous le souhaitez, une photo d'inspiration sont transmises à HeyGen (États-Unis, CCT UE) pour générer votre avatar. La photo n'est pas copiée à l'identique — c'est une réinterprétation artistique."
+                />
+
+                {/* C5 — Analytics */}
+                <ConsentRow
+                  id="c-analytics"
+                  checked={state.consentAnalytics}
+                  onChange={(v) => update("consentAnalytics", v)}
+                  required={false}
+                  title="Analyse comportementale et amélioration du service"
+                  description="Données d'usage pseudonymisées pour améliorer les fonctionnalités et le modèle IA. Facultatif — seuls les cookies strictement nécessaires sont déposés si vous refusez."
+                />
+
+                {/* Conditional doctor clearance */}
                 {hasHighRiskMedical && (
-                  <div className="flex items-center gap-3 rounded-xl border border-amber-400/60 bg-amber-50 p-3 text-sm">
-                    <Checkbox id="c-doc" checked={state.consentDoctorCleared} onCheckedChange={(c) => update("consentDoctorCleared", c === true)} />
-                    <Label htmlFor="c-doc">
+                  <div className="flex items-start gap-3 rounded-xl border border-amber-400/60 bg-amber-50 dark:bg-amber-950/20 p-3 text-sm">
+                    <Checkbox id="c-doc" checked={state.consentDoctorCleared} onCheckedChange={(c) => update("consentDoctorCleared", c === true)} className="mt-0.5" />
+                    <Label htmlFor="c-doc" className="cursor-pointer leading-snug">
                       Je certifie avoir obtenu l'accord de mon médecin pour pratiquer une activité
-                      physique compte tenu de mes antécédents.
+                      physique compte tenu de mes antécédents médicaux. <span className="text-destructive">*</span>
                     </Label>
                   </div>
                 )}
-              </>
+
+                <p className="text-[10px] text-muted-foreground">
+                  Responsable de traitement : [Raison sociale] — DPO : privacy@coachmii-fit.com — CNIL : www.cnil.fr — Version 1.0
+                </p>
+              </div>
             )}
 
             {error && (
@@ -874,6 +940,39 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function ConsentRow({
+  id,
+  checked,
+  onChange,
+  required,
+  title,
+  description,
+}: {
+  id: string;
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  required: boolean;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-border bg-card p-3">
+      <Checkbox id={id} checked={checked} onCheckedChange={(c) => onChange(c === true)} className="mt-0.5 shrink-0" />
+      <div className="min-w-0">
+        <Label htmlFor={id} className="cursor-pointer text-sm font-medium leading-snug">
+          {title}
+          {required ? (
+            <span className="ml-1 text-destructive">*</span>
+          ) : (
+            <span className="ml-2 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-normal text-muted-foreground">Facultatif</span>
+          )}
+        </Label>
+        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+      </div>
+    </div>
   );
 }
 
