@@ -16,6 +16,10 @@ type GenerationState = {
   generated: boolean;
   /** Human-readable reason when failed=true (HTTP status + server message). */
   errorReason: string | null;
+  /** Trigger a new generation against HeyGen. */
+  generate: () => void;
+  /** True once the persisted-avatar bootstrap GET has resolved. */
+  bootstrapped: boolean;
 };
 
 type Props = {
@@ -75,7 +79,11 @@ export function appearanceSignature(a: CoachAppearance, persona: Persona) {
 
 /**
  * Shared hook so multiple <CoachAvatarPreview /> instances (sticky desktop +
- * floating mobile) reuse a single fetch and stay perfectly in sync.
+ * floating mobile) reuse a single state and a single in-flight request.
+ *
+ * Generation is opt-in: nothing happens until the user clicks the "Generate"
+ * button (calls `generate()`). On mount we GET the persisted avatar from the
+ * DB so returning users see their coach immediately without spending credits.
  */
 export function useCoachPreview(
   appearance: CoachAppearance,
@@ -86,75 +94,76 @@ export function useCoachPreview(
   const [loading, setLoading] = React.useState(false);
   const [failed, setFailed] = React.useState(false);
   const [errorReason, setErrorReason] = React.useState<string | null>(null);
-  const bootstrapped = React.useRef(false);
-
-  const sig = appearanceSignature(appearance, persona);
-  const lastFetchedSig = React.useRef<string | null>(null);
+  const [bootstrapped, setBootstrapped] = React.useState(false);
+  const bootstrapStarted = React.useRef(false);
   const abortRef = React.useRef<AbortController | null>(null);
 
-  // Bootstrap from the persisted avatar (Preference.coachAvatarUrl) so the user
-  // sees their previously-generated coach immediately on mount and we don't burn
-  // a new HeyGen credit unless they actually change something.
+  // Keep latest values in refs so `generate` doesn't need to be re-created on
+  // every render (which would force consumers to memoize).
+  const latest = React.useRef({ appearance, persona, coachName });
+  latest.current = { appearance, persona, coachName };
+
+  // Bootstrap from Preference.coachAvatarUrl (persistent per-user).
   React.useEffect(() => {
-    if (bootstrapped.current) return;
-    bootstrapped.current = true;
+    if (bootstrapStarted.current) return;
+    bootstrapStarted.current = true;
     fetch("/api/coach-avatar", { method: "GET" })
       .then((r) => (r.ok ? r.json() : null))
       .then((data: { url: string | null } | null) => {
-        if (data?.url) {
-          setImageUrl(data.url);
-          lastFetchedSig.current = sig;
-        }
+        if (data?.url) setImageUrl(data.url);
       })
       .catch(() => {
         /* silent — bootstrap is best-effort */
-      });
-    // intentionally run once on mount; the next user change will trigger the
-    // generation effect below using the latest sig.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+      })
+      .finally(() => setBootstrapped(true));
   }, []);
 
-  React.useEffect(() => {
-    if (sig === lastFetchedSig.current) return;
+  const generate = React.useCallback(() => {
+    abortRef.current?.abort();
+    const ac = new AbortController();
+    abortRef.current = ac;
+    setLoading(true);
+    setFailed(false);
+    setErrorReason(null);
 
-    const handle = window.setTimeout(() => {
-      abortRef.current?.abort();
-      const ac = new AbortController();
-      abortRef.current = ac;
-      setLoading(true);
-      setFailed(false);
-      setErrorReason(null);
+    const body = JSON.stringify({
+      appearance: latest.current.appearance,
+      persona: latest.current.persona,
+      coachName: latest.current.coachName,
+    });
 
-      fetch("/api/coach-avatar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ appearance, persona, coachName }),
-        signal: ac.signal,
+    fetch("/api/coach-avatar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      signal: ac.signal,
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const payload = await res.json().catch(() => null);
+          const serverMsg = payload?.error ?? `HTTP ${res.status}`;
+          throw new Error(`${res.status} — ${serverMsg}`);
+        }
+        return res.json() as Promise<{ url: string }>;
       })
-        .then(async (res) => {
-          if (!res.ok) {
-            const payload = await res.json().catch(() => null);
-            const serverMsg = payload?.error ?? `HTTP ${res.status}`;
-            throw new Error(`${res.status} — ${serverMsg}`);
-          }
-          return res.json() as Promise<{ url: string }>;
-        })
-        .then(({ url }) => {
-          lastFetchedSig.current = sig;
-          setImageUrl(url);
-        })
-        .catch((err: unknown) => {
-          if (err instanceof DOMException && err.name === "AbortError") return;
-          setFailed(true);
-          setErrorReason(err instanceof Error ? err.message : String(err));
-        })
-        .finally(() => setLoading(false));
-    }, 700);
+      .then(({ url }) => setImageUrl(url))
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === "AbortError") return;
+        setFailed(true);
+        setErrorReason(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-    return () => window.clearTimeout(handle);
-  }, [sig, appearance, persona, coachName]);
-
-  return { imageUrl, loading, failed, generated: imageUrl !== null, errorReason };
+  return {
+    imageUrl,
+    loading,
+    failed,
+    generated: imageUrl !== null,
+    errorReason,
+    generate,
+    bootstrapped,
+  };
 }
 
 export function CoachAvatarPreview({
@@ -230,8 +239,8 @@ export function CoachAvatarPreview({
         {generation.failed
           ? `Génération IA indisponible — visuel d'approche affiché. (${generation.errorReason ?? "raison inconnue"})`
           : generation.generated
-            ? "Portrait généré par IA d'après tes critères. Modifie un attribut pour relancer."
-            : "Aperçu provisoire. Le portrait IA se génère dès que tu ajustes un critère."}
+            ? "Portrait IA. Modifie un attribut puis relance la génération si besoin."
+            : "Sélectionne tes critères ci-contre puis clique sur « Générer mon avatar »."}
       </p>
     </div>
   );

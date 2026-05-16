@@ -1,7 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Loader2, Wand2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import {
@@ -190,17 +191,18 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
 
       {/* Desktop: sticky right column. Mobile: fixed floating bottom-right. */}
       <aside className="hidden lg:block">
-        <div className="sticky top-4">
+        <div className="sticky top-4 space-y-3">
           <CoachAvatarPreview
             appearance={state}
             persona={persona}
             coachName={coachName}
             generation={generation}
           />
+          <GenerateButton generation={generation} />
         </div>
       </aside>
       <div className="pointer-events-none fixed bottom-20 right-3 z-30 w-[150px] sm:w-[180px] lg:hidden">
-        <div className="pointer-events-auto">
+        <div className="pointer-events-auto space-y-2">
           <CoachAvatarPreview
             appearance={state}
             persona={persona}
@@ -208,9 +210,40 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
             generation={generation}
             className="!p-2 !rounded-2xl"
           />
+          <GenerateButton generation={generation} compact />
         </div>
       </div>
     </div>
+  );
+}
+
+function GenerateButton({
+  generation,
+  compact = false,
+}: {
+  generation: ReturnType<typeof useCoachPreview>;
+  compact?: boolean;
+}) {
+  const label = generation.loading
+    ? "Génération…"
+    : generation.generated
+      ? "Régénérer l'avatar"
+      : "Générer mon avatar";
+  return (
+    <Button
+      type="button"
+      onClick={generation.generate}
+      disabled={generation.loading || !generation.bootstrapped}
+      className={compact ? "w-full text-xs" : "w-full"}
+      size={compact ? "sm" : "default"}
+    >
+      {generation.loading ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Wand2 className="mr-2 h-4 w-4" />
+      )}
+      {label}
+    </Button>
   );
 }
 
