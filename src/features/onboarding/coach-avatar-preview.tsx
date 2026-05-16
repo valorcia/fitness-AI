@@ -282,9 +282,13 @@ export function useCoachPreview(
           signal: ac.signal,
         });
         if (!submitRes.ok) {
-          const payload = await submitRes.json().catch(() => null);
+          const payload = (await submitRes.json().catch(() => null)) as {
+            error?: string;
+            heygenRaw?: string;
+          } | null;
           const serverMsg = payload?.error ?? `HTTP ${submitRes.status}`;
-          throw new Error(`${submitRes.status} — ${serverMsg}`);
+          const raw = payload?.heygenRaw ? ` | raw: ${payload.heygenRaw}` : "";
+          throw new Error(`${submitRes.status} — ${serverMsg}${raw}`);
         }
         const submitData = (await submitRes.json()) as {
           url?: string;

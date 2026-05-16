@@ -240,7 +240,7 @@ export async function POST(req: Request) {
       const text = await submit.text();
       logger.error("coach_avatar_heygen_submit_http", {
         status: submit.status,
-        body: text.slice(0, 500),
+        body: text, // full body — keep visibility into HeyGen's actual error
         sentPayload: heygenReq,
       });
       let detail: string | null = null;
@@ -259,6 +259,9 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error: `HeyGen submit failed (HTTP ${submit.status})${detail ? ` — ${detail}` : ""}`,
+          // Ship the unparsed body too so the UI can show it when `detail` is
+          // empty or generic (e.g. "invalid_parameter" with no specific message).
+          heygenRaw: text.slice(0, 1000),
           sentPayload: heygenReq,
         },
         { status: 502 },
