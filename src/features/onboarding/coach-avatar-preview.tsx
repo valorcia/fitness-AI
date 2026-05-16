@@ -53,6 +53,37 @@ const OUTFIT_COLOR_HEX: Record<string, string> = {
   purple: "#8B5CF6",
 };
 
+const COACH_APPEARANCE_KEYS = [
+  "coachPreferredGender",
+  "coachPreferredEthnicity",
+  "coachPreferredHairColor",
+  "coachPreferredHairStyle",
+  "coachPreferredFaceShape",
+  "coachPreferredEyeColor",
+  "coachPreferredEyeShape",
+  "coachPreferredSkinTone",
+  "coachPreferredMouth",
+  "coachPreferredNose",
+  "coachPreferredBodyHeight",
+  "coachPreferredBodyShape",
+  "coachOutfitTop",
+  "coachOutfitBottom",
+  "coachOutfitColor",
+  "coachOutfitStyle",
+] as const;
+
+/** Pick only the coach-related string fields. The wizard hands us its full
+ * onboarding state which contains numbers, booleans and arrays the avatar
+ * endpoint must never see. */
+function pickCoachAppearance(input: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of COACH_APPEARANCE_KEYS) {
+    const v = input[k];
+    if (typeof v === "string" && v.length > 0) out[k] = v;
+  }
+  return out;
+}
+
 export function appearanceSignature(a: CoachAppearance, persona: Persona) {
   return [
     persona,
@@ -127,7 +158,9 @@ export function useCoachPreview(
     setErrorReason(null);
 
     const body = JSON.stringify({
-      appearance: latest.current.appearance,
+      appearance: pickCoachAppearance(
+        latest.current.appearance as unknown as Record<string, unknown>,
+      ),
       persona: latest.current.persona,
       coachName: latest.current.coachName,
     });
