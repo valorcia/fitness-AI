@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Sparkles, Loader2, Wand2, Upload, X, Image as ImageIcon } from "lucide-react";
+import { Sparkles, Loader2, Wand2, Upload, X, Image as ImageIcon, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -64,11 +64,14 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <div>
             <p className="font-semibold">
-              Composez l'apparence physique de votre coach.
+              {generation.sourcePhotoUrl
+                ? "Photo importée — il ne reste qu'à choisir la tenue."
+                : "Composez l'apparence physique de votre coach."}
             </p>
             <p className="mt-1 opacity-80">
-              Un visage photoréaliste IA sera généré sur la base de vos critères. Indifférent =
-              l'IA choisit pour vous. Le rendu se met à jour à chaque modification.
+              {generation.sourcePhotoUrl
+                ? "L'IA s'inspire de votre photo pour le visage, les cheveux et la silhouette. Vous choisissez la tenue de sport ci-dessous."
+                : "Un visage photoréaliste IA sera généré sur la base de vos critères. Indifférent = l'IA choisit pour vous. Le rendu se met à jour à chaque modification."}
             </p>
           </div>
         </div>
@@ -92,6 +95,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       )}
 
+      {!generation.sourcePhotoUrl && (
       <Section title="Cheveux" emoji="💇">
         <Picker
           label="Couleur"
@@ -107,6 +111,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           onChange={(v) => update("coachPreferredHairStyle", v)}
         />
       </Section>
+      )}
 
       {!generation.sourcePhotoUrl && (
       <Section title="Visage" emoji="🙂">
@@ -151,6 +156,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       )}
 
+      {!generation.sourcePhotoUrl && (
       <Section title="Corps" emoji="🏋️">
         <Picker
           label="Taille"
@@ -165,6 +171,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           onChange={(v) => update("coachPreferredBodyShape", v)}
         />
       </Section>
+      )}
 
       <Section title="Tenue sportive" emoji="👕">
         <Picker
@@ -228,10 +235,12 @@ function PhotoUploadCard({
 }: {
   generation: ReturnType<typeof useCoachPreview>;
 }) {
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = React.useRef<HTMLInputElement | null>(null);
   const hasPhoto = Boolean(generation.sourcePhotoUrl);
 
-  const onPick = () => inputRef.current?.click();
+  const onPickFile = () => fileInputRef.current?.click();
+  const onPickCamera = () => cameraInputRef.current?.click();
   const onFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = ""; // allow re-uploading the same filename
@@ -246,9 +255,17 @@ function PhotoUploadCard({
       )}
     >
       <input
-        ref={inputRef}
+        ref={fileInputRef}
         type="file"
         accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={onFile}
+      />
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        capture="user"
         className="hidden"
         onChange={onFile}
       />
@@ -275,7 +292,7 @@ function PhotoUploadCard({
           <p className="mt-1 text-xs text-muted-foreground">
             {hasPhoto
               ? "L'IA s'inspire de ce visage. Le coach généré ne sera pas identique : c'est une réinterprétation, jamais une copie."
-              : "Importe un visage que tu trouves inspirant. HeyGen génère un coach proche, sans copier les traits à l'identique."}
+              : "Prenez-vous en photo ou importez une image que vous aimez. HeyGen génère un coach proche, sans copier les traits à l'identique."}
           </p>
           {generation.uploadError && (
             <p className="mt-1 text-xs text-destructive">{generation.uploadError}</p>
@@ -286,15 +303,26 @@ function PhotoUploadCard({
               variant={hasPhoto ? "outline" : "default"}
               size="sm"
               className="text-xs"
-              onClick={onPick}
+              onClick={onPickCamera}
               disabled={generation.uploading || !generation.bootstrapped}
             >
               {generation.uploading ? (
                 <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               ) : (
-                <Upload className="mr-1.5 h-3.5 w-3.5" />
+                <Camera className="mr-1.5 h-3.5 w-3.5" />
               )}
-              {hasPhoto ? "Remplacer la photo" : "Importer une photo"}
+              {hasPhoto ? "Reprendre une photo" : "Prendre une photo"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="text-xs"
+              onClick={onPickFile}
+              disabled={generation.uploading || !generation.bootstrapped}
+            >
+              <Upload className="mr-1.5 h-3.5 w-3.5" />
+              {hasPhoto ? "Importer une autre" : "Importer une photo"}
             </Button>
             {hasPhoto && (
               <Button
