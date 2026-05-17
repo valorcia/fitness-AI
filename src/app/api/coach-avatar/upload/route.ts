@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { rateLimits } from "@/lib/redis";
 
 export const runtime = "nodejs";
 // Upload (~2s) + group creation (~1s) + a few status polls (up to ~10s) = ~13s max
@@ -26,6 +27,19 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.id;
+
+  // Protect HeyGen credits: cap photo uploads (each one creates an avatar
+  // group, which counts against your quota).
+  const rl = await rateLimits.coachAvatarUpload.limit(userId);
+  if (!rl.success) {
+    return NextResponse.json(
+      {
+        error:
+          "Limite d'uploads atteinte (3 / heure). Réessayez plus tard pour protéger vos crédits HeyGen.",
+      },
+      { status: 429 },
+    );
+  }
 
   const apiKey = process.env.HEYGEN_API_KEY;
   if (!apiKey) {

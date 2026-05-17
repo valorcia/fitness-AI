@@ -30,4 +30,6 @@ export const rateLimits = {
   sos: createRateLimit("sos", 5, "1 h"),
   auth: createRateLimit("auth", 10, "15 m"),
   checkout: createRateLimit("checkout", 10, "1 h"),
+  coachAvatarGenerate: createRateLimit("coach-avatar-generate", 5, "1 h"),
+  coachAvatarUpload: createRateLimit("coach-avatar-upload", 3, "1 h"),
 };

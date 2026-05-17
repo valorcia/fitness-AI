@@ -3,6 +3,7 @@ import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logger } from "@/lib/logger";
+import { rateLimits } from "@/lib/redis";
 import { buildHeyGenPhotoRequest } from "@/lib/coach/heygen-prompt";
 
 export const runtime = "nodejs";
@@ -71,6 +72,18 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
   const userId = session.user.id;
+
+  // Protect HeyGen credits: hard cap on generations per user per hour.
+  const rl = await rateLimits.coachAvatarGenerate.limit(userId);
+  if (!rl.success) {
+    return NextResponse.json(
+      {
+        error:
+          "Limite de générations atteinte (5 / heure). Réessayez plus tard pour protéger vos crédits HeyGen.",
+      },
+      { status: 429 },
+    );
+  }
 
   const apiKey = process.env.HEYGEN_API_KEY;
   if (!apiKey) {
@@ -207,24 +220,44 @@ export async function POST(req: Request) {
             });
           }
         }
-        // look/generate failed → fall through to text generation below
-        logger.warn("coach_avatar_look_fallback", {
+        // look/generate failed — DO NOT fall through to Branch B: that would
+        // burn a second HeyGen credit. Surface the error so the user can retry
+        // explicitly (after removing the photo if they want text generation).
+        logger.warn("coach_avatar_look_failed", {
           status: submit.status,
           body: submitText.slice(0, 300),
           groupId,
         });
+        return NextResponse.json(
+          {
+            error: `Génération photo-locked impossible (HTTP ${submit.status}). Retirez la photo pour générer un avatar à partir des critères texte.`,
+            heygenRaw: submitText.slice(0, 500),
+          },
+          { status: 502 },
+        );
       } catch (e) {
-        logger.warn("coach_avatar_look_exception_fallback", {
+        logger.warn("coach_avatar_look_exception", {
           error: e instanceof Error ? e.message : String(e),
         });
+        return NextResponse.json(
+          { error: "La génération photo-locked a échoué. Retirez la photo et réessayez." },
+          { status: 502 },
+        );
       }
     } else {
-      logger.info("coach_avatar_group_not_ready_fallback", { groupId });
+      logger.info("coach_avatar_group_not_ready", { groupId });
+      return NextResponse.json(
+        {
+          error:
+            "Le modèle de votre photo est encore en cours de préparation chez HeyGen. Réessayez dans 30 secondes.",
+        },
+        { status: 503 },
+      );
     }
   }
   void usedFaceLock; // used above when returning early
 
-  // ── Branch B — text-only generation (no source photo, or group fallback) ──
+  // ── Branch B — text-only generation (no source photo uploaded) ──
   try {
     const submit = await fetch("https://api.heygen.com/v2/photo_avatar/photo/generate", {
       method: "POST",
