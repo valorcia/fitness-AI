@@ -242,77 +242,26 @@ export function useCoachPreview(
       coachName: latest.current.coachName,
     });
 
-    const POLL_INTERVAL_MS = 2000;
-    const POLL_DEADLINE_MS = 90_000; // 90s total budget client-side
-
-    const pollUntilDone = async (
-      generationId: string,
-      signature: string | undefined,
-      deadline: number,
-    ): Promise<string> => {
-      while (Date.now() < deadline) {
-        if (ac.signal.aborted) throw new DOMException("Aborted", "AbortError");
-        await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-        const params = new URLSearchParams({ id: generationId });
-        if (signature) params.set("sig", signature);
-        const res = await fetch(`/api/coach-avatar?${params.toString()}`, {
-          method: "GET",
-          signal: ac.signal,
-        });
-        if (!res.ok) continue;
-        const data = (await res.json()) as {
-          status?: string;
-          url?: string;
-          error?: string;
-        };
-        if (data.status === "success" && data.url) return data.url;
-        if (data.status === "failed") {
-          throw new Error(data.error ?? "HeyGen generation failed");
-        }
-      }
-      throw new Error("Generation timed out (90s)");
-    };
-
     (async () => {
       try {
-        const submitRes = await fetch("/api/coach-avatar", {
+        // fal.ai is synchronous (~5-10s) — single round-trip, no polling.
+        const res = await fetch("/api/coach-avatar", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body,
           signal: ac.signal,
         });
-        if (!submitRes.ok) {
-          const payload = (await submitRes.json().catch(() => null)) as {
+        if (!res.ok) {
+          const payload = (await res.json().catch(() => null)) as {
             error?: string;
-            heygenRaw?: string;
+            upgrade?: boolean;
           } | null;
-          const serverMsg = payload?.error ?? `HTTP ${submitRes.status}`;
-          const raw = payload?.heygenRaw ? ` | raw: ${payload.heygenRaw}` : "";
-          throw new Error(`${submitRes.status} — ${serverMsg}${raw}`);
+          const serverMsg = payload?.error ?? `HTTP ${res.status}`;
+          throw new Error(`${res.status} — ${serverMsg}`);
         }
-        const submitData = (await submitRes.json()) as {
-          url?: string;
-          generationId?: string;
-          signature?: string;
-          cached?: boolean;
-        };
-
-        // Cache hit short-circuit — server already had the URL.
-        if (submitData.url) {
-          setImageUrl(submitData.url);
-          return;
-        }
-
-        if (!submitData.generationId) {
-          throw new Error("No generationId returned");
-        }
-
-        const finalUrl = await pollUntilDone(
-          submitData.generationId,
-          submitData.signature,
-          Date.now() + POLL_DEADLINE_MS,
-        );
-        setImageUrl(finalUrl);
+        const data = (await res.json()) as { url?: string };
+        if (!data.url) throw new Error("Aucune URL renvoyée par le serveur");
+        setImageUrl(data.url);
       } catch (err: unknown) {
         if (err instanceof DOMException && err.name === "AbortError") return;
         setFailed(true);

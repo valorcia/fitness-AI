@@ -10,7 +10,14 @@ export type Entitlements = {
   elitePrograms: boolean;
   adsFree: boolean;
   prioritySupport: boolean;
+  /** Allow uploading a custom photo + per-criteria avatar customization. FREE = 10 standard coaches only. */
+  customAvatar: boolean;
 };
+
+/** Convenience: gate features by user's current tier. */
+export function isPaid(tier: PlanTier): boolean {
+  return tier !== "FREE";
+}
 
 export const ENTITLEMENTS: Record<PlanTier, Entitlements> = {
   FREE: {
@@ -23,6 +30,7 @@ export const ENTITLEMENTS: Record<PlanTier, Entitlements> = {
     elitePrograms: false,
     adsFree: false,
     prioritySupport: false,
+    customAvatar: false,
   },
   PREMIUM: {
     tier: "PREMIUM",
@@ -34,6 +42,7 @@ export const ENTITLEMENTS: Record<PlanTier, Entitlements> = {
     elitePrograms: false,
     adsFree: true,
     prioritySupport: false,
+    customAvatar: true,
   },
   PRO: {
     tier: "PRO",
@@ -45,6 +54,7 @@ export const ENTITLEMENTS: Record<PlanTier, Entitlements> = {
     elitePrograms: false,
     adsFree: true,
     prioritySupport: true,
+    customAvatar: true,
   },
   ELITE: {
     tier: "ELITE",
@@ -56,6 +66,7 @@ export const ENTITLEMENTS: Record<PlanTier, Entitlements> = {
     elitePrograms: true,
     adsFree: true,
     prioritySupport: true,
+    customAvatar: true,
   },
 };
 

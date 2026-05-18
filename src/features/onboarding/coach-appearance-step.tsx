@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
-import { Sparkles, Loader2, Wand2, Upload, X, Image as ImageIcon, Camera } from "lucide-react";
+import { Sparkles, Loader2, Wand2, Upload, X, Image as ImageIcon, Camera, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { StandardCoachGallery, type StandardCoachItem } from "@/features/coach/standard-coach-gallery";
 import {
   BODY_HEIGHT_OPTIONS,
   BODY_SHAPE_OPTIONS,
@@ -52,9 +53,23 @@ type Props = {
   update: <K extends keyof CoachAppearanceState>(k: K, v: CoachAppearanceState[K]) => void;
   persona: Persona;
   coachName: string;
+  /** Selected slug from the standard coach gallery. */
+  selectedCoachSlug?: string | null;
+  /** Called when user picks a different standard coach. */
+  onSelectCoach?: (slug: string, coach: StandardCoachItem) => void;
+  /** When false, hides the photo upload + per-criteria customization (gated to PREMIUM+). */
+  canCustomize?: boolean;
 };
 
-export function CoachAppearanceStep({ state, update, persona, coachName }: Props) {
+export function CoachAppearanceStep({
+  state,
+  update,
+  persona,
+  coachName,
+  selectedCoachSlug,
+  onSelectCoach,
+  canCustomize = false,
+}: Props) {
   const generation = useCoachPreview(state, persona, coachName);
 
   return (
@@ -63,22 +78,50 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
         <div className="flex items-start gap-2 rounded-xl border border-primary/30 bg-primary/5 p-3 text-xs text-primary">
           <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           <div>
-            <p className="font-semibold">
-              {generation.sourcePhotoUrl
-                ? "Photo importée — il ne reste qu'à choisir la tenue."
-                : "Composez l'apparence physique de votre coach."}
-            </p>
+            <p className="font-semibold">Choisissez votre coach</p>
             <p className="mt-1 opacity-80">
-              {generation.sourcePhotoUrl
-                ? "L'IA s'inspire de votre photo pour le visage, les cheveux et la silhouette. Vous choisissez la tenue de sport ci-dessous."
-                : "Un visage photoréaliste IA sera généré sur la base de vos critères. Indifférent = l'IA choisit pour vous. Le rendu se met à jour à chaque modification."}
+              {canCustomize
+                ? "Sélectionnez l'un des 10 coachs ou personnalisez le vôtre ci-dessous (Premium)."
+                : "Sélectionnez l'un des 10 coachs ci-dessous. La personnalisation totale (photo, traits, morphologie) est réservée aux abonnés Premium."}
             </p>
           </div>
         </div>
 
-        <PhotoUploadCard generation={generation} />
+        <section className="rounded-2xl border border-border bg-card p-4">
+          <h3 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide">
+            <span className="text-base">🎽</span>
+            Les 10 coachs
+            <span className="ml-1 rounded-full bg-green-500/15 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-green-600 dark:text-green-400">
+              Inclus
+            </span>
+          </h3>
+          <StandardCoachGallery
+            value={selectedCoachSlug ?? null}
+            onChange={(slug, coach) => onSelectCoach?.(slug, coach)}
+          />
+        </section>
 
-      {!generation.sourcePhotoUrl && (
+        {!canCustomize && (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-400/40 bg-amber-50 dark:bg-amber-950/20 p-4 text-sm">
+            <Crown className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+            <div>
+              <p className="font-semibold text-amber-900 dark:text-amber-200">
+                Personnalisation totale avec Premium
+              </p>
+              <p className="mt-1 text-amber-800/90 dark:text-amber-300/90">
+                Avec un abonnement Premium, vous pouvez importer une photo de votre choix
+                comme inspiration, ou définir précisément les traits, la morphologie et
+                la tenue de votre coach.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {canCustomize && (
+        <PhotoUploadCard generation={generation} />
+        )}
+
+      {canCustomize && !generation.sourcePhotoUrl && (
       <Section title="Identité" emoji="🪪">
         <Picker
           label="Sexe"
@@ -95,7 +138,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       )}
 
-      {!generation.sourcePhotoUrl && (
+      {canCustomize && !generation.sourcePhotoUrl && (
       <Section title="Cheveux" emoji="💇">
         <Picker
           label="Couleur"
@@ -113,7 +156,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       )}
 
-      {!generation.sourcePhotoUrl && (
+      {canCustomize && !generation.sourcePhotoUrl && (
       <Section title="Visage" emoji="🙂">
         <Picker
           label="Forme du visage"
@@ -156,7 +199,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       )}
 
-      {!generation.sourcePhotoUrl && (
+      {canCustomize && !generation.sourcePhotoUrl && (
       <Section title="Corps" emoji="🏋️">
         <Picker
           label="Taille"
@@ -173,6 +216,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
       </Section>
       )}
 
+      {canCustomize && (
       <Section title="Tenue sportive" emoji="👕">
         <Picker
           label="Haut"
@@ -200,9 +244,11 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           onChange={(v) => update("coachOutfitStyle", v)}
         />
       </Section>
+      )}
       </div>
 
-      {/* Desktop: sticky right column. Mobile: fixed floating bottom-right. */}
+      {/* Desktop preview column — only shown when user is customizing (paid). */}
+      {canCustomize && (
       <aside className="hidden lg:block">
         <div className="sticky top-4 space-y-3">
           <CoachAvatarPreview
@@ -214,6 +260,8 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           <GenerateButton generation={generation} />
         </div>
       </aside>
+      )}
+      {canCustomize && (
       <div className="pointer-events-none fixed bottom-20 right-3 z-30 w-[150px] sm:w-[180px] lg:hidden">
         <div className="pointer-events-auto space-y-2">
           <CoachAvatarPreview
@@ -226,6 +274,7 @@ export function CoachAppearanceStep({ state, update, persona, coachName }: Props
           <GenerateButton generation={generation} compact />
         </div>
       </div>
+      )}
     </div>
   );
 }

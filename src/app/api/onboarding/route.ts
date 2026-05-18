@@ -124,6 +124,7 @@ export async function POST(req: Request) {
         coachPersona: data.coachPersona,
         coachName: data.coachName,
         coachAvatar: data.coachAvatar,
+        coachProfileSlug: data.coachProfileSlug,
         coachPreferredGender: data.coachPreferredGender,
         coachPreferredEthnicity: data.coachPreferredEthnicity,
         coachPreferredHairColor: data.coachPreferredHairColor,

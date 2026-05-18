@@ -103,6 +103,7 @@ export const onboardingSchema = z
   coachPersona: z.enum(["STRICT", "FUN", "ZEN", "MILITARY", "ELITE"]).default("FUN"),
   coachName: z.string().min(1).max(30).default("Pulse"),
   coachAvatar: z.string().min(1).max(30).default("default"),
+  coachProfileSlug: z.string().min(1).max(60),
 
   // Coach appearance (sent as plain strings — catalog enforced client-side)
   coachPreferredGender: z.string().max(30).optional(),

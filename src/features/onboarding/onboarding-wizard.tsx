@@ -93,6 +93,7 @@ type State = {
   coachPersona: "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
   coachName: string;
   coachAvatar: string;
+  coachProfileSlug: string;
   coachPreferredGender: string;
   coachPreferredEthnicity: string;
   coachPreferredHairColor: string;
@@ -266,6 +267,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
     coachPersona: "FUN",
     coachName: "Pulse",
     coachAvatar: "default",
+    coachProfileSlug: "",
     coachPreferredGender: "any",
     coachPreferredEthnicity: "any",
     coachPreferredHairColor: "any",
@@ -338,7 +340,7 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
       case "notifications":
         return true;
       case "coach":
-        return state.coachName.trim().length > 0;
+        return state.coachName.trim().length > 0 && state.coachProfileSlug.length > 0;
       case "consent":
         return (
           state.consentMedicalDisclaimer &&
@@ -842,6 +844,17 @@ export function OnboardingWizard({ firstName }: { firstName: string }) {
                   }
                   persona={state.coachPersona}
                   coachName={state.coachName}
+                  selectedCoachSlug={state.coachProfileSlug || null}
+                  onSelectCoach={(slug, coach) => {
+                    update("coachProfileSlug", slug);
+                    // Sync persona to the picked coach so the rest of the
+                    // wizard (voice, prompt, etc.) stays consistent.
+                    update("coachPersona", coach.persona);
+                    if (!state.coachName.trim() || state.coachName === "Pulse") {
+                      update("coachName", coach.displayName);
+                    }
+                  }}
+                  canCustomize={false}
                 />
               </>
             )}

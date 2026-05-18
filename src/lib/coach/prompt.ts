@@ -3,50 +3,29 @@ import type { CoachAppearance } from "@/lib/onboarding/coach-appearance";
 type Persona = "STRICT" | "FUN" | "ZEN" | "MILITARY" | "ELITE";
 
 /**
- * Maps onboarding choices to the payload expected by HeyGen Photo Avatar API:
- *   POST https://api.heygen.com/v2/photo_avatar/photo/generate
- *
- * The API accepts `gender`, `age`, `ethnicity`, `pose`, `orientation`, `style`
- * and a free-text `appearance` field. We translate every UI choice into the
- * narrowest schema field when possible, and stuff the rest into `appearance`.
- *
- * Reference: https://docs.heygen.com/reference/photo-avatar-api
+ * Maps onboarding choices to a natural-language prompt suitable for fal.ai
+ * Flux Dev (text-to-image) or PuLID Flux (photo-locked). Unlike the previous
+ * HeyGen mapper, we don't need to fit fixed enums — Flux understands plain
+ * English natural descriptions, so we just stitch them together.
  */
 
-type HeyGenGender = "Man" | "Woman" | "Unspecified";
-type HeyGenAge = "Young Adult" | "Early Middle Age" | "Late Middle Age" | "Senior" | "Unspecified";
-type HeyGenEthnicity =
-  | "White"
-  | "Black"
-  | "Asian American"
-  | "East Asian"
-  | "South Asian"
-  | "South East Asian"
-  | "Middle Eastern"
-  | "Hispanic"
-  | "Pacific"
-  | "Unspecified";
-type HeyGenPose = "half_body" | "close_up" | "full_body";
-type HeyGenOrientation = "square" | "vertical" | "horizontal";
-type HeyGenStyle = "Realistic" | "Pixar" | "Cinematic" | "Vintage" | "Noir" | "Cyberpunk" | "Pop Art";
-
-const GENDER_MAP: Record<string, HeyGenGender> = {
-  male: "Man",
-  female: "Woman",
-  neutral: "Unspecified",
+const GENDER: Record<string, string> = {
+  male: "male",
+  female: "female",
+  neutral: "androgynous",
 };
 
-const ETHNICITY_MAP: Record<string, HeyGenEthnicity> = {
-  european: "White",
-  african: "Black",
-  asian: "East Asian",
-  "asian-american": "Asian American",
-  "south-asian": "South Asian",
-  "southeast-asian": "South East Asian",
-  maghrebi: "Middle Eastern",
-  latino: "Hispanic",
-  pacific: "Pacific",
-  mixed: "Unspecified",
+const ETHNICITY: Record<string, string> = {
+  european: "caucasian",
+  african: "black african",
+  asian: "east asian",
+  "asian-american": "asian american",
+  "south-asian": "south asian",
+  "southeast-asian": "southeast asian",
+  maghrebi: "middle eastern",
+  latino: "latin",
+  pacific: "pacific islander",
+  mixed: "mixed ethnicity",
 };
 
 const HAIR_COLOR: Record<string, string> = {
@@ -181,56 +160,51 @@ const OUTFIT_STYLE: Record<string, string> = {
 };
 
 const PERSONA_VIBE: Record<Persona, string> = {
-  FUN: "warm friendly smile, approachable expression",
-  STRICT: "intense focused gaze, serious expression",
-  ZEN: "calm serene expression, peaceful posture",
-  MILITARY: "disciplined determined expression, upright posture",
-  ELITE: "confident accomplished expression, refined demeanor",
+  FUN: "warm friendly genuine smile, approachable cheerful expression",
+  STRICT: "intense focused serious gaze, no-nonsense expression",
+  ZEN: "calm serene peaceful expression, balanced posture",
+  MILITARY: "disciplined determined no-nonsense expression, upright posture",
+  ELITE: "confident accomplished refined expression, mentor energy",
 };
+
+const SCENE =
+  "standing confidently in a bright modern gym studio with large windows, soft natural daylight from the side, full body shot from head to toe, sharp focus, editorial fitness photography, vertical 9:16 composition, ultra realistic, 4k";
 
 function pick<T extends string>(value: string | undefined, map: Record<string, T>): T | null {
   if (!value || value === "any") return null;
   return map[value] ?? null;
 }
 
-export type HeyGenPhotoRequest = {
-  name: string;
-  age: HeyGenAge;
-  gender: HeyGenGender;
-  ethnicity: HeyGenEthnicity;
-  orientation: HeyGenOrientation;
-  pose: HeyGenPose;
-  style: HeyGenStyle;
-  appearance: string;
+export type BuiltPrompt = {
+  prompt: string;
 };
 
-export type BuiltHeyGenPrompt = {
-  request: HeyGenPhotoRequest;
-  /** Stable signature for caching. */
-  signature: string;
-};
-
-export function buildHeyGenPhotoRequest(
+export function buildCoachPrompt(
   appearance: CoachAppearance,
   persona: Persona,
-  coachName: string,
-): BuiltHeyGenPrompt {
-  const gender = pick(appearance.coachPreferredGender, GENDER_MAP) ?? "Unspecified";
-  const ethnicity = pick(appearance.coachPreferredEthnicity, ETHNICITY_MAP) ?? "Unspecified";
-  const hairColor = pick(appearance.coachPreferredHairColor, HAIR_COLOR);
-  const hairStyle = pick(appearance.coachPreferredHairStyle, HAIR_STYLE);
-  const faceShape = pick(appearance.coachPreferredFaceShape, FACE_SHAPE);
-  const eyeColor = pick(appearance.coachPreferredEyeColor, EYE_COLOR);
-  const eyeShape = pick(appearance.coachPreferredEyeShape, EYE_SHAPE);
-  const skinTone = pick(appearance.coachPreferredSkinTone, SKIN_TONE);
-  const mouth = pick(appearance.coachPreferredMouth, MOUTH);
-  const nose = pick(appearance.coachPreferredNose, NOSE);
-  const bodyHeight = pick(appearance.coachPreferredBodyHeight, BODY_HEIGHT);
-  const bodyShape = pick(appearance.coachPreferredBodyShape, BODY_SHAPE);
+  _coachName: string,
+  opts: { omitFaceTraits?: boolean } = {},
+): BuiltPrompt {
+  const omitFace = opts.omitFaceTraits === true;
+
+  const gender = pick(appearance.coachPreferredGender, GENDER);
+  const ethnicity = omitFace ? null : pick(appearance.coachPreferredEthnicity, ETHNICITY);
+  const hairColor = omitFace ? null : pick(appearance.coachPreferredHairColor, HAIR_COLOR);
+  const hairStyle = omitFace ? null : pick(appearance.coachPreferredHairStyle, HAIR_STYLE);
+  const faceShape = omitFace ? null : pick(appearance.coachPreferredFaceShape, FACE_SHAPE);
+  const eyeColor = omitFace ? null : pick(appearance.coachPreferredEyeColor, EYE_COLOR);
+  const eyeShape = omitFace ? null : pick(appearance.coachPreferredEyeShape, EYE_SHAPE);
+  const skinTone = omitFace ? null : pick(appearance.coachPreferredSkinTone, SKIN_TONE);
+  const mouth = omitFace ? null : pick(appearance.coachPreferredMouth, MOUTH);
+  const nose = omitFace ? null : pick(appearance.coachPreferredNose, NOSE);
+  const bodyHeight = omitFace ? null : pick(appearance.coachPreferredBodyHeight, BODY_HEIGHT);
+  const bodyShape = omitFace ? null : pick(appearance.coachPreferredBodyShape, BODY_SHAPE);
   const top = pick(appearance.coachOutfitTop, OUTFIT_TOP);
   const bottom = pick(appearance.coachOutfitBottom, OUTFIT_BOTTOM);
   const color = pick(appearance.coachOutfitColor, OUTFIT_COLOR);
   const style = pick(appearance.coachOutfitStyle, OUTFIT_STYLE);
+
+  const subject = `Professional ${gender ?? ""} fitness coach`.replace(/\s+/g, " ").trim();
 
   const hair = [hairColor, hairStyle].filter(Boolean).join(" ");
   const hairClause = hair ? `${hair} hair` : null;
@@ -242,7 +216,9 @@ export function buildHeyGenPhotoRequest(
   const outfitClause = outfitParts.length > 0 ? `wearing ${outfitParts.join(" and ")}` : null;
   const styleClause = style ? `, ${style} sportswear style` : "";
 
-  const appearanceParts = [
+  const parts = [
+    subject,
+    ethnicity,
     skinTone,
     hairClause,
     eyeColor,
@@ -253,21 +229,14 @@ export function buildHeyGenPhotoRequest(
     bodyClause,
     outfitClause ? `${outfitClause}${styleClause}` : null,
     PERSONA_VIBE[persona],
-    "professional fitness coach standing in a bright modern gym studio, soft natural daylight, sharp focus on the entire body from head to feet, editorial fitness photography",
+    SCENE,
   ].filter(Boolean);
 
-  const request: HeyGenPhotoRequest = {
-    name: coachName || "Coach",
-    age: "Young Adult",
-    gender,
-    ethnicity,
-    orientation: "vertical",
-    pose: "full_body",
-    style: "Realistic",
-    appearance: appearanceParts.join(", "),
-  };
+  return { prompt: parts.join(", ") };
+}
 
-  const signature = [
+export function appearanceSignature(appearance: Record<string, string>, persona: Persona): string {
+  return [
     persona,
     appearance.coachPreferredGender,
     appearance.coachPreferredEthnicity,
@@ -288,6 +257,4 @@ export function buildHeyGenPhotoRequest(
   ]
     .map((v) => v ?? "any")
     .join("|");
-
-  return { request, signature };
 }
