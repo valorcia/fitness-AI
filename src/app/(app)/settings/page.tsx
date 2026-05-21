@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { CoachSettings } from "@/features/coach/coach-settings";
 import { ThemeToggle } from "@/components/app/theme-toggle";
 import { NotificationSettings } from "@/features/notifications/notification-settings";
+import { getCurrentCoach } from "@/lib/coach/current-coach";
 import Link from "next/link";
 import { PlugZap, RotateCcw, Wand2 } from "lucide-react";
 import { resetOnboarding } from "./reset-onboarding-action";
@@ -16,6 +17,7 @@ export const metadata = { title: "Paramètres" };
 export default async function SettingsPage() {
   const session = await auth();
   const userId = session!.user.id;
+  const coach = await getCurrentCoach(userId);
   const [user, prefs, profile] = await Promise.all([
     prisma.user.findUnique({ where: { id: userId } }),
     prisma.preference.findUnique({ where: { userId } }),
@@ -85,7 +87,14 @@ export default async function SettingsPage() {
           <CardDescription>Choisissez les rappels que vous souhaitez recevoir.</CardDescription>
         </CardHeader>
         <CardContent>
-          <NotificationSettings initial={prefs?.notifications ?? {}} />
+          <NotificationSettings
+            initial={prefs?.notifications ?? {}}
+            coach={{
+              displayName: coach.displayName,
+              portraitUrl: coach.portraitUrl,
+              avatarKey: coach.avatarKey,
+            }}
+          />
         </CardContent>
       </Card>
 

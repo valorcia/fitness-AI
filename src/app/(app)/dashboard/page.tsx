@@ -8,7 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { TopTabs } from "@/components/app/top-tabs";
 import { CoachChat } from "@/features/coach/coach-chat";
 import { CoachGreetingCard } from "@/features/coach/coach-greeting-card";
-import { getCurrentCoach, timeBasedGreeting } from "@/lib/coach/current-coach";
+import { StreakCelebrationTrigger } from "@/features/coach/streak-celebration-trigger";
+import { getCurrentCoach } from "@/lib/coach/current-coach";
+import { buildContextualGreeting } from "@/lib/coach/greeting-context";
 import { formatDuration } from "@/lib/utils";
 import { Apple, Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
@@ -88,9 +90,26 @@ export default async function DashboardPage() {
   const completedThisWeek = last7.length;
 
   const coach = await getCurrentCoach(userId);
-  const greet = timeBasedGreeting();
   const firstName = profile?.firstName?.trim() || session?.user?.name?.split(" ")[0] || "athlète";
-  const greetingMessage = coach.tagline || greet.mood;
+
+  // Compute coach context for a personalized one-liner.
+  const lastWorkout = await prisma.workout.findFirst({
+    where: { userId, status: "COMPLETED" },
+    orderBy: { completedAt: "desc" },
+    select: { completedAt: true },
+  });
+  const totalWorkouts = await prisma.workout.count({ where: { userId, status: "COMPLETED" } });
+  const daysSinceLastWorkout = lastWorkout?.completedAt
+    ? Math.floor((Date.now() - lastWorkout.completedAt.getTime()) / (24 * 3600 * 1000))
+    : null;
+  const greetingMessage = buildContextualGreeting({
+    firstName,
+    persona: coach.persona,
+    totalWorkouts,
+    daysSinceLastWorkout,
+    currentStreak: streak?.current ?? 0,
+    completedThisWeek,
+  });
   const nextCallout = firstPlanned
     ? `Prochaine séance : ${firstPlanned.type ?? "à venir"}`
     : completedThisWeek === 0
@@ -99,6 +118,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="grid gap-6">
+      <StreakCelebrationTrigger
+        currentStreak={streak?.current ?? 0}
+        coachName={coach.displayName}
+        persona={coach.persona}
+        portraitUrl={coach.portraitUrl}
+        fallbackKey={coach.avatarKey}
+      />
       <CoachGreetingCard
         firstName={firstName}
         coachName={coach.displayName}
