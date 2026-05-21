@@ -13,11 +13,20 @@ import type { Workout, WorkoutSet, Exercise, WorkoutFeedback } from "@prisma/cli
 import { FeedbackForm } from "./feedback-form";
 import { ExerciseIllustration } from "@/components/exercise/exercise-illustration";
 import { ExerciseDemo } from "@/components/exercise/exercise-demo";
+import { CoachCueBubble } from "@/features/coach/coach-cue-bubble";
 
 type SetWithExercise = WorkoutSet & { exercise: Exercise };
-type Props = { workout: Workout & { sets: SetWithExercise[]; feedback: WorkoutFeedback | null } };
+type Coach = {
+  displayName: string;
+  portraitUrl: string | null;
+  avatarKey: string;
+};
+type Props = {
+  workout: Workout & { sets: SetWithExercise[]; feedback: WorkoutFeedback | null };
+  coach?: Coach;
+};
 
-export function WorkoutPlayer({ workout }: Props) {
+export function WorkoutPlayer({ workout, coach }: Props) {
   const router = useRouter();
   const [activeIdx, setActiveIdx] = React.useState(() =>
     Math.max(0, workout.sets.findIndex((s) => !s.completed)),
@@ -167,12 +176,26 @@ export function WorkoutPlayer({ workout }: Props) {
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-border/60 bg-secondary/40 p-4 text-sm text-muted-foreground">
-                Cues :{" "}
-                {activeSet.exercise.cues.length
-                  ? activeSet.exercise.cues.join(" · ")
-                  : "Bonne posture. Respiration rythmée."}
-              </div>
+              {coach ? (
+                <CoachCueBubble
+                  portraitUrl={coach.portraitUrl}
+                  coachName={coach.displayName}
+                  fallbackKey={coach.avatarKey}
+                  active={voiceOn && restSecondsLeft === null}
+                  message={
+                    activeSet.exercise.cues.length
+                      ? activeSet.exercise.cues.join(" · ")
+                      : "Bonne posture. Respiration rythmée."
+                  }
+                />
+              ) : (
+                <div className="rounded-2xl border border-border/60 bg-secondary/40 p-4 text-sm text-muted-foreground">
+                  Cues :{" "}
+                  {activeSet.exercise.cues.length
+                    ? activeSet.exercise.cues.join(" · ")
+                    : "Bonne posture. Respiration rythmée."}
+                </div>
+              )}
 
               {restSecondsLeft !== null ? (
                 <div className="rounded-2xl border border-primary/40 bg-primary/10 p-4 text-center">

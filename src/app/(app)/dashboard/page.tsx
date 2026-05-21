@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { TopTabs } from "@/components/app/top-tabs";
 import { CoachChat } from "@/features/coach/coach-chat";
+import { CoachGreetingCard } from "@/features/coach/coach-greeting-card";
+import { getCurrentCoach, timeBasedGreeting } from "@/lib/coach/current-coach";
 import { formatDuration } from "@/lib/utils";
 import { Apple, Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
@@ -85,8 +87,26 @@ export default async function DashboardPage() {
   const firstPlanned = plan?.workouts.find((w) => w.status === "PLANNED");
   const completedThisWeek = last7.length;
 
+  const coach = await getCurrentCoach(userId);
+  const greet = timeBasedGreeting();
+  const firstName = profile?.firstName?.trim() || session?.user?.name?.split(" ")[0] || "athlète";
+  const greetingMessage = coach.tagline || greet.mood;
+  const nextCallout = firstPlanned
+    ? `Prochaine séance : ${firstPlanned.type ?? "à venir"}`
+    : completedThisWeek === 0
+      ? "Aucune séance cette semaine. On s'y met ?"
+      : `${completedThisWeek} séance${completedThisWeek > 1 ? "s" : ""} cette semaine — continue !`;
+
   return (
     <div className="grid gap-6">
+      <CoachGreetingCard
+        firstName={firstName}
+        coachName={coach.displayName}
+        portraitUrl={coach.portraitUrl}
+        message={greetingMessage}
+        callout={nextCallout}
+        fallbackKey={coach.avatarKey}
+      />
       <TopTabs
         tabs={[
           { href: "/dashboard", label: "Tableau de bord" },

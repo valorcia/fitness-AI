@@ -24,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BottomNav } from "./bottom-nav";
 import { ThemeToggle } from "./theme-toggle";
+import { CoachHeaderButton } from "./coach-header-button";
+import { getCurrentCoach } from "@/lib/coach/current-coach";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -43,6 +45,7 @@ const NAV = [
 
 export async function AppShell({ children }: { children: ReactNode }) {
   const session = await auth();
+  const coach = session?.user?.id ? await getCurrentCoach(session.user.id) : null;
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
@@ -103,7 +106,15 @@ export async function AppShell({ children }: { children: ReactNode }) {
           <Link href="/dashboard" className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-muted text-secondary" aria-label="Récent">
             <Clock className="h-5 w-5" />
           </Link>
-          <div className="text-base font-semibold">Entraînements</div>
+          {coach ? (
+            <CoachHeaderButton
+              portraitUrl={coach.portraitUrl}
+              coachName={coach.displayName}
+              fallbackKey={coach.avatarKey}
+            />
+          ) : (
+            <div className="text-base font-semibold">Entraînements</div>
+          )}
           <Link href="/exercises" className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-muted text-secondary" aria-label="Catalogue">
             <ListIcon className="h-5 w-5" />
           </Link>
@@ -115,6 +126,13 @@ export async function AppShell({ children }: { children: ReactNode }) {
             Bonjour, {session?.user?.name?.split(" ")[0] ?? "athlète"} 👋
           </span>
           <div className="flex items-center gap-3">
+            {coach && (
+              <CoachHeaderButton
+                portraitUrl={coach.portraitUrl}
+                coachName={coach.displayName}
+                fallbackKey={coach.avatarKey}
+              />
+            )}
             <ThemeToggle />
             <Button size="sm" variant="outline" asChild>
               <Link href="/safety/sos">SOS</Link>
