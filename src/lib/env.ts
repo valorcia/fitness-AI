@@ -16,6 +16,21 @@ const schema = z.object({
   OPENAI_MODEL_COACH: z.string().default("gpt-4o-mini"),
   OPENAI_MODEL_TTS: z.string().default("tts-1"),
   OPENAI_MODEL_STT: z.string().default("whisper-1"),
+  ANTHROPIC_API_KEY: z.string().optional(),
+  ANTHROPIC_MODEL_COACH: z.string().default("claude-sonnet-4-6"),
+  ANTHROPIC_MODEL_FAST: z.string().default("claude-haiku-4-5-20251001"),
+  VOYAGE_API_KEY: z.string().optional(),
+  VOYAGE_MODEL_EMBED: z.string().default("voyage-3"),
+  // Observability — additional Sentry fields (NEXT_PUBLIC_SENTRY_DSN + base SENTRY_DSN declared lower)
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
+  SENTRY_ORG: z.string().optional(),
+  SENTRY_PROJECT: z.string().optional(),
+  SENTRY_AUTH_TOKEN: z.string().optional(),
+  // Server-side PostHog (NEXT_PUBLIC_* declared lower)
+  POSTHOG_PROJECT_API_KEY: z.string().optional(),
+  // Transactional email
+  RESEND_API_KEY: z.string().optional(),
+  RESEND_FROM_EMAIL: z.string().default("Coachmii-fit <onboarding@coachmii-fit.com>"),
   ELEVENLABS_API_KEY: z.string().optional(),
   HEYGEN_API_KEY: z.string().optional(),
   PEXELS_API_KEY: z.string().optional(),
@@ -24,7 +39,7 @@ const schema = z.object({
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
-  NEXT_PUBLIC_POSTHOG_HOST: z.string().optional(),
+  NEXT_PUBLIC_POSTHOG_HOST: z.string().default("https://eu.i.posthog.com"),
   ADMIN_EMAILS: z.string().default(""),
 });
 

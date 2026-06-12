@@ -12,7 +12,7 @@ datasource db {
   provider   = "postgresql"
   url        = env("DATABASE_URL")
   directUrl  = env("DIRECT_URL")
-  extensions = [pgcrypto, citext]
+  extensions = [pgcrypto, citext, vector]
 }
 
 // ─── Enums ───────────────────────────────────────────────────
@@ -836,17 +836,21 @@ model CoachProfile {
 }
 
 model CoachMemory {
-  id        String   @id @default(cuid())
+  id        String                       @id @default(cuid())
   userId    String
-  kind      String   // injury | goal | preference | life_event | perf_record | conversation
-  content   String   @db.Text
-  weight    Float    @default(1)
-  createdAt DateTime @default(now())
+  kind      String                       // injury | goal | preference | life_event | perf_record | conversation | win | loss
+  content   String                       @db.Text
+  weight    Float                        @default(1)         // 0..10 importance (higher = retrieved more)
+  embedding Unsupported("vector(1024)")?                     // Voyage AI voyage-3 — null until indexed
+  source    String?                                          // "chat" | "workout" | "manual" | "onboarding"
+  createdAt DateTime                     @default(now())
+  lastUsed  DateTime?                                        // updated when memory is retrieved by RAG
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, kind])
   @@index([userId, createdAt])
+  @@index([userId, weight])
 }
 
 model PlanProposal {
