@@ -6,6 +6,8 @@ import { ArrowRight, MessageCircleMore } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CoachPortrait } from "./coach-portrait";
+import { CoachLevelBadge } from "./coach-level-badge";
+import type { CoachLevelInfo } from "@/lib/coach/level";
 
 type Props = {
   firstName: string;
@@ -16,6 +18,8 @@ type Props = {
   /** Optional secondary action callout (e.g. next workout). */
   callout?: string | null;
   fallbackKey?: string;
+  /** Visible level + progress badge — fed from computeCoachLevelInfo. */
+  levelInfo?: CoachLevelInfo;
 };
 
 /**
@@ -29,6 +33,7 @@ export function CoachGreetingCard({
   message,
   callout,
   fallbackKey,
+  levelInfo,
 }: Props) {
   return (
     <Card className="overflow-hidden border-primary/30 bg-gradient-to-br from-primary/5 via-card to-card">
@@ -40,9 +45,12 @@ export function CoachGreetingCard({
           fallbackKey={fallbackKey}
         />
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
-            {coachName} • votre coach
-          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">
+              {coachName} • votre coach
+            </p>
+            {levelInfo && <CoachLevelBadge info={levelInfo} variant="compact" />}
+          </div>
           <p className="mt-1 text-xl font-bold leading-tight">
             Bonjour {firstName} <span aria-hidden>👋</span>
           </p>

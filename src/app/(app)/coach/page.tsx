@@ -1,10 +1,15 @@
 import Image from "next/image";
+import Link from "next/link";
+import { Brain } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { CoachChat } from "@/features/coach/coach-chat";
 import { CoachGallery } from "@/features/coach/coach-gallery";
+import { CoachLevelBadge } from "@/features/coach/coach-level-badge";
+import { computeCoachLevelInfo } from "@/lib/coach/level";
 
 export const metadata = { title: "Coach" };
 
@@ -28,8 +33,32 @@ export default async function CoachPage() {
 
   const coachName = currentCoach?.displayName.split(" ")[0] ?? prefs?.coachName ?? "Pulse";
 
+  const levelInfo = await computeCoachLevelInfo(userId);
+  const memoryCount = await prisma.coachMemory.count({ where: { userId } });
+
   return (
     <div className="mx-auto grid max-w-2xl gap-5">
+      <CoachLevelBadge info={levelInfo} variant="full" />
+
+      <Card>
+        <CardContent className="flex items-center gap-3 p-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <Brain className="h-5 w-5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold">Souvenirs de mon coach</p>
+            <p className="text-xs text-muted-foreground">
+              {memoryCount === 0
+                ? "Aucun souvenir pour le moment — vos conversations alimenteront sa mémoire."
+                : `${memoryCount} souvenir${memoryCount > 1 ? "s" : ""} enregistré${memoryCount > 1 ? "s" : ""}. Vous gardez le contrôle.`}
+            </p>
+          </div>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/coach/memories">Voir</Link>
+          </Button>
+        </CardContent>
+      </Card>
+
       {currentCoach ? (
         <Card>
           <CardContent className="flex items-center gap-4 p-4">

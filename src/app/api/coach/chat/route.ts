@@ -8,7 +8,9 @@ import { logger } from "@/lib/logger";
 import { buildCoachSystem } from "@/lib/coach/system-prompt";
 import { retrieveMemories, recordMemories, extractMemoriesFromConversation } from "@/lib/coach/memory";
 import { applyHealthFilter } from "@/lib/coach/health-filter";
+import { moderateUserInput } from "@/lib/coach/moderation";
 import { getCurrentCoach } from "@/lib/coach/current-coach";
+import { computeCoachLevelInfo } from "@/lib/coach/level";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -24,29 +26,6 @@ const schema = z.object({
     .min(1)
     .max(40),
 });
-
-/**
- * Compute the coach's current relationship level from the user's history.
- * Cheap heuristic — runs every chat call but the queries are all indexed.
- */
-async function computeCoachLevel(userId: string): Promise<1 | 2 | 3 | 4 | 5> {
-  const [workouts, daysSinceCreation] = await Promise.all([
-    prisma.workout.count({ where: { userId, status: "COMPLETED" } }),
-    prisma.user
-      .findUnique({ where: { id: userId }, select: { createdAt: true } })
-      .then((u) =>
-        u?.createdAt
-          ? Math.floor((Date.now() - u.createdAt.getTime()) / (24 * 3600 * 1000))
-          : 0,
-      ),
-  ]);
-
-  if (daysSinceCreation >= 365) return 5;
-  if (daysSinceCreation >= 90 && workouts >= 50) return 4;
-  if (workouts >= 30) return 3;
-  if (workouts >= 10 || daysSinceCreation >= 14) return 2;
-  return 1;
-}
 
 export async function POST(req: Request) {
   const session = await auth();
@@ -76,14 +55,35 @@ export async function POST(req: Request) {
   const lastUserTurn = [...userMessages].reverse().find((m) => m.role === "user");
   const queryText = lastUserTurn?.content ?? "";
 
+  // ── Input moderation — runs BEFORE Claude to avoid spending tokens on
+  //    flagged content, and ensures self-harm is routed to 3114 not Claude.
+  const verdict = await moderateUserInput(queryText);
+  if (!verdict.ok) {
+    const encoder = new TextEncoder();
+    const safetyStream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(encoder.encode(verdict.message));
+        controller.close();
+      },
+    });
+    return new Response(safetyStream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Coach-Safety": verdict.reason,
+      },
+    });
+  }
+
   // ── Fetch everything in parallel ────────────────────────────────────────
-  const [profile, health, coach, memories, coachLevel] = await Promise.all([
+  const [profile, health, coach, memories, levelInfo] = await Promise.all([
     prisma.profile.findUnique({ where: { userId } }),
     prisma.healthProfile.findUnique({ where: { userId } }),
     getCurrentCoach(userId),
     retrieveMemories(userId, queryText, 6),
-    computeCoachLevel(userId),
+    computeCoachLevelInfo(userId),
   ]);
+  const coachLevel = levelInfo.level;
 
   const heightCm = profile?.heightCm;
   const weightKg = profile?.weightKg;

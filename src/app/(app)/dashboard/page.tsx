@@ -8,9 +8,11 @@ import { Progress } from "@/components/ui/progress";
 import { TopTabs } from "@/components/app/top-tabs";
 import { CoachChat } from "@/features/coach/coach-chat";
 import { CoachGreetingCard } from "@/features/coach/coach-greeting-card";
+import { CoachLevelBadge } from "@/features/coach/coach-level-badge";
 import { StreakCelebrationTrigger } from "@/features/coach/streak-celebration-trigger";
 import { getCurrentCoach } from "@/lib/coach/current-coach";
 import { buildContextualGreeting } from "@/lib/coach/greeting-context";
+import { computeCoachLevelInfo } from "@/lib/coach/level";
 import { formatDuration } from "@/lib/utils";
 import { Apple, Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-react";
 import { CATEGORY_META } from "@/lib/exercises/catalog";
@@ -90,6 +92,7 @@ export default async function DashboardPage() {
   const completedThisWeek = last7.length;
 
   const coach = await getCurrentCoach(userId);
+  const levelInfo = await computeCoachLevelInfo(userId);
   const firstName = profile?.firstName?.trim() || session?.user?.name?.split(" ")[0] || "athlète";
 
   // Compute coach context for a personalized one-liner.
@@ -98,7 +101,7 @@ export default async function DashboardPage() {
     orderBy: { completedAt: "desc" },
     select: { completedAt: true },
   });
-  const totalWorkouts = await prisma.workout.count({ where: { userId, status: "COMPLETED" } });
+  const totalWorkouts = levelInfo.completedWorkouts;
   const daysSinceLastWorkout = lastWorkout?.completedAt
     ? Math.floor((Date.now() - lastWorkout.completedAt.getTime()) / (24 * 3600 * 1000))
     : null;
@@ -132,7 +135,9 @@ export default async function DashboardPage() {
         message={greetingMessage}
         callout={nextCallout}
         fallbackKey={coach.avatarKey}
+        levelInfo={levelInfo}
       />
+      <CoachLevelBadge info={levelInfo} variant="full" />
       <TopTabs
         tabs={[
           { href: "/dashboard", label: "Tableau de bord" },
