@@ -1,0 +1,46 @@
+// Central registry of PostHog event names to avoid typos.
+export const PHEvent = {
+  // Onboarding
+  ONBOARDING_STARTED: "onboarding_started",
+  ONBOARDING_STEP_COMPLETED: "onboarding_step_completed",
+  ONBOARDING_COMPLETED: "onboarding_completed",
+
+  // Coach
+  COACH_CHAT_SENT: "coach_chat_sent",
+  COACH_AVATAR_GENERATED: "coach_avatar_generated",
+  COACH_AVATAR_PHOTO_UPLOADED: "coach_avatar_photo_uploaded",
+  COACH_PERSONA_CHANGED: "coach_persona_changed",
+  COACH_LEVEL_UP: "coach_level_up",
+
+  // Workout
+  WORKOUT_STARTED: "workout_started",
+  WORKOUT_COMPLETED: "workout_completed",
+  WORKOUT_ABANDONED: "workout_abandoned",
+  PLAN_GENERATED: "plan_generated",
+
+  // Streak / gamification
+  STREAK_MILESTONE: "streak_milestone",
+  BADGE_EARNED: "badge_earned",
+  XP_EARNED: "xp_earned",
+
+  // Health tracking
+  WEIGHT_LOGGED: "weight_logged",
+  HYDRATION_LOGGED: "hydration_logged",
+  SLEEP_LOGGED: "sleep_logged",
+  NUTRITION_LOGGED: "nutrition_logged",
+
+  // Subscriptions
+  SUBSCRIPTION_STARTED: "subscription_started",
+  SUBSCRIPTION_CANCELLED: "subscription_cancelled",
+  UPGRADE_PROMPT_SHOWN: "upgrade_prompt_shown",
+  UPGRADE_PROMPT_CLICKED: "upgrade_prompt_clicked",
+
+  // Settings & RGPD
+  NOTIFICATION_TOGGLED: "notification_toggled",
+  PUSH_PERMISSION_GRANTED: "push_permission_granted",
+  RGPD_CONSENT_GIVEN: "rgpd_consent_given",
+  MEMORY_DELETED: "memory_deleted",
+  ACCOUNT_DELETED: "account_deleted",
+} as const;
+
+export type PHEventName = (typeof PHEvent)[keyof typeof PHEvent];

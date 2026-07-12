@@ -1,71 +1,78 @@
 import { Resend } from "resend";
-import { env } from "../env";
-import { logger } from "../logger";
+import { env } from "@/lib/env";
 
-const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
+export const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
-export type EmailKind =
-  | "welcome"
-  | "magic_link"
-  | "weekly_recap"
-  | "streak_milestone"
-  | "subscription_changed"
-  | "data_export_ready";
-
-/**
- * Send a transactional email. Silently returns when Resend isn't configured
- * (development without API key) — never throws on the caller path.
- */
 export async function sendEmail(
   to: string,
   subject: string,
   html: string,
-  opts: { kind: EmailKind; replyTo?: string } = { kind: "welcome" },
-): Promise<{ id: string | null }> {
-  if (!resend) {
-    logger.info("email_skipped_no_api_key", { kind: opts.kind, to });
-    return { id: null };
+  opts?: { replyTo?: string },
+): Promise<boolean> {
+  if (!resend) return false;
+  const { error } = await resend.emails.send({
+    from: env.RESEND_FROM_EMAIL,
+    to,
+    subject,
+    html,
+    replyTo: opts?.replyTo,
+  });
+  if (error) {
+    console.error("[Resend]", error);
+    return false;
   }
-  try {
-    const res = await resend.emails.send({
-      from: env.RESEND_FROM_EMAIL,
-      to,
-      subject,
-      html,
-      replyTo: opts.replyTo,
-      tags: [{ name: "kind", value: opts.kind }],
-    });
-    return { id: res.data?.id ?? null };
-  } catch (e) {
-    logger.error("email_send_failed", {
-      kind: opts.kind,
-      error: e instanceof Error ? e.message : String(e),
-    });
-    return { id: null };
-  }
+  return true;
 }
 
-/** Minimal HTML wrapper — branded, mobile-friendly, no external assets. */
-export function renderEmail(opts: {
+// ─── Shared layout ────────────────────────────────────────────
+export function renderEmailLayout({
+  preheader,
+  heading,
+  body,
+  cta,
+  ctaUrl,
+  footer,
+}: {
   preheader: string;
   heading: string;
   body: string;
-  cta?: { label: string; url: string };
+  cta?: string;
+  ctaUrl?: string;
   footer?: string;
-}): string {
-  const cta = opts.cta
-    ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin: 24px auto;"><tr><td align="center" style="background:#0F172A;border-radius:9999px;"><a href="${opts.cta.url}" style="display:inline-block;padding:12px 24px;color:#fff;text-decoration:none;font-weight:600;font-family:system-ui,-apple-system,sans-serif;font-size:15px;">${opts.cta.label}</a></td></tr></table>`
-    : "";
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>${opts.heading}</title></head><body style="margin:0;padding:0;background:#f4f4f5;font-family:system-ui,-apple-system,sans-serif;color:#1e293b;">
-<span style="display:none;visibility:hidden;opacity:0;color:transparent;height:0;width:0;">${opts.preheader}</span>
-<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f4f5;padding:24px;"><tr><td align="center">
-<table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0" style="background:#ffffff;border-radius:16px;padding:32px;max-width:560px;">
-<tr><td>
-<h1 style="margin:0 0 12px;font-size:22px;font-weight:700;color:#0F172A;">${opts.heading}</h1>
-<div style="font-size:15px;line-height:1.6;color:#334155;">${opts.body}</div>
-${cta}
-<p style="margin-top:32px;font-size:12px;color:#94a3b8;line-height:1.5;">${opts.footer ?? "Coachmii-fit — votre compagnon de progression. Vous recevez cet email parce que vous êtes inscrit·e sur l'application. Vous pouvez gérer vos notifications depuis vos paramètres."}</p>
-</td></tr></table>
-</td></tr></table>
+}) {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const ctaButton =
+    cta && ctaUrl
+      ? `<tr><td align="center" style="padding:24px 0">
+          <a href="${ctaUrl}" style="background:#4f46e5;color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-weight:600;font-size:15px;display:inline-block">${cta}</a>
+        </td></tr>`
+      : "";
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${heading}</title></head>
+<body style="margin:0;padding:0;background:#f4f4f8;font-family:'Segoe UI',Arial,sans-serif">
+<div style="display:none;max-height:0;overflow:hidden">${preheader}</div>
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr><td align="center" style="padding:40px 16px">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+  <!-- Header -->
+  <tr><td style="background:linear-gradient(135deg,#4f46e5,#7c3aed);padding:32px 40px;text-align:center">
+    <p style="margin:0;color:#c7d2fe;font-size:12px;letter-spacing:.1em;text-transform:uppercase">Coachmii-fit</p>
+    <h1 style="margin:8px 0 0;color:#fff;font-size:24px;font-weight:700">${heading}</h1>
+  </td></tr>
+  <!-- Body -->
+  <tr><td style="padding:32px 40px;color:#374151;font-size:15px;line-height:1.6">
+    ${body}
+  </td></tr>
+  ${ctaButton ? `<tr><td style="padding:0 40px 8px">${ctaButton}</td></tr>` : ""}
+  <!-- Footer -->
+  <tr><td style="padding:24px 40px;border-top:1px solid #e5e7eb;text-align:center;color:#9ca3af;font-size:12px">
+    ${footer ?? `Coachmii-fit · <a href="${appUrl}/settings" style="color:#9ca3af">Gérer mes notifications</a> · <a href="${appUrl}/settings?tab=rgpd" style="color:#9ca3af">Se désabonner</a>`}
+  </td></tr>
+</table>
+</td></tr>
+</table>
 </body></html>`;
 }

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
+import { ConsentBanner } from "@/features/rgpd/consent-banner";
 import "./globals.css";
 
 const inter = Inter({
@@ -63,7 +64,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen bg-background font-sans text-foreground antialiased">
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <ConsentBanner />
+        </Providers>
       </body>
     </html>
   );

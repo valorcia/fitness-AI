@@ -1,22 +1,18 @@
 import { PostHog } from "posthog-node";
-import { env } from "../env";
+import { env } from "@/lib/env";
 
-/**
- * Server-side PostHog client — used to track events that originate on the
- * server (workout completed, subscription upgraded, memory created, etc.).
- */
-let client: PostHog | null = null;
+let _client: PostHog | null = null;
 
-export function posthogServer(): PostHog | null {
+function getClient(): PostHog | null {
   if (!env.POSTHOG_PROJECT_API_KEY) return null;
-  if (!client) {
-    client = new PostHog(env.POSTHOG_PROJECT_API_KEY, {
+  if (!_client) {
+    _client = new PostHog(env.POSTHOG_PROJECT_API_KEY, {
       host: env.NEXT_PUBLIC_POSTHOG_HOST,
-      flushAt: 1, // serverless friendly
+      flushAt: 1,
       flushInterval: 0,
     });
   }
-  return client;
+  return _client;
 }
 
 export async function trackServer(
@@ -24,8 +20,8 @@ export async function trackServer(
   event: string,
   properties?: Record<string, unknown>,
 ): Promise<void> {
-  const ph = posthogServer();
-  if (!ph) return;
-  ph.capture({ distinctId, event, properties });
-  await ph.shutdown().catch(() => null);
+  const client = getClient();
+  if (!client) return;
+  client.capture({ distinctId, event, properties: properties ?? {} });
+  await client.flush();
 }

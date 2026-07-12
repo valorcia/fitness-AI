@@ -11,6 +11,8 @@ import { applyHealthFilter } from "@/lib/coach/health-filter";
 import { moderateUserInput } from "@/lib/coach/moderation";
 import { getCurrentCoach } from "@/lib/coach/current-coach";
 import { computeCoachLevelInfo } from "@/lib/coach/level";
+import { trackServer } from "@/lib/analytics/posthog-server";
+import { PHEvent } from "@/lib/analytics/events";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -185,6 +187,12 @@ export async function POST(req: Request) {
           }),
         );
     },
+  });
+
+  // Fire-and-forget analytics
+  void trackServer(userId, PHEvent.COACH_CHAT_SENT, {
+    messageCount: userMessages.length,
+    persona: coach.persona,
   });
 
   return new Response(stream, {

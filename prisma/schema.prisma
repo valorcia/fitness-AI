@@ -212,6 +212,7 @@ model User {
   postLikes           PostLike[]
   postComments        PostComment[]
   coachMemories       CoachMemory[]
+  pushSubscriptions   PushSubscription[]
   planProposals       PlanProposal[]
   devices             DeviceConnection[]
   deviceReadings      DeviceReading[]
@@ -980,3 +981,17 @@ model PostComment {
 
 // ─── Coach avatar customization ──────────────────────────────
 // Stored on Preference.coachAvatar + Preference.coachName (see existing model).
+
+// ─── Web Push subscriptions ──────────────────────────────────
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

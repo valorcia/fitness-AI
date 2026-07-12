@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { onboardingSchema } from "@/lib/validation/onboarding";
 import { generatePlan } from "@/services/plan-generator";
 import { logger } from "@/lib/logger";
+import { trackServer } from "@/lib/analytics/posthog-server";
+import { sendWelcomeEmail } from "@/lib/email/templates";
+import { PHEvent } from "@/lib/analytics/events";
 
 export const runtime = "nodejs";
 
@@ -204,6 +207,20 @@ export async function POST(req: Request) {
         },
       },
     });
+
+    // Fire-and-forget: welcome email + analytics (don't block response)
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (user) {
+      const coachName = data.coachName ?? "Pulse";
+      void sendWelcomeEmail(user.email, data.firstName, coachName);
+      void trackServer(userId, PHEvent.ONBOARDING_COMPLETED, {
+        fitnessLevel: data.fitnessLevel,
+        goals: data.goals,
+        environment: data.environment,
+        coachPersona: data.coachPersona,
+        sessionsPerWeek: data.sessionsPerWeek,
+      });
+    }
 
     return NextResponse.json({ ok: true });
   } catch (e) {

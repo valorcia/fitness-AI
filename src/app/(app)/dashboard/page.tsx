@@ -18,6 +18,7 @@ import { Apple, Flame, HeartPulse, Play, Share2, Lock, Sparkles } from "lucide-r
 import { CATEGORY_META } from "@/lib/exercises/catalog";
 import { MuscleMap, type MuscleKey } from "@/components/anatomy/muscle-map";
 import { ActivityRings } from "@/components/metrics/activity-rings";
+import { PushPrompt } from "@/features/push/push-prompt";
 
 export const metadata = { title: "Tableau de bord" };
 
@@ -145,6 +146,9 @@ export default async function DashboardPage() {
           { href: "/nutrition", label: "Alimentation" },
         ]}
       />
+
+      {/* Web push prompt (shown only if not yet subscribed) */}
+      <PushPrompt />
 
       {/* Info banners */}
       <div className="grid gap-3 md:grid-cols-2">
