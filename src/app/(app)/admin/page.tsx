@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { CoachSeedButton } from "./coach-seed-button";
 
 export const metadata = { title: "Admin" };
 
@@ -47,6 +48,16 @@ export default async function AdminPage() {
           <CardContent className="text-3xl font-bold">{workoutsLast24h}</CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Portraits des coachs standards</CardTitle>
+          <CardDescription>Génère les 10 portraits via fal.ai et les stocke dans Vercel Blob.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CoachSeedButton />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
