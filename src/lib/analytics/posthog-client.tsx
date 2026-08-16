@@ -3,6 +3,7 @@
 import posthog from "posthog-js";
 import { PostHogProvider as PHProvider } from "posthog-js/react";
 import { useEffect } from "react";
+import type { PHEventName } from "./events";
 
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -17,19 +18,13 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return <>{children}</>;
   return <PHProvider client={posthog}>{children}</PHProvider>;
 }
 
-export function identifyUser(
-  userId: string,
-  traits: { email?: string; name?: string; plan?: string },
-) {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
+export function identifyUser(userId: string, traits?: Record<string, unknown>) {
   posthog.identify(userId, traits);
 }
 
-export function track(event: string, properties?: Record<string, unknown>) {
-  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return;
+export function track(event: PHEventName, properties?: Record<string, unknown>) {
   posthog.capture(event, properties);
 }

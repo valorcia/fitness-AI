@@ -189,7 +189,6 @@ export async function POST(req: Request) {
     },
   });
 
-  // Fire-and-forget analytics
   void trackServer(userId, PHEvent.COACH_CHAT_SENT, {
     messageCount: userMessages.length,
     persona: coach.persona,

@@ -1,23 +1,18 @@
-// Coachmii-fit service worker — handles Web Push notifications
-
 self.addEventListener("push", (event) => {
   if (!event.data) return;
-
-  let data;
+  let payload;
   try {
-    data = event.data.json();
+    payload = event.data.json();
   } catch {
-    data = { title: "Coachmii-fit", body: event.data.text() };
+    payload = { title: "Coachmii-fit", body: event.data.text() };
   }
-
-  const { title, body, icon, badge, tag, url } = data;
-
+  const { title, body, url, tag } = payload;
   event.waitUntil(
-    self.registration.showNotification(title ?? "Coachmii-fit", {
-      body: body ?? "",
-      icon: icon ?? "/icons/icon-192.png",
-      badge: badge ?? "/icons/badge-72.png",
-      tag: tag ?? "default",
+    self.registration.showNotification(title, {
+      body,
+      icon: "/icons/icon-192.png",
+      badge: "/icons/badge-96.png",
+      tag: tag ?? "coachmii",
       data: { url: url ?? "/" },
     }),
   );
@@ -27,16 +22,10 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const url = event.notification.data?.url ?? "/";
   event.waitUntil(
-    clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((windowClients) => {
-        for (const client of windowClients) {
-          if (client.url.includes(self.location.origin) && "focus" in client) {
-            client.navigate(url);
-            return client.focus();
-          }
-        }
-        if (clients.openWindow) return clients.openWindow(url);
-      }),
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((all) => {
+      const match = all.find((c) => c.url.includes(self.location.origin) && "focus" in c);
+      if (match) return match.focus().then((c) => c.navigate(url));
+      return clients.openWindow(url);
+    }),
   );
 });

@@ -1,102 +1,90 @@
 import webpush from "web-push";
 import { env } from "@/lib/env";
 
-let _configured = false;
+let configured = false;
 
 export function configurePush() {
-  if (_configured) return;
-  if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) return;
-  webpush.setVapidDetails(env.VAPID_SUBJECT, env.VAPID_PUBLIC_KEY, env.VAPID_PRIVATE_KEY);
-  _configured = true;
+  if (configured || !env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) return;
+  webpush.setVapidDetails(
+    env.VAPID_SUBJECT,
+    env.VAPID_PUBLIC_KEY,
+    env.VAPID_PRIVATE_KEY,
+  );
+  configured = true;
 }
 
-export interface PushPayload {
+export type PushPayload = {
   title: string;
   body: string;
-  icon?: string;
-  badge?: string;
-  tag?: string;
   url?: string;
-  data?: Record<string, unknown>;
-}
+  tag?: string;
+};
 
 export async function sendPushNotification(
   subscription: { endpoint: string; p256dh: string; auth: string },
   payload: PushPayload,
 ): Promise<boolean> {
   configurePush();
-  if (!env.VAPID_PUBLIC_KEY || !env.VAPID_PRIVATE_KEY) return false;
-
   try {
     await webpush.sendNotification(
-      {
-        endpoint: subscription.endpoint,
-        keys: { p256dh: subscription.p256dh, auth: subscription.auth },
-      },
-      JSON.stringify({
-        ...payload,
-        icon: payload.icon ?? "/icons/icon-192.png",
-        badge: payload.badge ?? "/icons/badge-72.png",
-      }),
+      { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
+      JSON.stringify(payload),
     );
     return true;
   } catch (err: unknown) {
-    const status = (err as { statusCode?: number }).statusCode;
-    // 404/410 means subscription is gone — caller should delete it
-    if (status === 404 || status === 410) return false;
-    console.error("[WebPush]", err);
-    return false;
+    const status = (err as { statusCode?: number })?.statusCode;
+    if (status === 404 || status === 410) return false; // stale subscription
+    throw err;
   }
 }
 
-// Notification templates for the 8 supported types
 export const PUSH_TEMPLATES = {
   hydration: (): PushPayload => ({
-    title: "Coachmii-fit 💧",
-    body: "N'oublie pas de boire un verre d'eau !",
-    tag: "hydration",
-    url: "/hydration",
-  }),
-  inactivity: (days: number): PushPayload => ({
-    title: "Coachmii-fit 🏃",
-    body: `Ça fait ${days} jours sans séance. Ton coach t'attend !`,
-    tag: "inactivity",
+    title: "💧 Rappel hydratation",
+    body: "Tu as atteint ton objectif d'eau aujourd'hui ?",
     url: "/dashboard",
+    tag: "hydration",
+  }),
+  inactivity: (name: string): PushPayload => ({
+    title: `🏃 ${name} t'attend !`,
+    body: "Ça fait 2 jours sans séance. On reprend ?",
+    url: "/workouts",
+    tag: "inactivity",
   }),
   sleepCheck: (): PushPayload => ({
-    title: "Coachmii-fit 😴",
-    body: "Comment as-tu dormi cette nuit ?",
-    tag: "sleep-check",
-    url: "/sleep",
+    title: "😴 Comment tu as dormi ?",
+    body: "Note ton sommeil pour optimiser ta récupération.",
+    url: "/dashboard",
+    tag: "sleep",
   }),
-  sessionFeedback: (workoutType: string): PushPayload => ({
-    title: "Coachmii-fit 💪",
-    body: `Ta séance ${workoutType} s'est bien passée ?`,
-    tag: "session-feedback",
+  sessionFeedback: (): PushPayload => ({
+    title: "🔥 Super séance !",
+    body: "Comment tu te sens ? Donne ton ressenti.",
     url: "/workouts",
+    tag: "feedback",
   }),
   streakReminder: (streak: number): PushPayload => ({
-    title: `Coachmii-fit 🔥 ${streak} jours !`,
-    body: "Ne brise pas ta série — une courte séance compte !",
+    title: `🔥 Série de ${streak} jours !`,
+    body: "Ne laisse pas tomber ta série ! Fais au moins 10 min aujourd'hui.",
+    url: "/workouts",
     tag: "streak",
+  }),
+  weeklyGoal: (pct: number): PushPayload => ({
+    title: "📊 Bilan de la semaine",
+    body: `Tu as atteint ${pct}% de ton objectif hebdo. Continue !`,
     url: "/dashboard",
+    tag: "weekly",
   }),
-  weeklyGoal: (percent: number): PushPayload => ({
-    title: "Coachmii-fit 🎯",
-    body: `Tu es à ${percent}% de ton objectif hebdo. Allez !`,
-    tag: "weekly-goal",
-    url: "/progression",
-  }),
-  coachMessage: (coach: string, msg: string): PushPayload => ({
-    title: `Message de ${coach} 🤖`,
+  coachMessage: (coachName: string, msg: string): PushPayload => ({
+    title: `💬 Message de ${coachName}`,
     body: msg,
-    tag: "coach-message",
     url: "/coach",
+    tag: "coach",
   }),
   planReady: (): PushPayload => ({
-    title: "Coachmii-fit ✨",
-    body: "Ton nouveau programme est prêt !",
-    tag: "plan-ready",
+    title: "📅 Ton plan est prêt !",
+    body: "Ton coach a créé un nouveau programme personnalisé.",
     url: "/planning",
+    tag: "plan",
   }),
 };

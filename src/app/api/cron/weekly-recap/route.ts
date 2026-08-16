@@ -2,94 +2,88 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { env } from "@/lib/env";
 import { sendWeeklyRecapEmail } from "@/lib/email/templates";
-import { openai } from "@/lib/ai/openai";
+import OpenAI from "openai";
 
 export const runtime = "nodejs";
-export const maxDuration = 300; // 5 min — iterates over many users
+export const maxDuration = 300;
 
-// Vercel Cron or CCR Routine calls this every Monday 08:00 UTC
+const PERSONA_NAMES: Record<string, string> = {
+  FUN: "Alex",
+  STRICT: "Anya",
+  ZEN: "Maya",
+  MILITARY: "Victor",
+  ELITE: "Julian",
+};
+
 export async function GET(req: Request) {
-  // Validate cron secret to prevent unauthorized calls
-  const authHeader = req.headers.get("authorization");
-  if (env.CRON_SECRET && authHeader !== `Bearer ${env.CRON_SECRET}`) {
+  const auth = req.headers.get("authorization");
+  if (!env.CRON_SECRET || auth !== `Bearer ${env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const oneWeekAgo = new Date(Date.now() - 7 * 24 * 3600 * 1000);
+  const since = new Date(Date.now() - 7 * 24 * 3600 * 1000);
 
-  // Fetch all users who completed at least 1 workout last week
-  const activeUsers = await prisma.user.findMany({
-    where: {
-      deletedAt: null,
-      workouts: { some: { completedAt: { gte: oneWeekAgo } } },
-    },
-    select: {
-      id: true,
-      email: true,
-      profile: { select: { firstName: true } },
-      preferences: { select: { coachName: true } },
-      streaks: { select: { current: true } },
-      workouts: {
-        where: { completedAt: { gte: oneWeekAgo } },
-        select: { durationSec: true, caloriesKcal: true, type: true },
-      },
-    },
-    take: 500,
+  const activeUserIds = await prisma.workout.findMany({
+    where: { status: "COMPLETED", completedAt: { gte: since } },
+    select: { userId: true },
+    distinct: ["userId"],
   });
+  const ids = activeUserIds.map((r) => r.userId);
 
+  const oai = env.OPENAI_API_KEY ? new OpenAI({ apiKey: env.OPENAI_API_KEY }) : null;
   let sent = 0;
   let failed = 0;
 
-  for (const user of activeUsers) {
-    try {
-      const firstName = user.profile?.firstName ?? "Champion";
-      const coachName = user.preferences?.coachName ?? "Pulse";
-      const workouts = user.workouts;
-      const workoutsCompleted = workouts.length;
-      const totalMinutes = Math.round(
-        workouts.reduce((s, w) => s + (w.durationSec ?? 0), 0) / 60,
-      );
-      const caloriesBurned = Math.round(
-        workouts.reduce((s, w) => s + (w.caloriesKcal ?? 0), 0),
-      );
-      const currentStreak = user.streaks?.current ?? 0;
+  for (const { userId } of activeUserIds) {
+    const [user, prefs, streak, weekWorkouts] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId } }),
+      prisma.preference.findUnique({ where: { userId } }),
+      prisma.streak.findUnique({ where: { userId } }),
+      prisma.workout.findMany({
+        where: { userId, status: "COMPLETED", completedAt: { gte: since } },
+        select: { durationSec: true, caloriesKcal: true },
+      }),
+    ]);
 
-      // Most frequent workout type this week
-      const typeCount: Record<string, number> = {};
-      for (const w of workouts) if (w.type) typeCount[w.type] = (typeCount[w.type] ?? 0) + 1;
-      const topExercise = Object.entries(typeCount).sort((a, b) => b[1] - a[1])[0]?.[0];
+    if (!user?.email) { failed++; continue; }
 
-      // Generate a brief coach message using OpenAI (GPT-4o-mini)
-      let coachMessage = `Tu as réalisé ${workoutsCompleted} séance${workoutsCompleted > 1 ? "s" : ""} cette semaine — continue comme ça !`;
-      if (openai) {
-        const prompt = `Tu es ${coachName}, coach sportif IA de ${firstName}. En 1 phrase courte et motivante, résume sa semaine : ${workoutsCompleted} séances, ${totalMinutes} min, ${caloriesBurned} kcal, streak de ${currentStreak} jours. Réponds en français, style chaleureux.`;
-        const res = await openai.chat.completions.create({
+    const wCount = weekWorkouts.length;
+    const totalMin = Math.round(weekWorkouts.reduce((a, w) => a + (w.durationSec ?? 0), 0) / 60);
+    const totalKcal = weekWorkouts.reduce((a, w) => a + (w.caloriesKcal ?? 0), 0);
+    const currentStreak = streak?.current ?? 0;
+    const persona = prefs?.coachPersona ?? "FUN";
+    const firstName = (user.name ?? user.email.split("@")[0] ?? "Champion").split(" ")[0]!;
+    const coachName = PERSONA_NAMES[persona] ?? "Coach";
+
+    let coachQuote = "Continue comme ça, tu es sur la bonne voie !";
+    if (oai) {
+      try {
+        const res = await oai.chat.completions.create({
           model: env.OPENAI_MODEL_COACH,
-          messages: [{ role: "user", content: prompt }],
           max_tokens: 80,
-          temperature: 0.8,
+          messages: [
+            {
+              role: "system",
+              content: `Tu es ${coachName}, coach sportif IA de style ${persona}. Génère UN message de motivation court (max 2 phrases) en français pour ${firstName} qui a fait ${wCount} séance(s) cette semaine et a une série de ${currentStreak} jour(s).`,
+            },
+          ],
         });
-        coachMessage = res.choices[0]?.message?.content?.trim() ?? coachMessage;
-      }
-
-      const ok = await sendWeeklyRecapEmail(user.email, {
-        firstName,
-        coachName,
-        workoutsCompleted,
-        totalMinutes,
-        caloriesBurned,
-        currentStreak,
-        coachMessage,
-        topExercise,
-      });
-
-      if (ok) sent++;
-      else failed++;
-    } catch (err) {
-      console.error(`[WeeklyRecap] user ${user.id}`, err);
-      failed++;
+        coachQuote = res.choices[0]?.message?.content?.trim() ?? coachQuote;
+      } catch { /* use default */ }
     }
+
+    const ok = await sendWeeklyRecapEmail(user.email, {
+      firstName,
+      coachName,
+      workoutsCount: wCount,
+      totalMinutes: totalMin,
+      caloriesKcal: totalKcal,
+      streakDays: currentStreak,
+      coachQuote,
+    });
+
+    if (ok) sent++; else failed++;
   }
 
-  return NextResponse.json({ sent, failed, total: activeUsers.length });
+  return NextResponse.json({ sent, failed, total: ids.length });
 }

@@ -1,78 +1,65 @@
 "use client";
 
-import { Bell, BellOff, X } from "lucide-react";
 import { useState } from "react";
+import { Bell, X } from "lucide-react";
 import { usePush } from "./use-push";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 
 export function PushPrompt() {
-  const { state, loading, subscribe } = usePush();
+  const { state, subscribe } = usePush();
   const [dismissed, setDismissed] = useState(false);
 
-  if (state === "unsupported" || state === "granted" || state === "blocked" || dismissed) {
-    return null;
-  }
+  if (state !== "default" || dismissed) return null;
 
   return (
-    <Card className="border-primary/20 bg-primary/5">
-      <CardContent className="flex items-start gap-3 p-4">
-        <Bell className="mt-0.5 size-5 shrink-0 text-primary" />
-        <div className="flex-1">
-          <p className="text-sm font-medium">Active les notifications</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Reçois tes rappels d&apos;hydratation, de séance et les messages de ton coach — directement sur ton téléphone.
-          </p>
-          <div className="mt-3 flex gap-2">
-            <Button size="sm" disabled={loading} onClick={subscribe}>
-              {loading ? "En cours…" : "Activer"}
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => setDismissed(true)}>
-              Plus tard
-            </Button>
-          </div>
-        </div>
-        <button
-          className="shrink-0 rounded p-1 text-muted-foreground hover:text-foreground"
-          onClick={() => setDismissed(true)}
-        >
-          <X className="size-4" />
-        </button>
-      </CardContent>
-    </Card>
+    <div className="mb-4 flex items-center gap-3 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-900/40 dark:bg-violet-950/30">
+      <Bell className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400" />
+      <div className="flex-1">
+        <p className="text-sm font-semibold text-violet-900 dark:text-violet-200">
+          Active les notifications
+        </p>
+        <p className="text-xs text-violet-700/80 dark:text-violet-400">
+          Rappels séances, hydratation, messages de ton coach.
+        </p>
+      </div>
+      <button
+        onClick={() => void subscribe()}
+        className="shrink-0 rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-violet-700"
+      >
+        Activer
+      </button>
+      <button
+        onClick={() => setDismissed(true)}
+        className="shrink-0 text-violet-400 hover:text-violet-600"
+        aria-label="Fermer"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
 export function PushToggle() {
-  const { state, loading, subscribe, unsubscribe } = usePush();
+  const { state, subscribe, unsubscribe } = usePush();
 
-  if (state === "unsupported") {
-    return (
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <BellOff className="size-4" />
-        <span>Notifications non supportées sur cet appareil</span>
-      </div>
-    );
-  }
-
+  if (state === "unsupported") return null;
   if (state === "blocked") {
     return (
-      <div className="text-sm text-muted-foreground">
-        <BellOff className="mr-1 inline size-4" />
-        Notifications bloquées — active-les dans les paramètres de ton navigateur
-      </div>
+      <p className="text-xs text-muted-foreground">
+        Notifications bloquées. Autorise-les dans les paramètres de ton navigateur.
+      </p>
     );
   }
 
   return (
-    <Button
-      size="sm"
-      variant={state === "granted" ? "outline" : "default"}
-      disabled={loading}
-      onClick={state === "granted" ? unsubscribe : subscribe}
+    <button
+      onClick={() => (state === "granted" ? void unsubscribe() : void subscribe())}
+      className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+        state === "granted"
+          ? "bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          : "bg-violet-600 text-white hover:bg-violet-700"
+      }`}
     >
-      <Bell className="mr-1.5 size-4" />
-      {loading ? "…" : state === "granted" ? "Désactiver les notifications" : "Activer les notifications"}
-    </Button>
+      {state === "granted" ? "Désactiver les notifications" : "Activer les notifications"}
+    </button>
   );
 }

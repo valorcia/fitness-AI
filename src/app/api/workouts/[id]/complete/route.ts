@@ -75,7 +75,7 @@ export async function POST(_req: Request, ctx: { params: Promise<{ id: string }>
         where: { id: session.user.id },
         select: { email: true, profile: { select: { firstName: true } }, preferences: { select: { coachName: true } } },
       });
-      if (user) {
+      if (user?.email) {
         await sendStreakMilestoneEmail(
           user.email,
           user.profile?.firstName ?? "Champion",
