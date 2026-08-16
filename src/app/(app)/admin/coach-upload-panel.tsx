@@ -79,7 +79,7 @@ export function CoachUploadPanel() {
 
       <div className="grid gap-2">
         {STANDARD_COACHES.map((coach) => {
-          const s = states[coach.slug] ?? {};
+          const s: CoachState = states[coach.slug] ?? { status: "idle" };
           const isDone = s.status === "done";
           const isUploading = s.status === "uploading";
           const mode = s.mode ?? "url";
