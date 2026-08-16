@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CoachSeedButton } from "./coach-seed-button";
+import { CoachUploadPanel } from "./coach-upload-panel";
 
 export const metadata = { title: "Admin" };
 
@@ -51,8 +52,21 @@ export default async function AdminPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Portraits des coachs standards</CardTitle>
-          <CardDescription>Génère les 10 portraits via fal.ai et les stocke dans Vercel Blob.</CardDescription>
+          <CardTitle>Portraits des coachs — Upload manuel</CardTitle>
+          <CardDescription>
+            Génère chaque image sur leonardo.ai avec le prompt fourni, puis uploade-la ici (max 5 Mo).
+            Nécessite <code className="font-mono text-xs">BLOB_READ_WRITE_TOKEN</code> dans Vercel.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <CoachUploadPanel />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Portraits des coachs — Génération automatique (fal.ai)</CardTitle>
+          <CardDescription>Génère les 10 portraits automatiquement via fal.ai (~0,25 $). Nécessite <code className="font-mono text-xs">FAL_KEY</code> et <code className="font-mono text-xs">BLOB_READ_WRITE_TOKEN</code>.</CardDescription>
         </CardHeader>
         <CardContent>
           <CoachSeedButton />
